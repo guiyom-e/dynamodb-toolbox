@@ -2,19 +2,18 @@ import type { A } from 'ts-toolbelt'
 
 import { DynamoDBToolboxError } from 'v1/errors'
 
-import { Never, AtLeastOnce, Always } from '../constants'
-import { string } from '../primitive'
+import { Always, AtLeastOnce, Never } from '../constants'
 import {
-  $type,
+  $defaults,
   $elements,
-  $required,
   $hidden,
   $key,
+  $required,
   $savedAs,
-  $defaults
+  $type,
 } from '../constants/attributeOptions'
-
-import type { ListAttribute, $ListAttributeState } from './interface'
+import { string } from '../primitive'
+import type { $ListAttributeState, ListAttribute } from './interface'
 import { list } from './typer'
 
 describe('list', () => {
@@ -24,56 +23,68 @@ describe('list', () => {
   it('rejects non-required elements', () => {
     const invalidList = list(
       // @ts-expect-error
-      string().optional()
+      string().optional(),
     )
 
     const invalidCall = () => invalidList.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.listAttribute.optionalElements', path })
+      expect.objectContaining({
+        code: 'schema.listAttribute.optionalElements',
+        path,
+      }),
     )
   })
 
   it('rejects hidden elements', () => {
     const invalidList = list(
       // @ts-expect-error
-      strElement.hidden()
+      strElement.hidden(),
     )
 
     const invalidCall = () => invalidList.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.listAttribute.hiddenElements', path })
+      expect.objectContaining({
+        code: 'schema.listAttribute.hiddenElements',
+        path,
+      }),
     )
   })
 
   it('rejects elements with savedAs values', () => {
     const invalidList = list(
       // @ts-expect-error
-      strElement.savedAs('foo')
+      strElement.savedAs('foo'),
     )
 
     const invalidCall = () => invalidList.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.listAttribute.savedAsElements', path })
+      expect.objectContaining({
+        code: 'schema.listAttribute.savedAsElements',
+        path,
+      }),
     )
   })
 
   it('rejects elements with default values', () => {
     const invalidList = list(
       // @ts-expect-error
-      strElement.putDefault('foo')
+      strElement.putDefault('foo'),
     )
 
     const invalidCall = () => invalidList.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.listAttribute.defaultedElements', path })
+      expect.objectContaining({
+        code: 'schema.listAttribute.defaultedElements',
+        path,
+      }),
     )
   })
 
@@ -115,8 +126,8 @@ describe('list', () => {
       [$defaults]: {
         key: undefined,
         put: undefined,
-        update: undefined
-      }
+        update: undefined,
+      },
     })
   })
 
@@ -125,9 +136,15 @@ describe('list', () => {
     const lstAlways = list(strElement, { required: 'always' })
     const lstNever = list(strElement, { required: 'never' })
 
-    const assertAtLeastOnce: A.Contains<typeof lstAtLeastOnce, { [$required]: AtLeastOnce }> = 1
+    const assertAtLeastOnce: A.Contains<
+      typeof lstAtLeastOnce,
+      { [$required]: AtLeastOnce }
+    > = 1
     assertAtLeastOnce
-    const assertAlways: A.Contains<typeof lstAlways, { [$required]: Always }> = 1
+    const assertAlways: A.Contains<
+      typeof lstAlways,
+      { [$required]: Always }
+    > = 1
     assertAlways
     const assertNever: A.Contains<typeof lstNever, { [$required]: Never }> = 1
     assertNever
@@ -143,9 +160,15 @@ describe('list', () => {
     const lstNever = list(strElement).required('never')
     const lstOpt = list(strElement).optional()
 
-    const assertAtLeastOnce: A.Contains<typeof lstAtLeastOnce, { [$required]: AtLeastOnce }> = 1
+    const assertAtLeastOnce: A.Contains<
+      typeof lstAtLeastOnce,
+      { [$required]: AtLeastOnce }
+    > = 1
     assertAtLeastOnce
-    const assertAlways: A.Contains<typeof lstAlways, { [$required]: Always }> = 1
+    const assertAlways: A.Contains<
+      typeof lstAlways,
+      { [$required]: Always }
+    > = 1
     assertAlways
     const assertNever: A.Contains<typeof lstNever, { [$required]: Never }> = 1
     assertNever
@@ -178,7 +201,10 @@ describe('list', () => {
   it('returns key list (option)', () => {
     const lst = list(strElement, { key: true })
 
-    const assertList: A.Contains<typeof lst, { [$key]: true; [$required]: AtLeastOnce }> = 1
+    const assertList: A.Contains<
+      typeof lst,
+      { [$key]: true; [$required]: AtLeastOnce }
+    > = 1
     assertList
 
     expect(lst).toMatchObject({ [$key]: true, [$required]: 'atLeastOnce' })
@@ -187,7 +213,10 @@ describe('list', () => {
   it('returns key list (method)', () => {
     const lst = list(strElement).key()
 
-    const assertList: A.Contains<typeof lst, { [$key]: true; [$required]: Always }> = 1
+    const assertList: A.Contains<
+      typeof lst,
+      { [$key]: true; [$required]: Always }
+    > = 1
     assertList
 
     expect(lst).toMatchObject({ [$key]: true, [$required]: 'always' })
@@ -214,7 +243,7 @@ describe('list', () => {
   it('returns defaulted list (option)', () => {
     const lstA = list(strElement, {
       // TOIMPROVE: Add type constraints here
-      defaults: { key: ['foo'], put: undefined, update: undefined }
+      defaults: { key: ['foo'], put: undefined, update: undefined },
     })
 
     const assertListA: A.Contains<
@@ -224,12 +253,12 @@ describe('list', () => {
     assertListA
 
     expect(lstA).toMatchObject({
-      [$defaults]: { key: ['foo'], put: undefined, update: undefined }
+      [$defaults]: { key: ['foo'], put: undefined, update: undefined },
     })
 
     const lstB = list(strElement, {
       // TOIMPROVE: Add type constraints here
-      defaults: { key: undefined, put: ['bar'], update: undefined }
+      defaults: { key: undefined, put: ['bar'], update: undefined },
     })
 
     const assertListB: A.Contains<
@@ -239,12 +268,12 @@ describe('list', () => {
     assertListB
 
     expect(lstB).toMatchObject({
-      [$defaults]: { key: undefined, put: ['bar'], update: undefined }
+      [$defaults]: { key: undefined, put: ['bar'], update: undefined },
     })
 
     const lstC = list(strElement, {
       // TOIMPROVE: Add type constraints here
-      defaults: { key: undefined, put: undefined, update: ['baz'] }
+      defaults: { key: undefined, put: undefined, update: ['baz'] },
     })
 
     const assertListC: A.Contains<
@@ -254,7 +283,7 @@ describe('list', () => {
     assertListC
 
     expect(lstC).toMatchObject({
-      [$defaults]: { key: undefined, put: undefined, update: ['baz'] }
+      [$defaults]: { key: undefined, put: undefined, update: ['baz'] },
     })
   })
 
@@ -268,7 +297,7 @@ describe('list', () => {
     assertListA
 
     expect(lstA).toMatchObject({
-      [$defaults]: { key: ['foo'], put: undefined, update: undefined }
+      [$defaults]: { key: ['foo'], put: undefined, update: undefined },
     })
 
     const lstB = list(strElement).putDefault(['bar'])
@@ -280,7 +309,7 @@ describe('list', () => {
     assertListB
 
     expect(lstB).toMatchObject({
-      [$defaults]: { key: undefined, put: ['bar'], update: undefined }
+      [$defaults]: { key: undefined, put: ['bar'], update: undefined },
     })
 
     const lstC = list(strElement).updateDefault(['baz'])
@@ -292,7 +321,7 @@ describe('list', () => {
     assertListC
 
     expect(lstC).toMatchObject({
-      [$defaults]: { key: undefined, put: undefined, update: ['baz'] }
+      [$defaults]: { key: undefined, put: undefined, update: ['baz'] },
     })
   })
 
@@ -306,7 +335,7 @@ describe('list', () => {
     assertList
 
     expect(listAttr).toMatchObject({
-      [$defaults]: { key: undefined, put: ['foo'], update: undefined }
+      [$defaults]: { key: undefined, put: ['foo'], update: undefined },
     })
   })
 
@@ -320,7 +349,7 @@ describe('list', () => {
     assertList
 
     expect(listAttr).toMatchObject({
-      [$defaults]: { key: ['bar'], put: undefined, update: undefined }
+      [$defaults]: { key: ['bar'], put: undefined, update: undefined },
     })
   })
 
@@ -369,8 +398,8 @@ describe('list', () => {
         [$defaults]: {
           key: undefined,
           put: undefined,
-          update: undefined
-        }
+          update: undefined,
+        },
       },
       [$required]: 'atLeastOnce',
       [$hidden]: false,
@@ -379,8 +408,8 @@ describe('list', () => {
       [$defaults]: {
         key: undefined,
         put: undefined,
-        update: undefined
-      }
+        update: undefined,
+      },
     })
   })
 })

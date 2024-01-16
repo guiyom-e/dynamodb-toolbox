@@ -12,7 +12,9 @@ describe('parseSavedPrimitiveAttribute', () => {
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'operations.formatSavedItem.invalidSavedAttribute' })
+      expect.objectContaining({
+        code: 'operations.formatSavedItem.invalidSavedAttribute',
+      }),
     )
   })
 
@@ -25,7 +27,10 @@ describe('parseSavedPrimitiveAttribute', () => {
   })
 
   it('throws if value is not part of enum', () => {
-    const str = string().enum('foo', 'bar').transform(prefix('TEST')).freeze('path')
+    const str = string()
+      .enum('foo', 'bar')
+      .transform(prefix('TEST'))
+      .freeze('path')
 
     const parsedValue = formatSavedPrimitiveAttribute(str, 'TEST#bar')
     expect(parsedValue).toBe('bar')
@@ -34,7 +39,9 @@ describe('parseSavedPrimitiveAttribute', () => {
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'operations.formatSavedItem.invalidSavedAttribute' })
+      expect.objectContaining({
+        code: 'operations.formatSavedItem.invalidSavedAttribute',
+      }),
     )
   })
 })

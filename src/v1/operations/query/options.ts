@@ -1,12 +1,16 @@
+import type { EntityV2 } from 'v1/entity'
 import type { CapacityOption } from 'v1/operations/constants/options/capacity'
 import type {
-  SelectOption,
   AllProjectedAttributesSelectOption,
-  SpecificAttributesSelectOption
+  SelectOption,
+  SpecificAttributesSelectOption,
 } from 'v1/operations/constants/options/select'
-import type { Condition, Query, AnyCommonAttributePath } from 'v1/operations/types'
+import type {
+  AnyCommonAttributePath,
+  Condition,
+  Query,
+} from 'v1/operations/types'
 import type { TableV2 } from 'v1/table'
-import type { EntityV2 } from 'v1/entity'
 
 export type QueryOptions<
   TABLE extends TableV2 = TableV2,

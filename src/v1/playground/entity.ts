@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-  number,
-  string,
-  map,
-  set,
   any,
-  schema,
   EntityV2,
-  PutItemInput,
-  SavedItem,
   FormattedItem,
   KeyInput,
+  map,
+  number,
+  prefix,
+  PutItemInput,
+  SavedItem,
+  schema,
+  set,
+  string,
   UpdateItemInput,
-  prefix
 } from 'v1'
 
 import { MyTable } from './table'
@@ -28,16 +28,19 @@ export const UserEntity = new EntityV2({
     lastName: string().savedAs('ln'),
     parents: map({
       father: string(),
-      mother: string()
+      mother: string(),
     }),
     someSet: set(string().enum('foo', 'bar')).optional(),
     castedStr: any().castAs<'foo' | 'bar'>(),
-    transformedStr: string().optional().enum('foo', 'bar').transform(prefix('toto'))
+    transformedStr: string()
+      .optional()
+      .enum('foo', 'bar')
+      .transform(prefix('toto')),
   }).and(prevSchema => ({
     completeName: string().putLink<typeof prevSchema>(
-      ({ firstName, lastName }) => firstName + ' ' + lastName
-    )
-  }))
+      ({ firstName, lastName }) => firstName + ' ' + lastName,
+    ),
+  })),
 })
 
 type UserPutItemInput = PutItemInput<typeof UserEntity>

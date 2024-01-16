@@ -1,34 +1,40 @@
 import type { Condition } from 'v1/operations/types'
 
 import type { ConditionParser } from '../../parser'
-
 import {
   isLogicalCombinationOperator,
   LogicalCombinationCondition,
-  LogicalCombinationOperator
+  LogicalCombinationOperator,
 } from './types'
 
-const logicalCombinationOperatorExpression: Record<LogicalCombinationOperator, string> = {
+const logicalCombinationOperatorExpression: Record<
+  LogicalCombinationOperator,
+  string
+> = {
   or: 'OR',
-  and: 'AND'
+  and: 'AND',
 }
 
-type AppendLogicalCombinationCondition = <CONDITION extends LogicalCombinationCondition>(
+type AppendLogicalCombinationCondition = <
+  CONDITION extends LogicalCombinationCondition
+>(
   conditionParser: ConditionParser,
-  condition: CONDITION
+  condition: CONDITION,
 ) => void
 
 export const parseLogicalCombinationCondition: AppendLogicalCombinationCondition = <
   CONDITION extends LogicalCombinationCondition
 >(
   conditionParser: ConditionParser,
-  condition: CONDITION
+  condition: CONDITION,
 ): void => {
   const logicalCombinationOperator = Object.keys(condition).find(
-    isLogicalCombinationOperator
+    isLogicalCombinationOperator,
   ) as keyof CONDITION & LogicalCombinationOperator
 
-  const childrenConditions = (condition[logicalCombinationOperator] as unknown) as Condition[]
+  const childrenConditions = (condition[
+    logicalCombinationOperator
+  ] as unknown) as Condition[]
   const childrenConditionExpressions: string[] = []
   conditionParser.resetExpression()
   for (const childCondition of childrenConditions) {
@@ -37,7 +43,7 @@ export const parseLogicalCombinationCondition: AppendLogicalCombinationCondition
   }
   conditionParser.resetExpression(
     `(${childrenConditionExpressions.join(
-      `) ${logicalCombinationOperatorExpression[logicalCombinationOperator]} (`
-    )})`
+      `) ${logicalCombinationOperatorExpression[logicalCombinationOperator]} (`,
+    )})`,
   )
 }

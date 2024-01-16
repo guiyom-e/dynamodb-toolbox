@@ -1,18 +1,17 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
 import type { A } from 'ts-toolbelt'
-
 import {
-  TableV2,
   DynamoDBToolboxError,
-  ScanCommand,
   EntityV2,
+  FormattedItem,
+  Item,
+  number,
+  prefix,
+  ScanCommand,
   schema,
   string,
-  number,
-  Item,
-  FormattedItem,
-  prefix
+  TableV2,
 } from 'v1'
 
 const dynamoDbClient = new DynamoDBClient({})
@@ -23,26 +22,26 @@ const TestTable = new TableV2({
   name: 'test-table',
   partitionKey: {
     type: 'string',
-    name: 'pk'
+    name: 'pk',
   },
   sortKey: {
     type: 'string',
-    name: 'sk'
+    name: 'sk',
   },
   indexes: {
     gsi: {
       type: 'global',
       partitionKey: {
         name: 'gsi_pk',
-        type: 'string'
+        type: 'string',
       },
       sortKey: {
         name: 'gsi_sk',
-        type: 'string'
-      }
-    }
+        type: 'string',
+      },
+    },
   },
-  documentClient
+  documentClient,
 })
 
 const Entity1 = new EntityV2({
@@ -51,9 +50,9 @@ const Entity1 = new EntityV2({
     userPoolId: string().key().savedAs('pk'),
     userId: string().key().savedAs('sk'),
     name: string(),
-    age: number()
+    age: number(),
   }),
-  table: TestTable
+  table: TestTable,
 })
 
 const Entity2 = new EntityV2({
@@ -62,9 +61,9 @@ const Entity2 = new EntityV2({
     productGroupId: string().key().savedAs('pk'),
     productId: string().key().savedAs('sk'),
     launchDate: string(),
-    price: number()
+    price: number(),
   }),
-  table: TestTable
+  table: TestTable,
 })
 
 describe('scan', () => {
@@ -95,18 +94,20 @@ describe('scan', () => {
       TestTable.build(ScanCommand)
         .options({
           // @ts-expect-error
-          capacity: 'test'
+          capacity: 'test',
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'operations.invalidCapacityOption' })
+      expect.objectContaining({ code: 'operations.invalidCapacityOption' }),
     )
   })
 
   it('sets consistent option', () => {
-    const { ConsistentRead } = TestTable.build(ScanCommand).options({ consistent: true }).params()
+    const { ConsistentRead } = TestTable.build(ScanCommand)
+      .options({ consistent: true })
+      .params()
 
     expect(ConsistentRead).toBe(true)
   })
@@ -116,13 +117,13 @@ describe('scan', () => {
       TestTable.build(ScanCommand)
         .options({
           // @ts-expect-error
-          consistent: 'true'
+          consistent: 'true',
         })
         .params()
 
     expect(invalidCallA).toThrow(DynamoDBToolboxError)
     expect(invalidCallA).toThrow(
-      expect.objectContaining({ code: 'operations.invalidConsistentOption' })
+      expect.objectContaining({ code: 'operations.invalidConsistentOption' }),
     )
 
     const invalidCallB = () =>
@@ -130,13 +131,13 @@ describe('scan', () => {
         // @ts-expect-error
         .options({
           index: 'gsi',
-          consistent: true
+          consistent: true,
         })
         .params()
 
     expect(invalidCallB).toThrow(DynamoDBToolboxError)
     expect(invalidCallB).toThrow(
-      expect.objectContaining({ code: 'operations.invalidConsistentOption' })
+      expect.objectContaining({ code: 'operations.invalidConsistentOption' }),
     )
   })
 
@@ -149,7 +150,9 @@ describe('scan', () => {
   })
 
   it('sets index option', () => {
-    const { IndexName } = TestTable.build(ScanCommand).options({ index: 'gsi' }).params()
+    const { IndexName } = TestTable.build(ScanCommand)
+      .options({ index: 'gsi' })
+      .params()
 
     expect(IndexName).toBe('gsi')
   })
@@ -159,27 +162,33 @@ describe('scan', () => {
       TestTable.build(ScanCommand)
         .options({
           // @ts-expect-error
-          index: { foo: 'bar' }
+          index: { foo: 'bar' },
         })
         .params()
 
     expect(invalidCallA).toThrow(DynamoDBToolboxError)
-    expect(invalidCallA).toThrow(expect.objectContaining({ code: 'operations.invalidIndexOption' }))
+    expect(invalidCallA).toThrow(
+      expect.objectContaining({ code: 'operations.invalidIndexOption' }),
+    )
 
     const invalidCallB = () =>
       TestTable.build(ScanCommand)
         .options({
           // @ts-expect-error
-          index: 'unexisting-index'
+          index: 'unexisting-index',
         })
         .params()
 
     expect(invalidCallB).toThrow(DynamoDBToolboxError)
-    expect(invalidCallB).toThrow(expect.objectContaining({ code: 'operations.invalidIndexOption' }))
+    expect(invalidCallB).toThrow(
+      expect.objectContaining({ code: 'operations.invalidIndexOption' }),
+    )
   })
 
   it('sets select option', () => {
-    const { Select } = TestTable.build(ScanCommand).options({ select: 'COUNT' }).params()
+    const { Select } = TestTable.build(ScanCommand)
+      .options({ select: 'COUNT' })
+      .params()
 
     expect(Select).toBe('COUNT')
   })
@@ -189,12 +198,14 @@ describe('scan', () => {
       TestTable.build(ScanCommand)
         .options({
           // @ts-expect-error
-          select: 'foobar'
+          select: 'foobar',
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.invalidSelectOption' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.invalidSelectOption' }),
+    )
   })
 
   it('sets "ALL_PROJECTED_ATTRIBUTES" select option if an index is provided', () => {
@@ -213,7 +224,9 @@ describe('scan', () => {
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.invalidSelectOption' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.invalidSelectOption' }),
+    )
   })
 
   it('accepts "SPECIFIC_ATTRIBUTES" select option if a projection expression has been provided', () => {
@@ -234,11 +247,15 @@ describe('scan', () => {
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.invalidSelectOption' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.invalidSelectOption' }),
+    )
   })
 
   it('sets limit option', () => {
-    const { Limit } = TestTable.build(ScanCommand).options({ limit: 3 }).params()
+    const { Limit } = TestTable.build(ScanCommand)
+      .options({ limit: 3 })
+      .params()
 
     expect(Limit).toBe(3)
   })
@@ -248,19 +265,23 @@ describe('scan', () => {
       TestTable.build(ScanCommand)
         .options({
           // @ts-expect-error
-          limit: '3'
+          limit: '3',
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.invalidLimitOption' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.invalidLimitOption' }),
+    )
   })
 
   it('ignores valid maxPages option', () => {
-    const validCallA = () => TestTable.build(ScanCommand).options({ maxPages: 3 }).params()
+    const validCallA = () =>
+      TestTable.build(ScanCommand).options({ maxPages: 3 }).params()
     expect(validCallA).not.toThrow()
 
-    const validCallB = () => TestTable.build(ScanCommand).options({ maxPages: Infinity }).params()
+    const validCallB = () =>
+      TestTable.build(ScanCommand).options({ maxPages: Infinity }).params()
     expect(validCallB).not.toThrow()
   })
 
@@ -269,21 +290,22 @@ describe('scan', () => {
       TestTable.build(ScanCommand)
         .options({
           // @ts-expect-error
-          maxPages: '3'
+          maxPages: '3',
         })
         .params()
 
     expect(invalidCallA).toThrow(DynamoDBToolboxError)
     expect(invalidCallA).toThrow(
-      expect.objectContaining({ code: 'operations.invalidMaxPagesOption' })
+      expect.objectContaining({ code: 'operations.invalidMaxPagesOption' }),
     )
 
     // Unable to ts-expect-error here
-    const invalidCallB = () => TestTable.build(ScanCommand).options({ maxPages: 0 }).params()
+    const invalidCallB = () =>
+      TestTable.build(ScanCommand).options({ maxPages: 0 }).params()
 
     expect(invalidCallB).toThrow(DynamoDBToolboxError)
     expect(invalidCallB).toThrow(
-      expect.objectContaining({ code: 'operations.invalidMaxPagesOption' })
+      expect.objectContaining({ code: 'operations.invalidMaxPagesOption' }),
     )
   })
 
@@ -306,7 +328,7 @@ describe('scan', () => {
 
     expect(invalidCallA).toThrow(DynamoDBToolboxError)
     expect(invalidCallA).toThrow(
-      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' })
+      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' }),
     )
 
     // invalid totalSegments (non number)
@@ -315,13 +337,13 @@ describe('scan', () => {
         .options({
           segment: 3,
           // @ts-expect-error
-          totalSegments: 'foo'
+          totalSegments: 'foo',
         })
         .params()
 
     expect(invalidCallB).toThrow(DynamoDBToolboxError)
     expect(invalidCallB).toThrow(
-      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' })
+      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' }),
     )
 
     // invalid totalSegments (non-integer)
@@ -333,7 +355,7 @@ describe('scan', () => {
 
     expect(invalidCallC).toThrow(DynamoDBToolboxError)
     expect(invalidCallC).toThrow(
-      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' })
+      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' }),
     )
 
     // invalid totalSegments (negative integer)
@@ -345,7 +367,7 @@ describe('scan', () => {
 
     expect(invalidCallD).toThrow(DynamoDBToolboxError)
     expect(invalidCallD).toThrow(
-      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' })
+      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' }),
     )
 
     // invalid segment (non-number)
@@ -354,13 +376,13 @@ describe('scan', () => {
         .options({
           // @ts-expect-error
           segment: 'foo',
-          totalSegments: 4
+          totalSegments: 4,
         })
         .params()
 
     expect(invalidCallE).toThrow(DynamoDBToolboxError)
     expect(invalidCallE).toThrow(
-      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' })
+      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' }),
     )
 
     // invalid segment (non-integer)
@@ -372,7 +394,7 @@ describe('scan', () => {
 
     expect(invalidCallF).toThrow(DynamoDBToolboxError)
     expect(invalidCallF).toThrow(
-      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' })
+      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' }),
     )
 
     // invalid segment (negative integer)
@@ -384,7 +406,7 @@ describe('scan', () => {
 
     expect(invalidCallG).toThrow(DynamoDBToolboxError)
     expect(invalidCallG).toThrow(
-      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' })
+      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' }),
     )
 
     // invalid segment (above totalSegments)
@@ -396,7 +418,7 @@ describe('scan', () => {
 
     expect(invalidCallH).toThrow(DynamoDBToolboxError)
     expect(invalidCallH).toThrow(
-      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' })
+      expect.objectContaining({ code: 'scanCommand.invalidSegmentOption' }),
     )
   })
 
@@ -405,12 +427,14 @@ describe('scan', () => {
       TestTable.build(ScanCommand)
         .options({
           // @ts-expect-error
-          extra: true
+          extra: true,
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.unknownOption' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.unknownOption' }),
+    )
   })
 
   it('applies entity _et filter', () => {
@@ -418,11 +442,13 @@ describe('scan', () => {
     const {
       FilterExpression,
       ExpressionAttributeNames,
-      ExpressionAttributeValues
+      ExpressionAttributeValues,
     } = command.params()
 
     expect(FilterExpression).toBe('#c0_1 = :c0_1')
-    expect(ExpressionAttributeNames).toMatchObject({ '#c0_1': TestTable.entityAttributeSavedAs })
+    expect(ExpressionAttributeNames).toMatchObject({
+      '#c0_1': TestTable.entityAttributeSavedAs,
+    })
     expect(ExpressionAttributeValues).toMatchObject({ ':c0_1': Entity1.name })
 
     const assertReturnedItems: A.Equals<
@@ -436,24 +462,24 @@ describe('scan', () => {
     const {
       FilterExpression,
       ExpressionAttributeNames,
-      ExpressionAttributeValues
+      ExpressionAttributeValues,
     } = TestTable.build(ScanCommand)
       .entities(Entity1)
       .options({
         filters: {
-          entity1: { attr: 'age', gte: 40 }
-        }
+          entity1: { attr: 'age', gte: 40 },
+        },
       })
       .params()
 
     expect(FilterExpression).toBe('(#c0_1 = :c0_1) AND (#c0_2 >= :c0_2)')
     expect(ExpressionAttributeNames).toMatchObject({
       '#c0_1': TestTable.entityAttributeSavedAs,
-      '#c0_2': 'age'
+      '#c0_2': 'age',
     })
     expect(ExpressionAttributeValues).toMatchObject({
       ':c0_1': Entity1.name,
-      ':c0_2': 40
+      ':c0_2': 40,
     })
   })
 
@@ -462,22 +488,23 @@ describe('scan', () => {
     const {
       FilterExpression,
       ExpressionAttributeNames,
-      ExpressionAttributeValues
+      ExpressionAttributeValues,
     } = command.params()
 
     expect(FilterExpression).toBe('(#c0_1 = :c0_1) OR (#c1_1 = :c1_1)')
     expect(ExpressionAttributeNames).toMatchObject({
       '#c0_1': TestTable.entityAttributeSavedAs,
-      '#c1_1': TestTable.entityAttributeSavedAs
+      '#c1_1': TestTable.entityAttributeSavedAs,
     })
     expect(ExpressionAttributeValues).toMatchObject({
       ':c0_1': Entity1.name,
-      ':c1_1': Entity2.name
+      ':c1_1': Entity2.name,
     })
 
     const assertReturnedItems: A.Equals<
       Awaited<ReturnType<typeof command.send>>['Items'],
-      (FormattedItem<typeof Entity1> | FormattedItem<typeof Entity2>)[] | undefined
+      | (FormattedItem<typeof Entity1> | FormattedItem<typeof Entity2>)[]
+      | undefined
     > = 1
     assertReturnedItems
   })
@@ -486,31 +513,31 @@ describe('scan', () => {
     const {
       FilterExpression,
       ExpressionAttributeNames,
-      ExpressionAttributeValues
+      ExpressionAttributeValues,
     } = TestTable.build(ScanCommand)
       .entities(Entity1, Entity2)
       .options({
         filters: {
           entity1: { attr: 'age', gte: 40 },
-          entity2: { attr: 'price', gte: 100 }
-        }
+          entity2: { attr: 'price', gte: 100 },
+        },
       })
       .params()
 
     expect(FilterExpression).toBe(
-      '((#c0_1 = :c0_1) AND (#c0_2 >= :c0_2)) OR ((#c1_1 = :c1_1) AND (#c1_2 >= :c1_2))'
+      '((#c0_1 = :c0_1) AND (#c0_2 >= :c0_2)) OR ((#c1_1 = :c1_1) AND (#c1_2 >= :c1_2))',
     )
     expect(ExpressionAttributeNames).toMatchObject({
       '#c0_1': TestTable.entityAttributeSavedAs,
       '#c0_2': 'age',
       '#c1_1': TestTable.entityAttributeSavedAs,
-      '#c1_2': 'price'
+      '#c1_2': 'price',
     })
     expect(ExpressionAttributeValues).toMatchObject({
       ':c0_1': Entity1.name,
       ':c0_2': 40,
       ':c1_1': Entity2.name,
-      ':c1_2': 100
+      ':c1_2': 100,
     })
   })
 
@@ -520,34 +547,38 @@ describe('scan', () => {
       schema: schema({
         email: string().key().savedAs('pk'),
         sort: string().key().savedAs('sk'),
-        transformedStr: string().transform(prefix('foo'))
+        transformedStr: string().transform(prefix('foo')),
       }),
-      table: TestTable
+      table: TestTable,
     })
 
     const {
       FilterExpression,
       ExpressionAttributeNames,
-      ExpressionAttributeValues
+      ExpressionAttributeValues,
     } = TestTable.build(ScanCommand)
       .entities(TestEntity3)
       .options({
         filters: {
-          entity3: { attr: 'transformedStr', gte: 'bar', transform: false }
-        }
+          entity3: { attr: 'transformedStr', gte: 'bar', transform: false },
+        },
       })
       .params()
 
     expect(FilterExpression).toContain('#c0_2 >= :c0_2')
-    expect(ExpressionAttributeNames).toMatchObject({ '#c0_2': 'transformedStr' })
+    expect(ExpressionAttributeNames).toMatchObject({
+      '#c0_2': 'transformedStr',
+    })
     expect(ExpressionAttributeValues).toMatchObject({ ':c0_2': 'bar' })
 
-    const { ExpressionAttributeValues: ExpressionAttributeValues2 } = TestTable.build(ScanCommand)
+    const {
+      ExpressionAttributeValues: ExpressionAttributeValues2,
+    } = TestTable.build(ScanCommand)
       .entities(TestEntity3)
       .options({
         filters: {
-          entity3: { attr: 'transformedStr', gte: 'bar' }
-        }
+          entity3: { attr: 'transformedStr', gte: 'bar' },
+        },
       })
       .params()
 
@@ -563,7 +594,8 @@ describe('scan', () => {
 
     const assertReturnedItems: A.Equals<
       Awaited<ReturnType<typeof command.send>>['Items'],
-      FormattedItem<typeof Entity1, { attributes: 'age' | 'name' }>[] | undefined
+      | FormattedItem<typeof Entity1, { attributes: 'age' | 'name' }>[]
+      | undefined
     > = 1
     assertReturnedItems
 
@@ -571,7 +603,7 @@ describe('scan', () => {
     expect(ExpressionAttributeNames).toMatchObject({
       '#p_1': '_et',
       '#p_2': 'age',
-      '#p_3': 'name'
+      '#p_3': 'name',
     })
   })
 
@@ -579,7 +611,7 @@ describe('scan', () => {
     const command = TestTable.build(ScanCommand)
       .entities(Entity1, Entity2)
       .options({
-        attributes: ['created', 'modified']
+        attributes: ['created', 'modified'],
       })
 
     const { ProjectionExpression, ExpressionAttributeNames } = command.params()
@@ -587,8 +619,14 @@ describe('scan', () => {
     const assertReturnedItems: A.Equals<
       Awaited<ReturnType<typeof command.send>>['Items'],
       | (
-          | FormattedItem<typeof Entity1, { attributes: 'created' | 'modified' }>
-          | FormattedItem<typeof Entity2, { attributes: 'created' | 'modified' }>
+          | FormattedItem<
+              typeof Entity1,
+              { attributes: 'created' | 'modified' }
+            >
+          | FormattedItem<
+              typeof Entity2,
+              { attributes: 'created' | 'modified' }
+            >
         )[]
       | undefined
     > = 1
@@ -598,7 +636,7 @@ describe('scan', () => {
     expect(ExpressionAttributeNames).toMatchObject({
       '#p_1': '_et',
       '#p_2': '_ct',
-      '#p_3': '_md'
+      '#p_3': '_md',
     })
   })
 })

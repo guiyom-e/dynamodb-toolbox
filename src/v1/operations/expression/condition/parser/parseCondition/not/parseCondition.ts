@@ -1,10 +1,9 @@
 import type { ConditionParser } from '../../parser'
-
 import type { NotCondition } from './types'
 
 export const parseNotCondition = (
   conditionParser: ConditionParser,
-  condition: NotCondition
+  condition: NotCondition,
 ): void => {
   const { not: negatedCondition } = condition
 

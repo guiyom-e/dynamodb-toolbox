@@ -1,19 +1,25 @@
-import type { Condition } from 'v1/operations/types'
 import { DynamoDBToolboxError } from 'v1/errors'
+import type { Condition } from 'v1/operations/types'
 
 import type { ConditionParser } from '../parser'
-import { isComparisonCondition, parseComparisonCondition } from './comparison'
-import { isSingleArgFnCondition, parseSingleArgFnCondition } from './singleArgFn'
 import { isBetweenCondition, parseBetweenCondition } from './between'
-import { isNotCondition, parseNotCondition } from './not'
+import { isComparisonCondition, parseComparisonCondition } from './comparison'
+import { isInCondition, parseInCondition } from './in'
 import {
   isLogicalCombinationCondition,
-  parseLogicalCombinationCondition
+  parseLogicalCombinationCondition,
 } from './logicalCombination'
+import { isNotCondition, parseNotCondition } from './not'
+import {
+  isSingleArgFnCondition,
+  parseSingleArgFnCondition,
+} from './singleArgFn'
 import { isTwoArgsFnCondition, parseTwoArgsFnCondition } from './twoArgsFn'
-import { isInCondition, parseInCondition } from './in'
 
-export const parseCondition = (conditionParser: ConditionParser, condition: Condition): void => {
+export const parseCondition = (
+  conditionParser: ConditionParser,
+  condition: Condition,
+): void => {
   if (isComparisonCondition(condition)) {
     return parseComparisonCondition(conditionParser, condition)
   }
@@ -43,6 +49,6 @@ export const parseCondition = (conditionParser: ConditionParser, condition: Cond
   }
 
   throw new DynamoDBToolboxError('operations.invalidCondition', {
-    message: 'Invalid condition: Unable to detect valid condition type.'
+    message: 'Invalid condition: Unable to detect valid condition type.',
   })
 }

@@ -1,1 +1,2 @@
-export const isString = (candidate: unknown): candidate is string => typeof candidate === 'string'
+export const isString = (candidate: unknown): candidate is string =>
+  typeof candidate === 'string'

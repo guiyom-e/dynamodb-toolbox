@@ -17,14 +17,16 @@ mockedEntity.on(GetItemCommand).resolve({
     completeName: 'Thomus Arbeit',
     parents: {
       father: 'yo',
-      mother: 'ya'
+      mother: 'ya',
     },
-    castedStr: 'bar'
-  }
+    castedStr: 'bar',
+  },
 })
 
 const test = async () => {
-  const test = await UserEntity.build(GetItemCommand).key({ userId: 'foo', age: 41 }).send()
+  const test = await UserEntity.build(GetItemCommand)
+    .key({ userId: 'foo', age: 41 })
+    .send()
   console.log('TEST', test)
 }
 

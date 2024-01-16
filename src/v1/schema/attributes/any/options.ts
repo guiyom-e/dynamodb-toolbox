@@ -1,4 +1,4 @@
-import { RequiredOption, AtLeastOnce } from '../constants/requiredOptions'
+import { AtLeastOnce, RequiredOption } from '../constants/requiredOptions'
 
 // Note: May look like a duplicate of AnyAttributeState but actually adds JSDocs
 
@@ -52,6 +52,6 @@ export const ANY_DEFAULT_OPTIONS: AnyAttributeDefaultOptions = {
   defaults: {
     key: undefined,
     put: undefined,
-    update: undefined
-  }
+    update: undefined,
+  },
 }

@@ -13,5 +13,5 @@ export const selectOptionsSet = new Set<SelectOption>([
   'ALL_ATTRIBUTES',
   'ALL_PROJECTED_ATTRIBUTES',
   'COUNT',
-  'SPECIFIC_ATTRIBUTES'
+  'SPECIFIC_ATTRIBUTES',
 ])

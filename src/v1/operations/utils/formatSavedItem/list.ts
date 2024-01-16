@@ -1,34 +1,41 @@
-import type { ListAttribute, AttributeValue, ListAttributeValue } from 'v1/schema'
-import { isArray } from 'v1/utils/validation'
 import { DynamoDBToolboxError } from 'v1/errors'
+import type {
+  AttributeValue,
+  ListAttribute,
+  ListAttributeValue,
+} from 'v1/schema'
+import { isArray } from 'v1/utils/validation'
 
-import type { FormatSavedAttributeOptions } from './types'
 import { formatSavedAttribute } from './attribute'
-import { matchProjection, getItemKey } from './utils'
+import type { FormatSavedAttributeOptions } from './types'
+import { getItemKey, matchProjection } from './utils'
 
 export const formatSavedListAttribute = (
   listAttribute: ListAttribute,
   savedValue: AttributeValue,
-  { projectedAttributes, ...restOptions }: FormatSavedAttributeOptions = {}
+  { projectedAttributes, ...restOptions }: FormatSavedAttributeOptions = {},
 ): ListAttributeValue => {
   if (!isArray(savedValue)) {
     const { partitionKey, sortKey } = restOptions
 
-    throw new DynamoDBToolboxError('operations.formatSavedItem.invalidSavedAttribute', {
-      message: [
-        `Invalid attribute in saved item: ${listAttribute.path}. Should be a ${listAttribute.type}.`,
-        getItemKey({ partitionKey, sortKey })
-      ]
-        .filter(Boolean)
-        .join(' '),
-      path: listAttribute.path,
-      payload: {
-        received: savedValue,
-        expected: listAttribute.type,
-        partitionKey,
-        sortKey
-      }
-    })
+    throw new DynamoDBToolboxError(
+      'operations.formatSavedItem.invalidSavedAttribute',
+      {
+        message: [
+          `Invalid attribute in saved item: ${listAttribute.path}. Should be a ${listAttribute.type}.`,
+          getItemKey({ partitionKey, sortKey }),
+        ]
+          .filter(Boolean)
+          .join(' '),
+        path: listAttribute.path,
+        payload: {
+          received: savedValue,
+          expected: listAttribute.type,
+          partitionKey,
+          sortKey,
+        },
+      },
+    )
   }
 
   // We don't need isProjected:
@@ -39,10 +46,14 @@ export const formatSavedListAttribute = (
 
   const parsedValues: ListAttributeValue = []
   for (const savedElement of savedValue) {
-    const parsedElement = formatSavedAttribute(listAttribute.elements, savedElement, {
-      projectedAttributes: childrenAttributes,
-      ...restOptions
-    })
+    const parsedElement = formatSavedAttribute(
+      listAttribute.elements,
+      savedElement,
+      {
+        projectedAttributes: childrenAttributes,
+        ...restOptions,
+      },
+    )
 
     if (parsedElement !== undefined) {
       parsedValues.push(parsedElement)

@@ -2,7 +2,6 @@ import isEmpty from 'lodash.isempty'
 
 import type { EntityV2 } from 'v1/entity'
 import { parseCondition } from 'v1/operations/expression/condition/parse'
-
 import { rejectExtraOptions } from 'v1/operations/utils/parseOptions/rejectExtraOptions'
 
 import { DeleteItemTransactionOptions } from '../options'
@@ -12,7 +11,7 @@ type TransactionOptions = Omit<TransactDeleteItemParams, 'TableName' | 'Key'>
 
 export const parseDeleteItemTransactionOptions = <ENTITY extends EntityV2>(
   entity: ENTITY,
-  deleteItemTransactionOptions: DeleteItemTransactionOptions<ENTITY>
+  deleteItemTransactionOptions: DeleteItemTransactionOptions<ENTITY>,
 ): TransactionOptions => {
   const transactionOptions: TransactionOptions = {}
 
@@ -22,7 +21,7 @@ export const parseDeleteItemTransactionOptions = <ENTITY extends EntityV2>(
     const {
       ExpressionAttributeNames,
       ExpressionAttributeValues,
-      ConditionExpression
+      ConditionExpression,
     } = parseCondition(entity, condition)
 
     if (!isEmpty(ExpressionAttributeNames)) {

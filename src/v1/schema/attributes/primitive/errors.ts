@@ -1,9 +1,9 @@
 import type { ErrorBlueprint } from 'v1/errors/blueprint'
 
 import type {
+  PrimitiveAttributeEnumValues,
   PrimitiveAttributeType,
   ResolvePrimitiveAttributeType,
-  PrimitiveAttributeEnumValues
 } from './types'
 
 type InvalidEnumValueTypeErrorBlueprint = ErrorBlueprint<{
@@ -28,7 +28,9 @@ type InvalidDefaultValueRangeErrorBlueprint = ErrorBlueprint<{
   code: 'schema.primitiveAttribute.invalidDefaultValueRange'
   hasPath: true
   payload: {
-    enumValues: NonNullable<PrimitiveAttributeEnumValues<PrimitiveAttributeType>>
+    enumValues: NonNullable<
+      PrimitiveAttributeEnumValues<PrimitiveAttributeType>
+    >
     defaultValue: unknown
   }
 }>

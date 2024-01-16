@@ -2,19 +2,18 @@ import type { O } from 'ts-toolbelt'
 
 import { DynamoDBToolboxError } from 'v1/errors'
 
-import type { FreezeAttribute } from '../freeze'
-import { validateAttributeProperties } from '../shared/validate'
-import { hasDefinedDefault } from '../shared/hasDefinedDefault'
 import {
+  $defaults,
   $elements,
-  $required,
   $hidden,
   $key,
+  $required,
   $savedAs,
-  $defaults
 } from '../constants/attributeOptions'
-
+import type { FreezeAttribute } from '../freeze'
+import { hasDefinedDefault } from '../shared/hasDefinedDefault'
 import type { SharedAttributeState } from '../shared/interface'
+import { validateAttributeProperties } from '../shared/validate'
 import type { $SetAttributeState, SetAttribute } from './interface'
 import type { $SetAttributeElements } from './types'
 
@@ -41,7 +40,7 @@ type SetAttributeFreezer = <
 >(
   $elements: $ELEMENTS,
   state: STATE,
-  path: string
+  path: string,
 ) => FreezeSetAttribute<$SetAttributeState<$ELEMENTS, STATE>>
 
 /**
@@ -58,44 +57,46 @@ export const freezeSetAttribute: SetAttributeFreezer = <
 >(
   elements: $ELEMENTS,
   state: STATE,
-  path: string
+  path: string,
 ): FreezeSetAttribute<$SetAttributeState<$ELEMENTS, STATE>> => {
   validateAttributeProperties(state, path)
 
   if (elements[$required] !== 'atLeastOnce') {
     throw new DynamoDBToolboxError('schema.setAttribute.optionalElements', {
       message: `Invalid set elements at path ${path}: Set elements must be required`,
-      path
+      path,
     })
   }
 
   if (elements[$hidden] !== false) {
     throw new DynamoDBToolboxError('schema.setAttribute.hiddenElements', {
       message: `Invalid set elements at path ${path}: Set elements cannot be hidden`,
-      path
+      path,
     })
   }
 
   if (elements[$savedAs] !== undefined) {
     throw new DynamoDBToolboxError('schema.setAttribute.savedAsElements', {
       message: `Invalid set elements at path ${path}: Set elements cannot be renamed (have savedAs option)`,
-      path
+      path,
     })
   }
 
   if (hasDefinedDefault(elements)) {
     throw new DynamoDBToolboxError('schema.setAttribute.defaultedElements', {
       message: `Invalid set elements at path ${path}: Set elements cannot have default values`,
-      path
+      path,
     })
   }
 
-  const frozenElements = elements.freeze(`${path}[x]`) as FreezeAttribute<$ELEMENTS>
+  const frozenElements = elements.freeze(
+    `${path}[x]`,
+  ) as FreezeAttribute<$ELEMENTS>
 
   return {
     path,
     type: 'set',
     elements: frozenElements,
-    ...state
+    ...state,
   }
 }

@@ -1,7 +1,7 @@
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
+import { DynamoDBToolboxError, EntityV2, schema, string, TableV2 } from 'v1'
 
-import { TableV2, EntityV2, schema, string, DynamoDBToolboxError } from 'v1'
 import { DeleteItemTransaction } from '../operation'
 
 const dynamoDbClient = new DynamoDBClient({})
@@ -12,13 +12,13 @@ const TestTable = new TableV2({
   name: 'test-table',
   partitionKey: {
     type: 'string',
-    name: 'pk'
+    name: 'pk',
   },
   sortKey: {
     type: 'string',
-    name: 'sk'
+    name: 'sk',
   },
-  documentClient
+  documentClient,
 })
 
 const TestEntity = new EntityV2({
@@ -26,9 +26,9 @@ const TestEntity = new EntityV2({
   schema: schema({
     email: string().key().savedAs('pk'),
     sort: string().key().savedAs('sk'),
-    test: string()
+    test: string(),
   }),
-  table: TestTable
+  table: TestTable,
 })
 
 const TestEntity2 = new EntityV2({
@@ -36,9 +36,9 @@ const TestEntity2 = new EntityV2({
   schema: schema({
     pk: string().key(),
     sk: string().key(),
-    test: string()
+    test: string(),
   }),
-  table: TestTable
+  table: TestTable,
 })
 
 describe('delete transaction', () => {
@@ -57,7 +57,7 @@ describe('delete transaction', () => {
         email: 'test-pk',
         sort: 'test-sk',
         // @ts-expect-error
-        test: 'test'
+        test: 'test',
       })
       .params()
 
@@ -69,9 +69,9 @@ describe('delete transaction', () => {
       TestEntity.build(DeleteItemTransaction)
         .key(
           // @ts-expect-error
-          {}
+          {},
         )
-        .params()
+        .params(),
     ).toThrow('Attribute email is required')
   })
 
@@ -80,9 +80,9 @@ describe('delete transaction', () => {
       TestEntity.build(DeleteItemTransaction)
         .key(
           // @ts-expect-error
-          { pk: 'test-pk' }
+          { pk: 'test-pk' },
         )
-        .params()
+        .params(),
     ).toThrow('Attribute email is required')
   })
 
@@ -91,9 +91,9 @@ describe('delete transaction', () => {
       TestEntity2.build(DeleteItemTransaction)
         .key(
           // @ts-expect-error
-          {}
+          {},
         )
-        .params()
+        .params(),
     ).toThrow('Attribute pk is required')
   })
 
@@ -102,9 +102,9 @@ describe('delete transaction', () => {
       TestEntity2.build(DeleteItemTransaction)
         .key(
           // @ts-expect-error
-          { pk: 'test-pk' }
+          { pk: 'test-pk' },
         )
-        .params()
+        .params(),
     ).toThrow('Attribute sk is required')
   })
 
@@ -115,19 +115,21 @@ describe('delete transaction', () => {
         .key({ email: 'x', sort: 'y' })
         .options({
           // @ts-expect-error
-          extra: true
+          extra: true,
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.unknownOption' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.unknownOption' }),
+    )
   })
 
   it('sets condition', () => {
     const {
       ExpressionAttributeNames,
       ExpressionAttributeValues,
-      ConditionExpression
+      ConditionExpression,
     } = TestEntity.build(DeleteItemTransaction)
       .key({ email: 'x', sort: 'y' })
       .options({ condition: { attr: 'email', gt: 'test' } })
@@ -142,6 +144,8 @@ describe('delete transaction', () => {
     const invalidCall = () => TestEntity.build(DeleteItemTransaction).params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.incompleteCommand' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.incompleteCommand' }),
+    )
   })
 })

@@ -1,25 +1,27 @@
-import type { Schema } from 'v1/schema'
-import type { TableV2, PrimaryKey } from 'v1/table'
-import type { KeyInput } from 'v1/operations/types'
-import type { EntityOperation } from 'v1/operations/class'
-import type { If } from 'v1/types/if'
 import { DynamoDBToolboxError } from 'v1/errors'
+import type { EntityOperation } from 'v1/operations/class'
+import type { KeyInput } from 'v1/operations/types'
+import type { Schema } from 'v1/schema'
+import type { PrimaryKey, TableV2 } from 'v1/table'
+import type { If } from 'v1/types/if'
 
 import type { NeedsKeyCompute } from './generics'
 import {
-  TimestampsOptions,
-  TimestampsDefaultOptions,
-  NarrowTimestampsOptions,
-  doesSchemaValidateTableSchema,
   addInternalAttributes,
-  WithInternalAttributes
+  doesSchemaValidateTableSchema,
+  NarrowTimestampsOptions,
+  TimestampsDefaultOptions,
+  TimestampsOptions,
+  WithInternalAttributes,
 } from './utils'
 
 export class EntityV2<
   NAME extends string = string,
   TABLE extends TableV2 = TableV2,
   SCHEMA extends Schema = Schema,
-  ENTITY_ATTRIBUTE_NAME extends string = string extends NAME ? string : 'entity',
+  ENTITY_ATTRIBUTE_NAME extends string = string extends NAME
+    ? string
+    : 'entity',
   TIMESTAMPS_OPTIONS extends TimestampsOptions = string extends NAME
     ? TimestampsOptions
     : TimestampsDefaultOptions
@@ -38,10 +40,12 @@ export class EntityV2<
   public timestamps: TIMESTAMPS_OPTIONS
   // any is needed for contravariance
   public computeKey?: (
-    keyInput: Schema extends SCHEMA ? any : KeyInput<SCHEMA>
+    keyInput: Schema extends SCHEMA ? any : KeyInput<SCHEMA>,
   ) => PrimaryKey<TABLE>
-  public build: <OPERATION_CLASS extends EntityOperation<this> = EntityOperation<this>>(
-    operationClass: new (entity: this) => OPERATION_CLASS
+  public build: <
+    OPERATION_CLASS extends EntityOperation<this> = EntityOperation<this>
+  >(
+    operationClass: new (entity: this) => OPERATION_CLASS,
   ) => OPERATION_CLASS
 
   /**
@@ -61,7 +65,7 @@ export class EntityV2<
     schema,
     computeKey,
     entityAttributeName = 'entity' as ENTITY_ATTRIBUTE_NAME,
-    timestamps = true as NarrowTimestampsOptions<TIMESTAMPS_OPTIONS>
+    timestamps = true as NarrowTimestampsOptions<TIMESTAMPS_OPTIONS>,
   }: {
     name: NAME
     table: TABLE
@@ -79,9 +83,12 @@ export class EntityV2<
     this.entityAttributeName = entityAttributeName
     this.timestamps = timestamps as TIMESTAMPS_OPTIONS
 
-    if (computeKey === undefined && !doesSchemaValidateTableSchema(schema, table)) {
+    if (
+      computeKey === undefined &&
+      !doesSchemaValidateTableSchema(schema, table)
+    ) {
       throw new DynamoDBToolboxError('entity.invalidSchema', {
-        message: `Entity ${name} schema does not follow its table primary key schema`
+        message: `Entity ${name} schema does not follow its table primary key schema`,
       })
     }
 
@@ -91,7 +98,7 @@ export class EntityV2<
       table: this.table,
       entityAttributeName: this.entityAttributeName,
       entityName: this.name,
-      timestamps: this.timestamps
+      timestamps: this.timestamps,
     })
 
     this.computeKey = computeKey as any

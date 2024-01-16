@@ -9,8 +9,12 @@ import type { Index, Key } from './types'
 export class TableV2<
   PARTITION_KEY extends Key = Key,
   SORT_KEY extends Key = Key,
-  INDEXES extends Record<string, Index> = Key extends PARTITION_KEY ? Record<string, Index> : {},
-  ENTITY_ATTRIBUTE_SAVED_AS extends string = Key extends PARTITION_KEY ? string : '_et'
+  INDEXES extends Record<string, Index> = Key extends PARTITION_KEY
+    ? Record<string, Index>
+    : {},
+  ENTITY_ATTRIBUTE_SAVED_AS extends string = Key extends PARTITION_KEY
+    ? string
+    : '_et'
 > {
   public documentClient: DynamoDBDocumentClient
   public name: string | (() => string)
@@ -20,8 +24,10 @@ export class TableV2<
   public entityAttributeSavedAs: ENTITY_ATTRIBUTE_SAVED_AS
 
   public getName: () => string
-  public build: <TABLE_COMMAND_CLASS extends TableCommand<this> = TableCommand<this>>(
-    tableCommandClass: new (table: this) => TABLE_COMMAND_CLASS
+  public build: <
+    TABLE_COMMAND_CLASS extends TableCommand<this> = TableCommand<this>
+  >(
+    tableCommandClass: new (table: this) => TABLE_COMMAND_CLASS,
   ) => TABLE_COMMAND_CLASS
 
   /**
@@ -39,7 +45,7 @@ export class TableV2<
     partitionKey,
     sortKey,
     indexes = {} as INDEXES,
-    entityAttributeSavedAs = '_et' as ENTITY_ATTRIBUTE_SAVED_AS
+    entityAttributeSavedAs = '_et' as ENTITY_ATTRIBUTE_SAVED_AS,
   }: {
     documentClient: DynamoDBDocumentClient
     name: string | (() => string)

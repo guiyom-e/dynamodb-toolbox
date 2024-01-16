@@ -4,26 +4,27 @@ import { DynamoDBToolboxError } from 'v1/errors'
 import { isStaticDefault } from 'v1/schema/utils/isStaticDefault'
 import { validatorsByPrimitiveType } from 'v1/utils/validation'
 
-import { validateAttributeProperties } from '../shared/validate'
 import {
-  $type,
-  $required,
+  $defaults,
+  $enum,
   $hidden,
   $key,
+  $required,
   $savedAs,
-  $enum,
-  $defaults,
-  $transform
+  $transform,
+  $type,
 } from '../constants/attributeOptions'
-
+import { validateAttributeProperties } from '../shared/validate'
 import type { $PrimitiveAttributeState, PrimitiveAttribute } from './interface'
 import type {
   PrimitiveAttributeEnumValues,
   PrimitiveAttributeState,
-  PrimitiveAttributeType
+  PrimitiveAttributeType,
 } from './types'
 
-export type FreezePrimitiveAttribute<$PRIMITIVE_ATTRIBUTE extends $PrimitiveAttributeState> =
+export type FreezePrimitiveAttribute<
+  $PRIMITIVE_ATTRIBUTE extends $PrimitiveAttributeState
+> =
   // Applying void O.Update improves type display
   O.Update<
     PrimitiveAttribute<
@@ -51,7 +52,7 @@ type PrimitiveAttributeFreezer = <
 >(
   type: TYPE,
   primitiveAttribute: STATE,
-  path: string
+  path: string,
 ) => FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>
 
 /**
@@ -68,7 +69,7 @@ export const freezePrimitiveAttribute: PrimitiveAttributeFreezer = <
 >(
   type: TYPE,
   state: STATE,
-  path: string
+  path: string,
 ): FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>> => {
   validateAttributeProperties(state, path)
 
@@ -78,36 +79,48 @@ export const freezePrimitiveAttribute: PrimitiveAttributeFreezer = <
   enumValues?.forEach(enumValue => {
     const isEnumValueValid = typeValidator(enumValue)
     if (!isEnumValueValid) {
-      throw new DynamoDBToolboxError('schema.primitiveAttribute.invalidEnumValueType', {
-        message: `Invalid enum value type at path ${path}. Expected: ${type}. Received: ${String(
-          enumValue
-        )}.`,
-        path,
-        payload: { expectedType: type, enumValue }
-      })
+      throw new DynamoDBToolboxError(
+        'schema.primitiveAttribute.invalidEnumValueType',
+        {
+          message: `Invalid enum value type at path ${path}. Expected: ${type}. Received: ${String(
+            enumValue,
+          )}.`,
+          path,
+          payload: { expectedType: type, enumValue },
+        },
+      )
     }
   })
 
   for (const defaultValue of Object.values(state.defaults)) {
     if (defaultValue !== undefined && isStaticDefault(defaultValue)) {
       if (!typeValidator(defaultValue)) {
-        throw new DynamoDBToolboxError('schema.primitiveAttribute.invalidDefaultValueType', {
-          message: `Invalid default value type at path ${path}: Expected: ${type}. Received: ${String(
-            defaultValue
-          )}.`,
-          path,
-          payload: { expectedType: type, defaultValue }
-        })
+        throw new DynamoDBToolboxError(
+          'schema.primitiveAttribute.invalidDefaultValueType',
+          {
+            message: `Invalid default value type at path ${path}: Expected: ${type}. Received: ${String(
+              defaultValue,
+            )}.`,
+            path,
+            payload: { expectedType: type, defaultValue },
+          },
+        )
       }
 
-      if (enumValues !== undefined && !enumValues.some(enumValue => enumValue === defaultValue)) {
-        throw new DynamoDBToolboxError('schema.primitiveAttribute.invalidDefaultValueRange', {
-          message: `Invalid default value at path ${path}: Expected one of: ${enumValues.join(
-            ', '
-          )}. Received: ${String(defaultValue)}.`,
-          path,
-          payload: { enumValues, defaultValue }
-        })
+      if (
+        enumValues !== undefined &&
+        !enumValues.some(enumValue => enumValue === defaultValue)
+      ) {
+        throw new DynamoDBToolboxError(
+          'schema.primitiveAttribute.invalidDefaultValueRange',
+          {
+            message: `Invalid default value at path ${path}: Expected one of: ${enumValues.join(
+              ', ',
+            )}. Received: ${String(defaultValue)}.`,
+            path,
+            payload: { enumValues, defaultValue },
+          },
+        )
       }
     }
   }
@@ -115,7 +128,10 @@ export const freezePrimitiveAttribute: PrimitiveAttributeFreezer = <
   return {
     path,
     type,
-    enum: state.enum as Extract<STATE['enum'], PrimitiveAttributeEnumValues<TYPE>>,
-    ...restState
+    enum: state.enum as Extract<
+      STATE['enum'],
+      PrimitiveAttributeEnumValues<TYPE>
+    >,
+    ...restState,
   }
 }

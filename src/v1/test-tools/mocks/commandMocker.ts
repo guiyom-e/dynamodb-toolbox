@@ -1,7 +1,11 @@
 import { isString } from 'v1/utils/validation/isString'
 
+import {
+  $mockedEntity,
+  $mockedImplementations,
+  $operationName,
+} from './constants'
 import type { operationName } from './types'
-import { $operationName, $mockedEntity, $mockedImplementations } from './constants'
 
 // NOTE: Those types come from @aws-sdk
 interface Error {
@@ -30,7 +34,12 @@ interface AwsError
   $service?: string
 }
 
-export class OperationMocker<OPERATION_TYPE extends operationName, INPUT, OPTIONS, RESPONSE> {
+export class OperationMocker<
+  OPERATION_TYPE extends operationName,
+  INPUT,
+  OPTIONS,
+  RESPONSE
+> {
   [$operationName]: OPERATION_TYPE;
   [$mockedEntity]: {
     [$mockedImplementations]: Partial<
@@ -38,12 +47,14 @@ export class OperationMocker<OPERATION_TYPE extends operationName, INPUT, OPTION
     >
   }
 
-  resolve: (response: RESPONSE) => OperationMocker<OPERATION_TYPE, INPUT, OPTIONS, RESPONSE>
+  resolve: (
+    response: RESPONSE,
+  ) => OperationMocker<OPERATION_TYPE, INPUT, OPTIONS, RESPONSE>
   reject: (
-    error?: string | Error | AwsError
+    error?: string | Error | AwsError,
   ) => OperationMocker<OPERATION_TYPE, INPUT, OPTIONS, RESPONSE>
   mockImplementation: (
-    implementation: (key: INPUT, options?: OPTIONS) => RESPONSE
+    implementation: (key: INPUT, options?: OPTIONS) => RESPONSE,
   ) => OperationMocker<OPERATION_TYPE, INPUT, OPTIONS, RESPONSE>
 
   constructor(
@@ -52,18 +63,21 @@ export class OperationMocker<OPERATION_TYPE extends operationName, INPUT, OPTION
       [$mockedImplementations]: Partial<
         Record<OPERATION_TYPE, (input: INPUT, options?: OPTIONS) => RESPONSE>
       >
-    }
+    },
   ) {
     this[$operationName] = operationName
     this[$mockedEntity] = mockedEntity
 
     this.resolve = response => {
-      this[$mockedEntity][$mockedImplementations][this[$operationName]] = () => response
+      this[$mockedEntity][$mockedImplementations][this[$operationName]] = () =>
+        response
       return this
     }
 
     this.reject = error => {
-      this[$mockedEntity][$mockedImplementations][this[$operationName]] = () => {
+      this[$mockedEntity][$mockedImplementations][
+        this[$operationName]
+      ] = () => {
         if (error === undefined || isString(error)) {
           throw new Error(error)
         } else {
@@ -75,7 +89,9 @@ export class OperationMocker<OPERATION_TYPE extends operationName, INPUT, OPTION
     }
 
     this.mockImplementation = implementation => {
-      this[$mockedEntity][$mockedImplementations][this[$operationName]] = implementation
+      this[$mockedEntity][$mockedImplementations][
+        this[$operationName]
+      ] = implementation
 
       return this
     }

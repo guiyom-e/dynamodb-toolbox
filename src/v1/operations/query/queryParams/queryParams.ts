@@ -1,22 +1,22 @@
 import type { QueryCommandInput } from '@aws-sdk/lib-dynamodb'
 import isEmpty from 'lodash.isempty'
 
-import type { TableV2 } from 'v1/table'
-import type { AnyAttributePath, Condition, Query } from 'v1/operations/types'
 import type { EntityV2 } from 'v1/entity'
 import { DynamoDBToolboxError } from 'v1/errors'
+import { parseCondition } from 'v1/operations/expression/condition/parse'
+import { parseProjection } from 'v1/operations/expression/projection/parse'
+import type { AnyAttributePath, Condition, Query } from 'v1/operations/types'
 import { parseCapacityOption } from 'v1/operations/utils/parseOptions/parseCapacityOption'
-import { parseIndexOption } from 'v1/operations/utils/parseOptions/parseIndexOption'
 import { parseConsistentOption } from 'v1/operations/utils/parseOptions/parseConsistentOption'
+import { parseIndexOption } from 'v1/operations/utils/parseOptions/parseIndexOption'
 import { parseLimitOption } from 'v1/operations/utils/parseOptions/parseLimitOption'
 import { parseMaxPagesOption } from 'v1/operations/utils/parseOptions/parseMaxPagesOption'
 import { parseSelectOption } from 'v1/operations/utils/parseOptions/parseSelectOption'
 import { rejectExtraOptions } from 'v1/operations/utils/parseOptions/rejectExtraOptions'
-import { parseCondition } from 'v1/operations/expression/condition/parse'
-import { parseProjection } from 'v1/operations/expression/projection/parse'
+import type { TableV2 } from 'v1/table'
+import { isBoolean } from 'v1/utils/validation'
 
 import type { QueryOptions } from '../options'
-import { isBoolean } from 'v1/utils/validation'
 import { parseQuery } from './parseQuery'
 
 export const queryParams = <
@@ -28,7 +28,7 @@ export const queryParams = <
   table: TABLE,
   entities = ([] as unknown) as ENTITIES,
   query: QUERY,
-  scanOptions: OPTIONS = {} as OPTIONS
+  scanOptions: OPTIONS = {} as OPTIONS,
 ): QueryCommandInput => {
   const { index } = query
   const {
@@ -48,7 +48,7 @@ export const queryParams = <
   const attributes = _attributes as AnyAttributePath[] | undefined
 
   const commandOptions: QueryCommandInput = {
-    TableName: table.getName()
+    TableName: table.getName(),
   }
 
   if (capacity !== undefined) {
@@ -80,7 +80,7 @@ export const queryParams = <
     if (!isBoolean(reverse)) {
       throw new DynamoDBToolboxError('queryCommand.invalidReverseOption', {
         message: 'Invalid "reverse" options: Must be a boolean',
-        payload: { reverse }
+        payload: { reverse },
       })
     }
 
@@ -97,30 +97,38 @@ export const queryParams = <
   const {
     KeyConditionExpression,
     ExpressionAttributeNames: keyConditionExpressionAttributeNames,
-    ExpressionAttributeValues: keyConditionExpressionAttributeValues
+    ExpressionAttributeValues: keyConditionExpressionAttributeValues,
   } = parseQuery(table, query)
 
   commandOptions.KeyConditionExpression = KeyConditionExpression
   Object.assign(expressionAttributeNames, keyConditionExpressionAttributeNames)
-  Object.assign(expressionAttributeValues, keyConditionExpressionAttributeValues)
+  Object.assign(
+    expressionAttributeValues,
+    keyConditionExpressionAttributeValues,
+  )
 
   if (entities.length > 0) {
     const filterExpressions: string[] = []
     let projectionExpression: string | undefined = undefined
 
     entities.forEach((entity, index) => {
-      const entityNameFilter = { attr: entity.entityAttributeName, eq: entity.name }
+      const entityNameFilter = {
+        attr: entity.entityAttributeName,
+        eq: entity.name,
+      }
       const entityFilter = filters[entity.name]
 
       const {
         ExpressionAttributeNames: filterExpressionAttributeNames,
         ExpressionAttributeValues: filterExpressionAttributeValues,
-        ConditionExpression: filterExpression
+        ConditionExpression: filterExpression,
       } = parseCondition<EntityV2, Condition<EntityV2>>(
         entity,
-        entityFilter !== undefined ? { and: [entityNameFilter, entityFilter] } : entityNameFilter,
+        entityFilter !== undefined
+          ? { and: [entityNameFilter, entityFilter] }
+          : entityNameFilter,
         // Need to add +1 to take KeyConditionExpression into account
-        (index + 1).toString()
+        (index + 1).toString(),
       )
 
       Object.assign(expressionAttributeNames, filterExpressionAttributeNames)
@@ -131,14 +139,19 @@ export const queryParams = <
       if (projectionExpression === undefined && attributes !== undefined) {
         const {
           ExpressionAttributeNames: projectionExpressionAttributeNames,
-          ProjectionExpression
+          ProjectionExpression,
         } = parseProjection<EntityV2, AnyAttributePath[]>(entity, [
           // entityAttributeName is required at all times for formatting
-          ...(attributes.includes(entity.entityAttributeName) ? [] : [entity.entityAttributeName]),
-          ...attributes
+          ...(attributes.includes(entity.entityAttributeName)
+            ? []
+            : [entity.entityAttributeName]),
+          ...attributes,
         ])
 
-        Object.assign(expressionAttributeNames, projectionExpressionAttributeNames)
+        Object.assign(
+          expressionAttributeNames,
+          projectionExpressionAttributeNames,
+        )
         projectionExpression = ProjectionExpression
       }
     })

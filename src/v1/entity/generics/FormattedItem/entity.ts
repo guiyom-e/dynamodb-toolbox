@@ -11,7 +11,10 @@ import type { FormattedAttribute } from './attribute'
  */
 export type FormattedItem<
   ENTITY extends EntityV2,
-  OPTIONS extends { attributes?: AnyAttributePath<ENTITY>; partial?: boolean } = {}
+  OPTIONS extends {
+    attributes?: AnyAttributePath<ENTITY>
+    partial?: boolean
+  } = {}
 > = FormattedAttribute<
   ENTITY['schema'],
   {

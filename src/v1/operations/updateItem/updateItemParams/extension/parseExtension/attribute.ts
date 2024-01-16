@@ -1,22 +1,21 @@
-import type { ExtensionParser } from 'v1/validation/parseClonedInput/types'
-import type { PrimitiveAttribute } from 'v1/schema'
 import { DynamoDBToolboxError } from 'v1/errors'
-
-import type { UpdateItemInputExtension } from 'v1/operations/updateItem/types'
 import { $REMOVE } from 'v1/operations/updateItem/constants'
+import type { UpdateItemInputExtension } from 'v1/operations/updateItem/types'
 import { hasGetOperation } from 'v1/operations/updateItem/utils'
+import type { PrimitiveAttribute } from 'v1/schema'
+import type { ExtensionParser } from 'v1/validation/parseClonedInput/types'
 
-import { parseNumberExtension } from './number'
-import { parseSetExtension } from './set'
 import { parseListExtension } from './list'
 import { parseMapExtension } from './map'
+import { parseNumberExtension } from './number'
 import { parseRecordExtension } from './record'
 import { parseReferenceExtension } from './reference'
+import { parseSetExtension } from './set'
 
 export const parseUpdateExtension: ExtensionParser<UpdateItemInputExtension> = (
   attribute,
   input,
-  options
+  options,
 ) => {
   if (input === $REMOVE) {
     return {
@@ -28,7 +27,7 @@ export const parseUpdateExtension: ExtensionParser<UpdateItemInputExtension> = (
         if (attribute.required !== 'never') {
           throw new DynamoDBToolboxError('parsing.attributeRequired', {
             message: `Attribute ${attribute.path} is required and cannot be removed`,
-            path: attribute.path
+            path: attribute.path,
           })
         }
 
@@ -37,7 +36,7 @@ export const parseUpdateExtension: ExtensionParser<UpdateItemInputExtension> = (
 
         const collapsedValue: typeof $REMOVE = parsedValue
         return collapsedValue
-      }
+      },
     }
   }
 
@@ -48,7 +47,7 @@ export const parseUpdateExtension: ExtensionParser<UpdateItemInputExtension> = (
     return parseReferenceExtension(attribute, input, {
       ...options,
       // Can be a reference
-      parseExtension: parseReferenceExtension
+      parseExtension: parseReferenceExtension,
     })
   }
 
@@ -57,7 +56,11 @@ export const parseUpdateExtension: ExtensionParser<UpdateItemInputExtension> = (
       /**
        * @debt type "fix this cast"
        */
-      return parseNumberExtension(attribute as PrimitiveAttribute<'number'>, input, options)
+      return parseNumberExtension(
+        attribute as PrimitiveAttribute<'number'>,
+        input,
+        options,
+      )
     case 'set':
       return parseSetExtension(attribute, input, options)
     case 'list':

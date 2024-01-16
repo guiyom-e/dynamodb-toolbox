@@ -1,8 +1,8 @@
 import type { A } from 'ts-toolbelt'
 
-import { schema } from './typer'
-import { boolean, binary, number, string, set, list, map } from './attributes'
+import { binary, boolean, list, map, number, set, string } from './attributes'
 import type { FreezeAttribute } from './attributes/freeze'
+import { schema } from './typer'
 
 describe('schema', () => {
   it('primitives', () => {
@@ -19,7 +19,7 @@ describe('schema', () => {
       defNum,
       savedAsBin,
       keyStr,
-      enumStr
+      enumStr,
     })
 
     const assertSch: A.Contains<
@@ -45,8 +45,8 @@ describe('schema', () => {
         defNum: defNum.freeze('defNum'),
         savedAsBin: savedAsBin.freeze('savedAsBin'),
         keyStr: keyStr.freeze('keyStr'),
-        enumStr: enumStr.freeze('enumStr')
-      }
+        enumStr: enumStr.freeze('enumStr'),
+      },
     })
   })
 
@@ -54,7 +54,7 @@ describe('schema', () => {
     const str = string()
     const flatMap = map({ str })
     const nestedMap = map({
-      nested: map({ str })
+      nested: map({ str }),
     })
     const reqMap = map({ str })
     const hiddenMap = map({ str }).hidden()
@@ -79,8 +79,8 @@ describe('schema', () => {
         flatMap: flatMap.freeze('flatMap'),
         nestedMap: nestedMap.freeze('nestedMap'),
         reqMap: reqMap.freeze('reqMap'),
-        hiddenMap: hiddenMap.freeze('hiddenMap')
-      }
+        hiddenMap: hiddenMap.freeze('hiddenMap'),
+      },
     })
   })
 
@@ -95,7 +95,7 @@ describe('schema', () => {
       optList,
       nestedList,
       reqList,
-      hiddenList
+      hiddenList,
     })
 
     const assertSch: A.Contains<
@@ -116,8 +116,8 @@ describe('schema', () => {
         optList: optList.freeze('optList'),
         nestedList: nestedList.freeze('nestedList'),
         reqList: reqList.freeze('reqList'),
-        hiddenList: hiddenList.freeze('hiddenList')
-      }
+        hiddenList: hiddenList.freeze('hiddenList'),
+      },
     })
   })
 
@@ -130,7 +130,7 @@ describe('schema', () => {
     const sch = schema({
       optSet,
       reqSet,
-      hiddenSet
+      hiddenSet,
     })
 
     const assertSch: A.Contains<
@@ -149,8 +149,8 @@ describe('schema', () => {
       attributes: {
         optSet: optSet.freeze('optSet'),
         reqSet: reqSet.freeze('reqSet'),
-        hiddenSet: hiddenSet.freeze('hiddenSet')
-      }
+        hiddenSet: hiddenSet.freeze('hiddenSet'),
+      },
     })
   })
 })

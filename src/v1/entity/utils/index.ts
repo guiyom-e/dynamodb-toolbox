@@ -3,6 +3,6 @@ export type { WithInternalAttributes } from './addInternalAttributes'
 export type {
   TimestampsOptions,
   TimestampsDefaultOptions,
-  NarrowTimestampsOptions
+  NarrowTimestampsOptions,
 } from './addTimestampAttributes'
 export { doesSchemaValidateTableSchema } from './doesSchemaValidateTableSchema'

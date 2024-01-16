@@ -1,20 +1,28 @@
-import type { RequiredOption, Attribute, Extension, AttributeValue } from 'v1/schema'
-import type { If } from 'v1/types'
 import { DynamoDBToolboxError } from 'v1/errors'
+import type {
+  Attribute,
+  AttributeValue,
+  Extension,
+  RequiredOption,
+} from 'v1/schema'
+import type { If } from 'v1/types'
 import { isFunction } from 'v1/utils/validation'
 
 import type { HasExtension } from '../types'
-import type { ParsingOptions, ExtensionParser } from './types'
 import { parseAnyAttributeClonedInput } from './any'
-import { parsePrimitiveAttributeClonedInput } from './primitive'
-import { parseSetAttributeClonedInput } from './set'
+import { parseAnyOfAttributeClonedInput } from './anyOf'
 import { parseListAttributeClonedInput } from './list'
 import { parseMapAttributeClonedInput } from './map'
+import { parsePrimitiveAttributeClonedInput } from './primitive'
 import { parseRecordAttributeClonedInput } from './record'
-import { parseAnyOfAttributeClonedInput } from './anyOf'
+import { parseSetAttributeClonedInput } from './set'
+import type { ExtensionParser, ParsingOptions } from './types'
 import { defaultParseExtension } from './utils'
 
-const defaultRequiringOptions = new Set<RequiredOption>(['atLeastOnce', 'always'])
+const defaultRequiringOptions = new Set<RequiredOption>([
+  'atLeastOnce',
+  'always',
+])
 
 export function* parseAttributeClonedInput<
   INPUT_EXTENSION extends Extension = never,
@@ -38,7 +46,7 @@ export function* parseAttributeClonedInput<
     parseExtension = (defaultParseExtension as unknown) as ExtensionParser<
       INPUT_EXTENSION,
       SCHEMA_EXTENSION
-    >
+    >,
   } = options
 
   let defaultedValue = inputValue
@@ -49,14 +57,16 @@ export function* parseAttributeClonedInput<
       : operationName && attribute.defaults[operationName]
 
     defaultedValue = isFunction(operationDefault)
-      ? (operationDefault(schemaInput) as AttributeValue<INPUT_EXTENSION> | undefined)
+      ? (operationDefault(schemaInput) as
+          | AttributeValue<INPUT_EXTENSION>
+          | undefined)
       : (operationDefault as AttributeValue<INPUT_EXTENSION> | undefined)
   }
 
   const { isExtension, extensionParser, basicInput } = parseExtension(
     attribute,
     defaultedValue,
-    options
+    options,
   )
 
   if (isExtension) {
@@ -70,7 +80,7 @@ export function* parseAttributeClonedInput<
     if (requiringOptions.has(attribute.required)) {
       throw new DynamoDBToolboxError('parsing.attributeRequired', {
         message: `Attribute ${attribute.path} is required`,
-        path: attribute.path
+        path: attribute.path,
       })
     }
 
@@ -88,16 +98,32 @@ export function* parseAttributeClonedInput<
     case 'binary':
     case 'number':
     case 'string':
-      return yield* parsePrimitiveAttributeClonedInput(attribute, basicInput, options)
+      return yield* parsePrimitiveAttributeClonedInput(
+        attribute,
+        basicInput,
+        options,
+      )
     case 'set':
       return yield* parseSetAttributeClonedInput(attribute, basicInput, options)
     case 'list':
-      return yield* parseListAttributeClonedInput(attribute, basicInput, options)
+      return yield* parseListAttributeClonedInput(
+        attribute,
+        basicInput,
+        options,
+      )
     case 'map':
       return yield* parseMapAttributeClonedInput(attribute, basicInput, options)
     case 'record':
-      return yield* parseRecordAttributeClonedInput(attribute, basicInput, options)
+      return yield* parseRecordAttributeClonedInput(
+        attribute,
+        basicInput,
+        options,
+      )
     case 'anyOf':
-      return yield* parseAnyOfAttributeClonedInput(attribute, basicInput, options)
+      return yield* parseAnyOfAttributeClonedInput(
+        attribute,
+        basicInput,
+        options,
+      )
   }
 }

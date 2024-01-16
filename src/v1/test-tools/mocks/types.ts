@@ -1,25 +1,32 @@
 import type { EntityV2 } from 'v1/entity'
 import type { KeyInput } from 'v1/operations'
+import type {
+  DeleteItemOptions,
+  DeleteItemResponse,
+} from 'v1/operations/deleteItem'
+import type { DeleteItemCommandClass } from 'v1/operations/deleteItem/command'
 import type { GetItemOptions, GetItemResponse } from 'v1/operations/getItem'
 import type { GetItemCommandClass } from 'v1/operations/getItem/command'
-import type { PutItemInput, PutItemOptions, PutItemResponse } from 'v1/operations/putItem'
+import type {
+  PutItemInput,
+  PutItemOptions,
+  PutItemResponse,
+} from 'v1/operations/putItem'
 import type { PutItemCommandClass } from 'v1/operations/putItem/command'
-import type { DeleteItemOptions, DeleteItemResponse } from 'v1/operations/deleteItem'
-import type { DeleteItemCommandClass } from 'v1/operations/deleteItem/command'
 import type {
   UpdateItemInput,
   UpdateItemOptions,
-  UpdateItemResponse
+  UpdateItemResponse,
 } from 'v1/operations/updateItem'
 import type { UpdateItemCommandClass } from 'v1/operations/updateItem/command'
 
+import type { OperationMocker } from './commandMocker'
+import type { CommandResults } from './commandResults'
+import type { $operationName } from './constants'
+import type { DeleteItemCommandMock } from './deleteItemCommand'
 import type { GetItemCommandMock } from './getItemCommand'
 import type { PutItemCommandMock } from './putItemCommand'
-import type { DeleteItemCommandMock } from './deleteItemCommand'
 import type { UpdateItemCommandMock } from './updateItemCommand'
-import type { $operationName } from './constants'
-import type { CommandResults } from './commandResults'
-import type { OperationMocker } from './commandMocker'
 
 type ClassStaticProperties<CLASSES> = CLASSES extends infer CLASS
   ? {

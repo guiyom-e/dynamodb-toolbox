@@ -1,16 +1,18 @@
 import cloneDeep from 'lodash.clonedeep'
 
-import type { Schema, Item, Extension, AttributeValue } from 'v1/schema'
+import { DynamoDBToolboxError } from 'v1/errors'
+import type { AttributeValue, Extension, Item, Schema } from 'v1/schema'
 import type { If } from 'v1/types'
 import { isObject } from 'v1/utils/validation/isObject'
-import { DynamoDBToolboxError } from 'v1/errors'
 
 import type { HasExtension } from '../types'
-import type { ParsingOptions } from './types'
 import { parseAttributeClonedInput } from './attribute'
 import { doesAttributeMatchFilters } from './doesAttributeMatchFilter'
+import type { ParsingOptions } from './types'
 
-export function* parseSchemaClonedInput<SCHEMA_EXTENSION extends Extension = never>(
+export function* parseSchemaClonedInput<
+  SCHEMA_EXTENSION extends Extension = never
+>(
   schema: Schema,
   inputValue: Item<SCHEMA_EXTENSION>,
   ...[options = {} as ParsingOptions<SCHEMA_EXTENSION, SCHEMA_EXTENSION>]: If<
@@ -20,7 +22,10 @@ export function* parseSchemaClonedInput<SCHEMA_EXTENSION extends Extension = nev
   >
 ): Generator<Item<SCHEMA_EXTENSION>, Item<SCHEMA_EXTENSION>> {
   const { filters } = options
-  const parsers: Record<string, Generator<AttributeValue<SCHEMA_EXTENSION>>> = {}
+  const parsers: Record<
+    string,
+    Generator<AttributeValue<SCHEMA_EXTENSION>>
+  > = {}
   let additionalAttributeNames: Set<string> = new Set()
 
   const isInputValueObject = isObject(inputValue)
@@ -30,10 +35,14 @@ export function* parseSchemaClonedInput<SCHEMA_EXTENSION extends Extension = nev
     Object.entries(schema.attributes)
       .filter(([, attribute]) => doesAttributeMatchFilters(attribute, filters))
       .forEach(([attributeName, attribute]) => {
-        parsers[attributeName] = parseAttributeClonedInput(attribute, inputValue[attributeName], {
-          ...options,
-          schemaInput: inputValue
-        })
+        parsers[attributeName] = parseAttributeClonedInput(
+          attribute,
+          inputValue[attributeName],
+          {
+            ...options,
+            schemaInput: inputValue,
+          },
+        )
 
         additionalAttributeNames.delete(attributeName)
       })
@@ -50,18 +59,21 @@ export function* parseSchemaClonedInput<SCHEMA_EXTENSION extends Extension = nev
                 ? parseAttributeClonedInput(
                     additionalAttribute,
                     inputValue[attributeName],
-                    options
+                    options,
                   ).next().value
                 : cloneDeep(inputValue[attributeName])
 
             return [attributeName, clonedAttributeValue]
-          })
+          }),
         ),
         ...Object.fromEntries(
           Object.entries(parsers)
-            .map(([attributeName, attribute]) => [attributeName, attribute.next().value])
-            .filter(([, attributeValue]) => attributeValue !== undefined)
-        )
+            .map(([attributeName, attribute]) => [
+              attributeName,
+              attribute.next().value,
+            ])
+            .filter(([, attributeValue]) => attributeValue !== undefined),
+        ),
       }
     : cloneDeep(inputValue)
   yield clonedValue
@@ -71,15 +83,18 @@ export function* parseSchemaClonedInput<SCHEMA_EXTENSION extends Extension = nev
       message: 'Items should be objects',
       payload: {
         received: inputValue,
-        expected: 'object'
-      }
+        expected: 'object',
+      },
     })
   }
 
   const parsedValue = Object.fromEntries(
     Object.entries(parsers)
-      .map(([attributeName, attribute]) => [attributeName, attribute.next().value])
-      .filter(([, attributeValue]) => attributeValue !== undefined)
+      .map(([attributeName, attribute]) => [
+        attributeName,
+        attribute.next().value,
+      ])
+      .filter(([, attributeValue]) => attributeValue !== undefined),
   )
   yield parsedValue
 
@@ -87,9 +102,9 @@ export function* parseSchemaClonedInput<SCHEMA_EXTENSION extends Extension = nev
     Object.entries(parsers)
       .map(([attributeName, attribute]) => [
         schema.attributes[attributeName].savedAs ?? attributeName,
-        attribute.next().value
+        attribute.next().value,
       ])
-      .filter(([, attributeValue]) => attributeValue !== undefined)
+      .filter(([, attributeValue]) => attributeValue !== undefined),
   )
   return collapsedValue
 }

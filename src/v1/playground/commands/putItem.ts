@@ -12,10 +12,10 @@ const test = async () => {
       lastName: 'dow',
       parents: {
         father: 'dark vador',
-        mother: 'toto'
+        mother: 'toto',
       },
       someSet: new Set(['foo', 'bar']),
-      castedStr: 'foo'
+      castedStr: 'foo',
     })
     .options({ returnValues: 'ALL_OLD' })
     .send()

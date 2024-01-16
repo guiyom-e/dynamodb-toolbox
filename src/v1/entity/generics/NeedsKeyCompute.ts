@@ -1,8 +1,8 @@
 import type { O } from 'ts-toolbelt'
 
+import type { Always, Schema } from 'v1/schema'
+import type { IndexableKeyType, Key, TableV2 } from 'v1/table'
 import type { Or } from 'v1/types/or'
-import type { Schema, Always } from 'v1/schema'
-import type { TableV2, IndexableKeyType, Key } from 'v1/table'
 
 type NeedsKeyPartCompute<
   SCHEMA extends Schema,
@@ -15,7 +15,12 @@ type NeedsKeyPartCompute<
   ? false
   : O.SelectKeys<
       SCHEMA['attributes'],
-      { type: KEY_PART_TYPE; required: Always; key: true; savedAs: KEY_PART_NAME }
+      {
+        type: KEY_PART_TYPE
+        required: Always
+        key: true
+        savedAs: KEY_PART_NAME
+      }
     > extends never
   ? true
   : false
@@ -31,10 +36,18 @@ export type NeedsKeyCompute<
   SCHEMA extends Schema,
   TABLE extends TableV2
 > = Key extends TABLE['sortKey']
-  ? NeedsKeyPartCompute<SCHEMA, TABLE['partitionKey']['name'], TABLE['partitionKey']['type']>
+  ? NeedsKeyPartCompute<
+      SCHEMA,
+      TABLE['partitionKey']['name'],
+      TABLE['partitionKey']['type']
+    >
   : NonNullable<TABLE['sortKey']> extends Key
   ? Or<
-      NeedsKeyPartCompute<SCHEMA, TABLE['partitionKey']['name'], TABLE['partitionKey']['type']>,
+      NeedsKeyPartCompute<
+        SCHEMA,
+        TABLE['partitionKey']['name'],
+        TABLE['partitionKey']['type']
+      >,
       NeedsKeyPartCompute<
         SCHEMA,
         NonNullable<TABLE['sortKey']>['name'],

@@ -1,14 +1,13 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
-
 import {
-  TableV2,
+  DeleteItemCommand,
+  DynamoDBToolboxError,
   EntityV2,
+  prefix,
   schema,
   string,
-  DynamoDBToolboxError,
-  DeleteItemCommand,
-  prefix
+  TableV2,
 } from 'v1'
 
 const dynamoDbClient = new DynamoDBClient({})
@@ -19,13 +18,13 @@ const TestTable = new TableV2({
   name: 'test-table',
   partitionKey: {
     type: 'string',
-    name: 'pk'
+    name: 'pk',
   },
   sortKey: {
     type: 'string',
-    name: 'sk'
+    name: 'sk',
   },
-  documentClient
+  documentClient,
 })
 
 const TestEntity = new EntityV2({
@@ -33,9 +32,9 @@ const TestEntity = new EntityV2({
   schema: schema({
     email: string().key().savedAs('pk'),
     sort: string().key().savedAs('sk'),
-    test: string()
+    test: string(),
   }),
-  table: TestTable
+  table: TestTable,
 })
 
 const TestEntity2 = new EntityV2({
@@ -43,9 +42,9 @@ const TestEntity2 = new EntityV2({
   schema: schema({
     pk: string().key(),
     sk: string().key(),
-    test: string()
+    test: string(),
   }),
-  table: TestTable
+  table: TestTable,
 })
 
 describe('delete', () => {
@@ -64,7 +63,7 @@ describe('delete', () => {
         email: 'test-pk',
         sort: 'test-sk',
         // @ts-expect-error
-        test: 'test'
+        test: 'test',
       })
       .params()
 
@@ -76,9 +75,9 @@ describe('delete', () => {
       TestEntity.build(DeleteItemCommand)
         .key(
           // @ts-expect-error
-          {}
+          {},
         )
-        .params()
+        .params(),
     ).toThrow('Attribute email is required')
   })
 
@@ -87,9 +86,9 @@ describe('delete', () => {
       TestEntity.build(DeleteItemCommand)
         .key(
           // @ts-expect-error
-          { pk: 'test-pk' }
+          { pk: 'test-pk' },
         )
-        .params()
+        .params(),
     ).toThrow('Attribute email is required')
   })
 
@@ -98,9 +97,9 @@ describe('delete', () => {
       TestEntity2.build(DeleteItemCommand)
         .key(
           // @ts-expect-error
-          {}
+          {},
         )
-        .params()
+        .params(),
     ).toThrow('Attribute pk is required')
   })
 
@@ -109,9 +108,9 @@ describe('delete', () => {
       TestEntity2.build(DeleteItemCommand)
         .key(
           // @ts-expect-error
-          { pk: 'test-pk' }
+          { pk: 'test-pk' },
         )
-        .params()
+        .params(),
     ).toThrow('Attribute sk is required')
   })
 
@@ -130,13 +129,13 @@ describe('delete', () => {
         .key({ email: 'x', sort: 'y' })
         .options(
           // @ts-expect-error
-          { capacity: 'test' }
+          { capacity: 'test' },
         )
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'operations.invalidCapacityOption' })
+      expect.objectContaining({ code: 'operations.invalidCapacityOption' }),
     )
   })
 
@@ -155,13 +154,13 @@ describe('delete', () => {
         .key({ email: 'x', sort: 'y' })
         .options({
           // @ts-expect-error
-          metrics: 'test'
+          metrics: 'test',
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'operations.invalidMetricsOption' })
+      expect.objectContaining({ code: 'operations.invalidMetricsOption' }),
     )
   })
 
@@ -180,13 +179,13 @@ describe('delete', () => {
         .key({ email: 'x', sort: 'y' })
         .options({
           // @ts-expect-error
-          returnValues: 'test'
+          returnValues: 'test',
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'operations.invalidReturnValuesOption' })
+      expect.objectContaining({ code: 'operations.invalidReturnValuesOption' }),
     )
   })
 
@@ -196,19 +195,21 @@ describe('delete', () => {
         .key({ email: 'x', sort: 'y' })
         .options({
           // @ts-expect-error
-          extra: true
+          extra: true,
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.unknownOption' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.unknownOption' }),
+    )
   })
 
   it('sets condition', () => {
     const {
       ExpressionAttributeNames,
       ExpressionAttributeValues,
-      ConditionExpression
+      ConditionExpression,
     } = TestEntity.build(DeleteItemCommand)
       .key({ email: 'x', sort: 'y' })
       .options({ condition: { attr: 'email', gt: 'test' } })
@@ -223,7 +224,9 @@ describe('delete', () => {
     const invalidCall = () => TestEntity.build(DeleteItemCommand).params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.incompleteCommand' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.incompleteCommand' }),
+    )
   })
 
   it('transformed key', () => {
@@ -231,14 +234,16 @@ describe('delete', () => {
       name: 'TestEntity',
       schema: schema({
         email: string().key().savedAs('pk').transform(prefix('EMAIL')),
-        sort: string().key().savedAs('sk')
+        sort: string().key().savedAs('sk'),
       }),
-      table: TestTable
+      table: TestTable,
     })
 
-    const { Key, ExpressionAttributeNames, ExpressionAttributeValues } = TestEntity3.build(
-      DeleteItemCommand
-    )
+    const {
+      Key,
+      ExpressionAttributeNames,
+      ExpressionAttributeValues,
+    } = TestEntity3.build(DeleteItemCommand)
       .key({ email: 'foo@bar.mail', sort: 'y' })
       .options({ condition: { attr: 'email', gt: 'test', transform: false } })
       .params()
@@ -247,9 +252,9 @@ describe('delete', () => {
     expect(ExpressionAttributeNames).toEqual({ '#c_1': 'pk' })
     expect(ExpressionAttributeValues).toEqual({ ':c_1': 'test' })
 
-    const { ExpressionAttributeValues: ExpressionAttributeValues2 } = TestEntity3.build(
-      DeleteItemCommand
-    )
+    const {
+      ExpressionAttributeValues: ExpressionAttributeValues2,
+    } = TestEntity3.build(DeleteItemCommand)
       .key({ email: 'foo@bar.mail', sort: 'y' })
       .options({ condition: { attr: 'email', gt: 'test' } })
       .params()

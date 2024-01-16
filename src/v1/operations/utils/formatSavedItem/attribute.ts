@@ -1,18 +1,21 @@
 import cloneDeep from 'lodash.clonedeep'
 
-import type { Attribute, RequiredOption, AttributeValue } from 'v1/schema'
 import { DynamoDBToolboxError } from 'v1/errors'
+import type { Attribute, AttributeValue, RequiredOption } from 'v1/schema'
 
-import type { FormatSavedAttributeOptions } from './types'
-import { formatSavedPrimitiveAttribute } from './primitive'
-import { formatSavedSetAttribute } from './set'
+import { formatSavedAnyOfAttribute } from './anyOf'
 import { formatSavedListAttribute } from './list'
 import { formatSavedMapAttribute } from './map'
-import { formatSavedAnyOfAttribute } from './anyOf'
+import { formatSavedPrimitiveAttribute } from './primitive'
 import { formatSavedRecordAttribute } from './record'
+import { formatSavedSetAttribute } from './set'
+import type { FormatSavedAttributeOptions } from './types'
 import { getItemKey } from './utils'
 
-export const requiringOptions = new Set<RequiredOption>(['always', 'atLeastOnce'])
+export const requiringOptions = new Set<RequiredOption>([
+  'always',
+  'atLeastOnce',
+])
 
 export const isRequired = (attribute: Attribute): boolean =>
   requiringOptions.has(attribute.required)
@@ -20,25 +23,28 @@ export const isRequired = (attribute: Attribute): boolean =>
 export const formatSavedAttribute = (
   attribute: Attribute,
   savedValue: AttributeValue | undefined,
-  options: FormatSavedAttributeOptions = {}
+  options: FormatSavedAttributeOptions = {},
 ): AttributeValue | undefined => {
   if (savedValue === undefined) {
     if (isRequired(attribute) && options.partial !== true) {
       const { partitionKey, sortKey } = options
 
-      throw new DynamoDBToolboxError('operations.formatSavedItem.savedAttributeRequired', {
-        message: [
-          `Missing required attribute in saved item: ${attribute.path}.`,
-          getItemKey({ partitionKey, sortKey })
-        ]
-          .filter(Boolean)
-          .join(' '),
-        path: attribute.path,
-        payload: {
-          partitionKey,
-          sortKey
-        }
-      })
+      throw new DynamoDBToolboxError(
+        'operations.formatSavedItem.savedAttributeRequired',
+        {
+          message: [
+            `Missing required attribute in saved item: ${attribute.path}.`,
+            getItemKey({ partitionKey, sortKey }),
+          ]
+            .filter(Boolean)
+            .join(' '),
+          path: attribute.path,
+          payload: {
+            partitionKey,
+            sortKey,
+          },
+        },
+      )
     } else {
       return undefined
     }

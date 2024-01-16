@@ -1,15 +1,15 @@
-import type { Attribute, AttributeValue } from 'v1/schema'
+import cloneDeep from 'lodash.clonedeep'
+
+import { DynamoDBToolboxError } from 'v1/errors'
 import type { ReferenceExtension } from 'v1/operations/types'
-import type { ExtensionParser } from 'v1/validation/parseClonedInput/types'
+import { $GET } from 'v1/operations/updateItem/constants'
+import type { UpdateItemInputExtension } from 'v1/operations/updateItem/types'
+import { hasGetOperation } from 'v1/operations/updateItem/utils'
+import type { Attribute, AttributeValue } from 'v1/schema'
+import { isString } from 'v1/utils/validation'
 import { isArray } from 'v1/utils/validation/isArray'
 import { parseAttributeClonedInput } from 'v1/validation/parseClonedInput/attribute'
-import { DynamoDBToolboxError } from 'v1/errors'
-
-import type { UpdateItemInputExtension } from 'v1/operations/updateItem/types'
-import { $GET } from 'v1/operations/updateItem/constants'
-import { hasGetOperation } from 'v1/operations/updateItem/utils'
-import cloneDeep from 'lodash.clonedeep'
-import { isString } from 'v1/utils/validation'
+import type { ExtensionParser } from 'v1/validation/parseClonedInput/types'
 
 export const parseReferenceExtension: ExtensionParser<
   ReferenceExtension,
@@ -22,7 +22,10 @@ export const parseReferenceExtension: ExtensionParser<
         const isInputValueArray = isArray(inputValue[$GET])
         let reference: string | undefined = undefined
         let fallbackParser:
-          | Generator<AttributeValue<ReferenceExtension>, AttributeValue<ReferenceExtension>>
+          | Generator<
+              AttributeValue<ReferenceExtension>,
+              AttributeValue<ReferenceExtension>
+            >
           | undefined = undefined
 
         if (isInputValueArray) {
@@ -30,7 +33,11 @@ export const parseReferenceExtension: ExtensionParser<
           reference = _reference
 
           if (fallback !== undefined) {
-            fallbackParser = parseAttributeClonedInput(attribute, fallback, options)
+            fallbackParser = parseAttributeClonedInput(
+              attribute,
+              fallback,
+              options,
+            )
           }
 
           const clonedValue = {
@@ -41,10 +48,10 @@ export const parseReferenceExtension: ExtensionParser<
                   ? [fallbackParser.next().value]
                   : rest.length === 0
                   ? []
-                  : [undefined]
+                  : [undefined],
               ],
-              ...cloneDeep(rest)
-            ]
+              ...cloneDeep(rest),
+            ],
           }
           yield clonedValue
         } else {
@@ -57,8 +64,8 @@ export const parseReferenceExtension: ExtensionParser<
             message: `Reference for attribute ${attribute.path} should be a tuple of one or two elements`,
             path: attribute.path,
             payload: {
-              received: inputValue[$GET]
-            }
+              received: inputValue[$GET],
+            },
           })
         }
 
@@ -67,8 +74,8 @@ export const parseReferenceExtension: ExtensionParser<
             message: `First element of a reference for attribute ${attribute.path} should be a string`,
             path: attribute.path,
             payload: {
-              received: inputValue[$GET][0]
-            }
+              received: inputValue[$GET][0],
+            },
           })
         }
 
@@ -76,8 +83,10 @@ export const parseReferenceExtension: ExtensionParser<
           [$GET]: [
             // NOTE: Reference validation will be done in UpdateExpressionParser
             reference,
-            ...(fallbackParser !== undefined ? [fallbackParser.next().value] : [])
-          ]
+            ...(fallbackParser !== undefined
+              ? [fallbackParser.next().value]
+              : []),
+          ],
         }
         yield parsedValue
 
@@ -85,16 +94,18 @@ export const parseReferenceExtension: ExtensionParser<
           [$GET]: [
             // NOTE: Reference validation will be done in UpdateExpressionParser
             reference,
-            ...(fallbackParser !== undefined ? [fallbackParser.next().value] : [])
-          ]
+            ...(fallbackParser !== undefined
+              ? [fallbackParser.next().value]
+              : []),
+          ],
         }
         return collapsedValue
-      }
+      },
     }
   }
 
   return {
     isExtension: false,
-    basicInput: inputValue
+    basicInput: inputValue,
   }
 }

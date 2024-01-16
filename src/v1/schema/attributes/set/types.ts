@@ -1,5 +1,8 @@
 import type { AtLeastOnce } from '../constants'
-import type { $PrimitiveAttributeNestedState, PrimitiveAttribute } from '../primitive/interface'
+import type {
+  $PrimitiveAttributeNestedState,
+  PrimitiveAttribute,
+} from '../primitive/interface'
 import type { PrimitiveAttributeEnumValues } from '../primitive/types'
 
 interface SetAttributeElementState {

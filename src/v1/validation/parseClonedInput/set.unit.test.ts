@@ -1,12 +1,12 @@
 import { DynamoDBToolboxError } from 'v1/errors'
 import { set, string } from 'v1/schema'
 
-import { parseSetAttributeClonedInput } from './set'
 import * as parseAttributeClonedInputModule from './attribute'
+import { parseSetAttributeClonedInput } from './set'
 
 const parseAttributeClonedInput = jest.spyOn(
   parseAttributeClonedInputModule,
-  'parseAttributeClonedInput'
+  'parseAttributeClonedInput',
 )
 
 const setAttr = set(string()).freeze('path')
@@ -30,7 +30,9 @@ describe('parseSetAttributeClonedInput', () => {
     }
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'parsing.invalidAttributeInput' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'parsing.invalidAttributeInput' }),
+    )
   })
 
   it('applies parseAttributeClonesInput on input elements otherwise (and pass options)', () => {
@@ -39,7 +41,7 @@ describe('parseSetAttributeClonedInput', () => {
       setAttr,
       new Set(['foo', 'bar']),
       // @ts-expect-error we don't really care about the type here
-      options
+      options,
     )
 
     const clonedState = parser.next()
@@ -47,8 +49,16 @@ describe('parseSetAttributeClonedInput', () => {
     expect(clonedState.value).toStrictEqual(new Set(['foo', 'bar']))
 
     expect(parseAttributeClonedInput).toHaveBeenCalledTimes(2)
-    expect(parseAttributeClonedInput).toHaveBeenCalledWith(setAttr.elements, 'foo', options)
-    expect(parseAttributeClonedInput).toHaveBeenCalledWith(setAttr.elements, 'bar', options)
+    expect(parseAttributeClonedInput).toHaveBeenCalledWith(
+      setAttr.elements,
+      'foo',
+      options,
+    )
+    expect(parseAttributeClonedInput).toHaveBeenCalledWith(
+      setAttr.elements,
+      'bar',
+      options,
+    )
 
     const parsedState = parser.next()
     expect(parsedState.done).toBe(false)

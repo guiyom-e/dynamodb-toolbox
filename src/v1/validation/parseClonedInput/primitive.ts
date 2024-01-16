@@ -1,16 +1,16 @@
 import cloneDeep from 'lodash.clonedeep'
 
+import { DynamoDBToolboxError } from 'v1/errors'
 import type {
+  AttributeBasicValue,
+  Extension,
   PrimitiveAttribute,
   PrimitiveAttributeBasicValue,
-  AttributeBasicValue,
   ResolvedPrimitiveAttribute,
-  Extension,
-  Transformer
+  Transformer,
 } from 'v1/schema'
 import type { If } from 'v1/types'
 import { validatorsByPrimitiveType } from 'v1/utils/validation'
-import { DynamoDBToolboxError } from 'v1/errors'
 
 import type { HasExtension } from '../types'
 import type { ParsingOptions } from './types'
@@ -39,8 +39,8 @@ export function* parsePrimitiveAttributeClonedInput<
       path: primitiveAttribute.path,
       payload: {
         received: clonedValue,
-        expected: primitiveAttribute.type
-      }
+        expected: primitiveAttribute.type,
+      },
     })
   }
 
@@ -55,8 +55,8 @@ export function* parsePrimitiveAttributeClonedInput<
       path: primitiveAttribute.path,
       payload: {
         received: clonedValue,
-        expected: primitiveAttribute.enum
-      }
+        expected: primitiveAttribute.enum,
+      },
     })
   }
 

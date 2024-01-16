@@ -1,19 +1,19 @@
-import type { O } from 'ts-toolbelt'
-import {
-  QueryCommandInput,
-  QueryCommand as _QueryCommand,
-  QueryCommandOutput
-} from '@aws-sdk/lib-dynamodb'
 import type { ConsumedCapacity } from '@aws-sdk/client-dynamodb'
+import {
+  QueryCommand as _QueryCommand,
+  QueryCommandInput,
+  QueryCommandOutput,
+} from '@aws-sdk/lib-dynamodb'
 import type { NativeAttributeValue } from '@aws-sdk/util-dynamodb'
+import type { O } from 'ts-toolbelt'
 
-import type { TableV2 } from 'v1/table'
 import type { EntityV2, FormattedItem } from 'v1/entity'
-import type { Item } from 'v1/schema'
+import { DynamoDBToolboxError } from 'v1/errors'
 import type { CountSelectOption } from 'v1/operations/constants/options/select'
 import type { AnyAttributePath, Query } from 'v1/operations/types'
 import { formatSavedItem } from 'v1/operations/utils/formatSavedItem'
-import { DynamoDBToolboxError } from 'v1/errors'
+import type { Item } from 'v1/schema'
+import type { TableV2 } from 'v1/table'
 import { isString } from 'v1/utils/validation'
 
 import { $entities, $table, TableCommand } from '../class'
@@ -66,7 +66,11 @@ export class QueryCommand<
   TABLE extends TableV2 = TableV2,
   ENTITIES extends EntityV2[] = EntityV2[],
   QUERY extends Query<TABLE> = Query<TABLE>,
-  OPTIONS extends QueryOptions<TABLE, ENTITIES, QUERY> = QueryOptions<TABLE, ENTITIES, QUERY>
+  OPTIONS extends QueryOptions<TABLE, ENTITIES, QUERY> = QueryOptions<
+    TABLE,
+    ENTITIES,
+    QUERY
+  >
 > extends TableCommand<TABLE, ENTITIES> {
   static operationName = 'query' as const
 
@@ -83,24 +87,26 @@ export class QueryCommand<
 
   [$query]?: QUERY
   query: <NEXT_QUERY extends Query<TABLE>>(
-    query: NEXT_QUERY
+    query: NEXT_QUERY,
   ) => QueryCommand<TABLE, ENTITIES, NEXT_QUERY, OPTIONS>;
   [$options]: OPTIONS
   options: <NEXT_OPTIONS extends QueryOptions<TABLE, ENTITIES, QUERY>>(
-    nextOptions: NEXT_OPTIONS
+    nextOptions: NEXT_OPTIONS,
   ) => QueryCommand<TABLE, ENTITIES, QUERY, NEXT_OPTIONS>
 
   constructor(
     table: TABLE,
     entities = ([] as unknown) as ENTITIES,
     query?: QUERY,
-    options: OPTIONS = {} as OPTIONS
+    options: OPTIONS = {} as OPTIONS,
   ) {
     super(table, entities)
     this[$query] = query
     this[$options] = options
 
-    this.entities = <NEXT_ENTITIES extends EntityV2[]>(...nextEntities: NEXT_ENTITIES) =>
+    this.entities = <NEXT_ENTITIES extends EntityV2[]>(
+      ...nextEntities: NEXT_ENTITIES
+    ) =>
       new QueryCommand<
         TABLE,
         NEXT_ENTITIES,
@@ -114,7 +120,7 @@ export class QueryCommand<
         this[$query],
         this[$options] as OPTIONS extends QueryOptions<TABLE, NEXT_ENTITIES>
           ? OPTIONS
-          : QueryOptions<TABLE, NEXT_ENTITIES>
+          : QueryOptions<TABLE, NEXT_ENTITIES>,
       )
     this.query = nextQuery =>
       new QueryCommand(this[$table], this[$entities], nextQuery, this[$options])
@@ -125,11 +131,16 @@ export class QueryCommand<
   params = (): QueryCommandInput => {
     if (!this[$query]) {
       throw new DynamoDBToolboxError('operations.incompleteCommand', {
-        message: 'QueryCommand incomplete: Missing "query" property'
+        message: 'QueryCommand incomplete: Missing "query" property',
       })
     }
 
-    return queryParams(this[$table], this[$entities], this[$query], this[$options])
+    return queryParams(
+      this[$table],
+      this[$entities],
+      this[$query],
+      this[$options],
+    )
   }
 
   send = async (): Promise<QueryResponse<TABLE, ENTITIES, QUERY, OPTIONS>> => {
@@ -142,11 +153,15 @@ export class QueryCommand<
     })
 
     const formattedItems: Item[] = []
-    let lastEvaluatedKey: Record<string, NativeAttributeValue> | undefined = undefined
+    let lastEvaluatedKey:
+      | Record<string, NativeAttributeValue>
+      | undefined = undefined
     let count: number | undefined = 0
     let scannedCount: number | undefined = 0
     let consumedCapacity: ConsumedCapacity | undefined = undefined
-    let responseMetadata: QueryCommandOutput['$metadata'] | undefined = undefined
+    let responseMetadata:
+      | QueryCommandOutput['$metadata']
+      | undefined = undefined
 
     // NOTE: maxPages has been validated by this.params()
     const { attributes, maxPages = 1 } = this[$options]
@@ -157,7 +172,9 @@ export class QueryCommand<
       const pageQueryParams: QueryCommandInput = {
         ...queryParams,
         // NOTE: Important NOT to override initial exclusiveStartKey on first page
-        ...(lastEvaluatedKey !== undefined ? { ExclusiveStartKey: lastEvaluatedKey } : {})
+        ...(lastEvaluatedKey !== undefined
+          ? { ExclusiveStartKey: lastEvaluatedKey }
+          : {}),
       }
 
       const {
@@ -166,8 +183,10 @@ export class QueryCommand<
         Count: pageCount,
         ScannedCount: pageScannedCount,
         ConsumedCapacity: pageConsumedCapacity,
-        $metadata: pageMetadata
-      } = await this[$table].documentClient.send(new _QueryCommand(pageQueryParams))
+        $metadata: pageMetadata,
+      } = await this[$table].documentClient.send(
+        new _QueryCommand(pageQueryParams),
+      )
 
       for (const item of items) {
         const itemEntityName = item[this[$table].entityAttributeSavedAs]
@@ -183,7 +202,7 @@ export class QueryCommand<
         }
 
         formattedItems.push(
-          formatSavedItem<EntityV2, {}>(itemEntity, item, { attributes })
+          formatSavedItem<EntityV2, {}>(itemEntity, item, { attributes }),
         )
       }
 
@@ -194,7 +213,10 @@ export class QueryCommand<
       }
 
       if (scannedCount !== undefined) {
-        scannedCount = pageScannedCount !== undefined ? scannedCount + pageScannedCount : undefined
+        scannedCount =
+          pageScannedCount !== undefined
+            ? scannedCount + pageScannedCount
+            : undefined
       }
 
       consumedCapacity = pageConsumedCapacity
@@ -202,17 +224,28 @@ export class QueryCommand<
     } while (pageIndex < maxPages && lastEvaluatedKey !== undefined)
 
     return {
-      Items: formattedItems as QueryResponse<TABLE, ENTITIES, QUERY, OPTIONS>['Items'],
-      ...(lastEvaluatedKey !== undefined ? { LastEvaluatedKey: lastEvaluatedKey } : {}),
+      Items: formattedItems as QueryResponse<
+        TABLE,
+        ENTITIES,
+        QUERY,
+        OPTIONS
+      >['Items'],
+      ...(lastEvaluatedKey !== undefined
+        ? { LastEvaluatedKey: lastEvaluatedKey }
+        : {}),
       ...(count !== undefined ? { Count: count } : {}),
       ...(scannedCount !== undefined ? { ScannedCount: scannedCount } : {}),
       // return ConsumedCapacity & $metadata only if one page has been fetched
       ...(pageIndex === 1
         ? {
-            ...(consumedCapacity !== undefined ? { ConsumedCapacity: consumedCapacity } : {}),
-            ...(responseMetadata !== undefined ? { $metadata: responseMetadata } : {})
+            ...(consumedCapacity !== undefined
+              ? { ConsumedCapacity: consumedCapacity }
+              : {}),
+            ...(responseMetadata !== undefined
+              ? { $metadata: responseMetadata }
+              : {}),
           }
-        : {})
+        : {}),
     }
   }
 }

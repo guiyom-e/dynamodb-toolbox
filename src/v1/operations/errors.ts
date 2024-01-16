@@ -1,9 +1,9 @@
 import type { ErrorBlueprint } from 'v1/errors/blueprint'
 
-import type { ScanCommandErrorBlueprints } from './scan/errors'
-import type { QueryCommandErrorBlueprints } from './query/errors'
-import type { OperationUtilsErrorBlueprints } from './utils/errors'
 import type { ExpressionParsersErrorBlueprints } from './expression/errors'
+import type { QueryCommandErrorBlueprints } from './query/errors'
+import type { ScanCommandErrorBlueprints } from './scan/errors'
+import type { OperationUtilsErrorBlueprints } from './utils/errors'
 
 type IncompleteOperationErrorBlueprint = ErrorBlueprint<{
   code: 'operations.incompleteCommand'

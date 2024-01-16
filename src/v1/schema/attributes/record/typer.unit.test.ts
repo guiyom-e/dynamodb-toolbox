@@ -2,21 +2,20 @@ import type { A } from 'ts-toolbelt'
 
 import { DynamoDBToolboxError } from 'v1/errors'
 
-import { Never, AtLeastOnce, Always } from '../constants'
-import { string, number } from '../primitive'
+import { Always, AtLeastOnce, Never } from '../constants'
 import {
-  $type,
-  $keys,
+  $defaults,
   $elements,
-  $required,
   $hidden,
   $key,
+  $keys,
+  $required,
   $savedAs,
-  $defaults
+  $type,
 } from '../constants/attributeOptions'
-
+import { number, string } from '../primitive'
+import type { $RecordAttributeState, RecordAttribute } from './interface'
 import { record } from './typer'
-import type { RecordAttribute, $RecordAttributeState } from './interface'
 
 describe('record', () => {
   const path = 'some.path'
@@ -27,14 +26,17 @@ describe('record', () => {
     const invalidRecord = record(
       // @ts-expect-error
       number(),
-      str
+      str,
     )
 
     const invalidCall = () => invalidRecord.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.recordAttribute.invalidKeys', path })
+      expect.objectContaining({
+        code: 'schema.recordAttribute.invalidKeys',
+        path,
+      }),
     )
   })
 
@@ -42,14 +44,17 @@ describe('record', () => {
     const invalidRecord = record(
       // @ts-expect-error
       str.optional(),
-      str
+      str,
     )
 
     const invalidCall = () => invalidRecord.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.recordAttribute.optionalKeys', path })
+      expect.objectContaining({
+        code: 'schema.recordAttribute.optionalKeys',
+        path,
+      }),
     )
   })
 
@@ -57,14 +62,17 @@ describe('record', () => {
     const invalidRecord = record(
       // @ts-expect-error
       str.hidden(),
-      str
+      str,
     )
 
     const invalidCall = () => invalidRecord.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.recordAttribute.hiddenKeys', path })
+      expect.objectContaining({
+        code: 'schema.recordAttribute.hiddenKeys',
+        path,
+      }),
     )
   })
 
@@ -72,14 +80,14 @@ describe('record', () => {
     const invalidRecord = record(
       // @ts-expect-error
       str.key(),
-      str
+      str,
     )
 
     const invalidCall = () => invalidRecord.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.recordAttribute.keyKeys', path })
+      expect.objectContaining({ code: 'schema.recordAttribute.keyKeys', path }),
     )
   })
 
@@ -87,14 +95,17 @@ describe('record', () => {
     const invalidRecord = record(
       // @ts-expect-error
       str.savedAs('foo'),
-      str
+      str,
     )
 
     const invalidCall = () => invalidRecord.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.recordAttribute.savedAsKeys', path })
+      expect.objectContaining({
+        code: 'schema.recordAttribute.savedAsKeys',
+        path,
+      }),
     )
   })
 
@@ -102,14 +113,17 @@ describe('record', () => {
     const invalidRecord = record(
       // @ts-expect-error
       str.putDefault('foo'),
-      str
+      str,
     )
 
     const invalidCall = () => invalidRecord.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.recordAttribute.defaultedKeys', path })
+      expect.objectContaining({
+        code: 'schema.recordAttribute.defaultedKeys',
+        path,
+      }),
     )
   })
 
@@ -117,14 +131,17 @@ describe('record', () => {
     const invalidRecord = record(
       str,
       // @ts-expect-error
-      str.optional()
+      str.optional(),
     )
 
     const invalidCall = () => invalidRecord.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.recordAttribute.optionalElements', path })
+      expect.objectContaining({
+        code: 'schema.recordAttribute.optionalElements',
+        path,
+      }),
     )
   })
 
@@ -132,14 +149,17 @@ describe('record', () => {
     const invalidRecord = record(
       str,
       // @ts-expect-error
-      str.hidden()
+      str.hidden(),
     )
 
     const invalidCall = () => invalidRecord.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.recordAttribute.hiddenElements', path })
+      expect.objectContaining({
+        code: 'schema.recordAttribute.hiddenElements',
+        path,
+      }),
     )
   })
 
@@ -147,14 +167,17 @@ describe('record', () => {
     const invalidRecord = record(
       str,
       // @ts-expect-error
-      str.key()
+      str.key(),
     )
 
     const invalidCall = () => invalidRecord.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.recordAttribute.keyElements', path })
+      expect.objectContaining({
+        code: 'schema.recordAttribute.keyElements',
+        path,
+      }),
     )
   })
 
@@ -162,14 +185,17 @@ describe('record', () => {
     const invalidRecord = record(
       str,
       // @ts-expect-error
-      str.savedAs('foo')
+      str.savedAs('foo'),
     )
 
     const invalidCall = () => invalidRecord.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.recordAttribute.savedAsElements', path })
+      expect.objectContaining({
+        code: 'schema.recordAttribute.savedAsElements',
+        path,
+      }),
     )
   })
 
@@ -177,14 +203,17 @@ describe('record', () => {
     const invalidRecord = record(
       str,
       // @ts-expect-error
-      str.putDefault('foo')
+      str.putDefault('foo'),
     )
 
     const invalidCall = () => invalidRecord.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.recordAttribute.defaultedElements', path })
+      expect.objectContaining({
+        code: 'schema.recordAttribute.defaultedElements',
+        path,
+      }),
     )
   })
 
@@ -228,8 +257,8 @@ describe('record', () => {
       [$defaults]: {
         key: undefined,
         put: undefined,
-        update: undefined
-      }
+        update: undefined,
+      },
     })
   })
 
@@ -238,9 +267,15 @@ describe('record', () => {
     const recAlways = record(fooBar, str, { required: 'always' })
     const recNever = record(fooBar, str, { required: 'never' })
 
-    const assertAtLeastOnce: A.Contains<typeof recAtLeastOnce, { [$required]: AtLeastOnce }> = 1
+    const assertAtLeastOnce: A.Contains<
+      typeof recAtLeastOnce,
+      { [$required]: AtLeastOnce }
+    > = 1
     assertAtLeastOnce
-    const assertAlways: A.Contains<typeof recAlways, { [$required]: Always }> = 1
+    const assertAlways: A.Contains<
+      typeof recAlways,
+      { [$required]: Always }
+    > = 1
     assertAlways
     const assertNever: A.Contains<typeof recNever, { [$required]: Never }> = 1
     assertNever
@@ -256,9 +291,15 @@ describe('record', () => {
     const recNever = record(fooBar, str).required('never')
     const recOpt = record(fooBar, str).optional()
 
-    const assertAtLeastOnce: A.Contains<typeof recAtLeastOnce, { [$required]: AtLeastOnce }> = 1
+    const assertAtLeastOnce: A.Contains<
+      typeof recAtLeastOnce,
+      { [$required]: AtLeastOnce }
+    > = 1
     assertAtLeastOnce
-    const assertAlways: A.Contains<typeof recAlways, { [$required]: Always }> = 1
+    const assertAlways: A.Contains<
+      typeof recAlways,
+      { [$required]: Always }
+    > = 1
     assertAlways
     const assertNever: A.Contains<typeof recNever, { [$required]: Never }> = 1
     assertNever
@@ -291,7 +332,10 @@ describe('record', () => {
   it('returns key record (option)', () => {
     const rec = record(fooBar, str, { key: true })
 
-    const assertRec: A.Contains<typeof rec, { [$key]: true; [$required]: AtLeastOnce }> = 1
+    const assertRec: A.Contains<
+      typeof rec,
+      { [$key]: true; [$required]: AtLeastOnce }
+    > = 1
     assertRec
 
     expect(rec).toMatchObject({ [$key]: true, [$required]: 'atLeastOnce' })
@@ -300,7 +344,10 @@ describe('record', () => {
   it('returns key record (method)', () => {
     const rec = record(fooBar, str).key()
 
-    const assertRec: A.Contains<typeof rec, { [$key]: true; [$required]: Always }> = 1
+    const assertRec: A.Contains<
+      typeof rec,
+      { [$key]: true; [$required]: Always }
+    > = 1
     assertRec
 
     expect(rec).toMatchObject({ [$key]: true, [$required]: 'always' })
@@ -327,7 +374,7 @@ describe('record', () => {
   it('returns defaulted record (option)', () => {
     const stA = record(fooBar, str, {
       // TOIMPROVE: Reintroduce type constraints here
-      defaults: { key: { foo: 'foo' }, put: undefined, update: undefined }
+      defaults: { key: { foo: 'foo' }, put: undefined, update: undefined },
     })
 
     const assertSetA: A.Contains<
@@ -337,12 +384,12 @@ describe('record', () => {
     assertSetA
 
     expect(stA).toMatchObject({
-      [$defaults]: { key: { foo: 'foo' }, put: undefined, update: undefined }
+      [$defaults]: { key: { foo: 'foo' }, put: undefined, update: undefined },
     })
 
     const stB = record(fooBar, str, {
       // TOIMPROVE: Reintroduce type constraints here
-      defaults: { key: undefined, put: { bar: 'bar' }, update: undefined }
+      defaults: { key: undefined, put: { bar: 'bar' }, update: undefined },
     })
 
     const assertSetB: A.Contains<
@@ -352,12 +399,12 @@ describe('record', () => {
     assertSetB
 
     expect(stB).toMatchObject({
-      [$defaults]: { key: undefined, put: { bar: 'bar' }, update: undefined }
+      [$defaults]: { key: undefined, put: { bar: 'bar' }, update: undefined },
     })
 
     const stC = record(fooBar, str, {
       // TOIMPROVE: Reintroduce type constraints here
-      defaults: { key: undefined, put: undefined, update: { foo: 'bar' } }
+      defaults: { key: undefined, put: undefined, update: { foo: 'bar' } },
     })
 
     const assertSetC: A.Contains<
@@ -367,7 +414,7 @@ describe('record', () => {
     assertSetC
 
     expect(stC).toMatchObject({
-      [$defaults]: { key: undefined, put: undefined, update: { foo: 'bar' } }
+      [$defaults]: { key: undefined, put: undefined, update: { foo: 'bar' } },
     })
   })
 
@@ -381,7 +428,7 @@ describe('record', () => {
     assertSetA
 
     expect(stA).toMatchObject({
-      [$defaults]: { key: { foo: 'foo' }, put: undefined, update: undefined }
+      [$defaults]: { key: { foo: 'foo' }, put: undefined, update: undefined },
     })
 
     const stB = record(fooBar, str).putDefault({ bar: 'bar' })
@@ -393,7 +440,7 @@ describe('record', () => {
     assertSetB
 
     expect(stB).toMatchObject({
-      [$defaults]: { key: undefined, put: { bar: 'bar' }, update: undefined }
+      [$defaults]: { key: undefined, put: { bar: 'bar' }, update: undefined },
     })
 
     const stC = record(fooBar, str).updateDefault({ foo: 'bar' })
@@ -405,7 +452,7 @@ describe('record', () => {
     assertSetC
 
     expect(stC).toMatchObject({
-      [$defaults]: { key: undefined, put: undefined, update: { foo: 'bar' } }
+      [$defaults]: { key: undefined, put: undefined, update: { foo: 'bar' } },
     })
   })
 
@@ -458,8 +505,8 @@ describe('record', () => {
         [$defaults]: {
           key: undefined,
           put: undefined,
-          update: undefined
-        }
+          update: undefined,
+        },
       },
       [$required]: 'atLeastOnce',
       [$hidden]: false,
@@ -468,8 +515,8 @@ describe('record', () => {
       [$defaults]: {
         key: undefined,
         put: undefined,
-        update: undefined
-      }
+        update: undefined,
+      },
     })
   })
 })

@@ -1,12 +1,12 @@
+import type { EntityV2 } from 'v1/entity'
 import type { CapacityOption } from 'v1/operations/constants/options/capacity'
 import type {
-  SelectOption,
   AllProjectedAttributesSelectOption,
-  SpecificAttributesSelectOption
+  SelectOption,
+  SpecificAttributesSelectOption,
 } from 'v1/operations/constants/options/select'
-import type { Condition, AnyCommonAttributePath } from 'v1/operations/types'
-import type { TableV2, IndexNames } from 'v1/table'
-import type { EntityV2 } from 'v1/entity'
+import type { AnyCommonAttributePath, Condition } from 'v1/operations/types'
+import type { IndexNames, TableV2 } from 'v1/table'
 
 export type ScanOptions<
   TABLE extends TableV2 = TableV2,

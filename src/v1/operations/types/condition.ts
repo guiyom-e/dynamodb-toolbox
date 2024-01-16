@@ -1,16 +1,17 @@
 import type { EntityV2 } from 'v1/entity'
 import type {
-  Schema,
   AnyAttribute,
-  ListAttribute,
-  MapAttribute,
-  RecordAttribute,
   AnyOfAttribute,
   Attribute,
-  ResolvePrimitiveAttribute,
+  ListAttribute,
+  MapAttribute,
+  PrimitiveAttribute,
+  RecordAttribute,
   ResolvedPrimitiveAttribute,
-  PrimitiveAttribute
+  ResolvePrimitiveAttribute,
+  Schema,
 } from 'v1/schema'
+
 import type { SchemaAttributePath } from './paths'
 
 export type AnyAttributeCondition<
@@ -27,13 +28,25 @@ export type AnyAttributeCondition<
       COMPARED_ATTRIBUTE_PATH
     >
 
-export type TypeCondition = 'S' | 'SS' | 'N' | 'NS' | 'B' | 'BS' | 'BOOL' | 'NULL' | 'L' | 'M'
+export type TypeCondition =
+  | 'S'
+  | 'SS'
+  | 'N'
+  | 'NS'
+  | 'B'
+  | 'BS'
+  | 'BOOL'
+  | 'NULL'
+  | 'L'
+  | 'M'
 
 export type AttrOrSize<ATTRIBUTE_PATH extends string> =
   | { attr: ATTRIBUTE_PATH; size?: undefined }
   | { attr?: undefined; size: ATTRIBUTE_PATH }
 
-export type SharedAttributeCondition<ATTRIBUTE_PATH extends string> = AttrOrSize<ATTRIBUTE_PATH> &
+export type SharedAttributeCondition<
+  ATTRIBUTE_PATH extends string
+> = AttrOrSize<ATTRIBUTE_PATH> &
   (
     | // TO VERIFY: Is EXIST applyable to all types of Attributes?
     { exists: boolean }
@@ -49,10 +62,17 @@ export type AttributeCondition<
 > =
   | SharedAttributeCondition<ATTRIBUTE_PATH>
   | (ATTRIBUTE extends AnyAttribute
-      ? AnyAttributeCondition<`${ATTRIBUTE_PATH}${string}`, COMPARED_ATTRIBUTE_PATH>
+      ? AnyAttributeCondition<
+          `${ATTRIBUTE_PATH}${string}`,
+          COMPARED_ATTRIBUTE_PATH
+        >
       : never)
   | (ATTRIBUTE extends PrimitiveAttribute
-      ? PrimitiveAttributeExtraCondition<ATTRIBUTE_PATH, ATTRIBUTE, COMPARED_ATTRIBUTE_PATH>
+      ? PrimitiveAttributeExtraCondition<
+          ATTRIBUTE_PATH,
+          ATTRIBUTE,
+          COMPARED_ATTRIBUTE_PATH
+        >
       : never)
   /**
    * @debt feature "Can you apply Contains clauses to Set attributes?"
@@ -105,7 +125,7 @@ type NumberStringOrBinaryAttributeExtraCondition<
     | {
         between: [
           ATTRIBUTE_VALUE | { attr: COMPARED_ATTRIBUTE_PATH },
-          ATTRIBUTE_VALUE | { attr: COMPARED_ATTRIBUTE_PATH }
+          ATTRIBUTE_VALUE | { attr: COMPARED_ATTRIBUTE_PATH },
         ]
       }
   )
@@ -142,12 +162,20 @@ export type PrimitiveAttributeExtraCondition<
             COMPARED_ATTRIBUTE_PATH
           >
         : never)
-    | (ATTRIBUTE extends PrimitiveAttribute<'string'> | PrimitiveAttribute<'binary'>
-        ? StringOrBinaryAttributeExtraCondition<ATTRIBUTE_PATH, ATTRIBUTE, COMPARED_ATTRIBUTE_PATH>
+    | (ATTRIBUTE extends
+        | PrimitiveAttribute<'string'>
+        | PrimitiveAttribute<'binary'>
+        ? StringOrBinaryAttributeExtraCondition<
+            ATTRIBUTE_PATH,
+            ATTRIBUTE,
+            COMPARED_ATTRIBUTE_PATH
+          >
         : never)
   )
 
-export type NonLogicalCondition<SCHEMA extends Schema = Schema> = Schema extends SCHEMA
+export type NonLogicalCondition<
+  SCHEMA extends Schema = Schema
+> = Schema extends SCHEMA
   ? AnyAttributeCondition<string, string>
   : keyof SCHEMA['attributes'] extends infer ATTRIBUTE_PATH
   ? ATTRIBUTE_PATH extends string
@@ -165,7 +193,9 @@ export type SchemaCondition<SCHEMA extends Schema = Schema> =
   | { or: SchemaCondition<SCHEMA>[] }
   | { not: SchemaCondition<SCHEMA> }
 
-export type Condition<ENTITY extends EntityV2 = EntityV2> = SchemaCondition<ENTITY['schema']>
+export type Condition<ENTITY extends EntityV2 = EntityV2> = SchemaCondition<
+  ENTITY['schema']
+>
 
 export interface ConditionOptions<ENTITY extends EntityV2 = EntityV2> {
   /** Optional condition to apply to the operation */

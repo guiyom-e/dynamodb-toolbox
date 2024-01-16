@@ -1,22 +1,27 @@
 import type { O } from 'ts-toolbelt'
 
-import type { If, ValueOrGetter } from 'v1/types'
 import type {
   AttributeKeyInput,
   AttributePutItemInput,
   AttributeUpdateItemInput,
   KeyInput,
   PutItemInput,
-  UpdateItemInput
+  UpdateItemInput,
 } from 'v1/operations'
+import type { If, ValueOrGetter } from 'v1/types'
 
 import type { Schema } from '../../interface'
-import type { RequiredOption, AtLeastOnce, Never, Always } from '../constants'
-import type { $type, $attributes } from '../constants/attributeOptions'
-import type { SharedAttributeState, $SharedAttributeState } from '../shared/interface'
-
+import type { Always, AtLeastOnce, Never, RequiredOption } from '../constants'
+import type { $attributes, $type } from '../constants/attributeOptions'
+import type {
+  $SharedAttributeState,
+  SharedAttributeState,
+} from '../shared/interface'
 import type { FreezeMapAttribute } from './freeze'
-import type { $MapAttributeAttributeStates, MapAttributeAttributes } from './types'
+import type {
+  $MapAttributeAttributeStates,
+  MapAttributeAttributes,
+} from './types'
 
 export interface $MapAttributeState<
   $ATTRIBUTES extends $MapAttributeAttributeStates = $MapAttributeAttributeStates,
@@ -30,7 +35,9 @@ export interface $MapAttributeNestedState<
   $ATTRIBUTES extends $MapAttributeAttributeStates = $MapAttributeAttributeStates,
   STATE extends SharedAttributeState = SharedAttributeState
 > extends $MapAttributeState<$ATTRIBUTES, STATE> {
-  freeze: (path: string) => FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>
+  freeze: (
+    path: string,
+  ) => FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>
 }
 
 /**
@@ -49,12 +56,18 @@ export interface $MapAttribute<
    * @param nextRequired RequiredOption
    */
   required: <NEXT_REQUIRED extends RequiredOption = AtLeastOnce>(
-    nextRequired?: NEXT_REQUIRED
-  ) => $MapAttribute<$ATTRIBUTES, O.Overwrite<STATE, { required: NEXT_REQUIRED }>>
+    nextRequired?: NEXT_REQUIRED,
+  ) => $MapAttribute<
+    $ATTRIBUTES,
+    O.Overwrite<STATE, { required: NEXT_REQUIRED }>
+  >
   /**
    * Shorthand for `required('never')`
    */
-  optional: () => $MapAttribute<$ATTRIBUTES, O.Overwrite<STATE, { required: Never }>>
+  optional: () => $MapAttribute<
+    $ATTRIBUTES,
+    O.Overwrite<STATE, { required: Never }>
+  >
   /**
    * Hide attribute after fetch commands and formatting
    */
@@ -62,13 +75,19 @@ export interface $MapAttribute<
   /**
    * Tag attribute as needed for Primary Key computing
    */
-  key: () => $MapAttribute<$ATTRIBUTES, O.Overwrite<STATE, { required: Always; key: true }>>
+  key: () => $MapAttribute<
+    $ATTRIBUTES,
+    O.Overwrite<STATE, { required: Always; key: true }>
+  >
   /**
    * Rename attribute before save commands
    */
   savedAs: <NEXT_SAVED_AS extends string | undefined>(
-    nextSavedAs: NEXT_SAVED_AS
-  ) => $MapAttribute<$ATTRIBUTES, O.Overwrite<STATE, { savedAs: NEXT_SAVED_AS }>>
+    nextSavedAs: NEXT_SAVED_AS,
+  ) => $MapAttribute<
+    $ATTRIBUTES,
+    O.Overwrite<STATE, { savedAs: NEXT_SAVED_AS }>
+  >
   /**
    * Provide a default value for attribute in Primary Key computing
    *
@@ -76,8 +95,11 @@ export interface $MapAttribute<
    */
   keyDefault: (
     nextKeyDefault: ValueOrGetter<
-      AttributeKeyInput<FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>, true>
-    >
+      AttributeKeyInput<
+        FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>,
+        true
+      >
+    >,
   ) => $MapAttribute<
     $ATTRIBUTES,
     O.Overwrite<
@@ -98,8 +120,11 @@ export interface $MapAttribute<
    */
   putDefault: (
     nextPutDefault: ValueOrGetter<
-      AttributePutItemInput<FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>, true>
-    >
+      AttributePutItemInput<
+        FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>,
+        true
+      >
+    >,
   ) => $MapAttribute<
     $ATTRIBUTES,
     O.Overwrite<
@@ -120,8 +145,11 @@ export interface $MapAttribute<
    */
   updateDefault: (
     nextUpdateDefault: ValueOrGetter<
-      AttributeUpdateItemInput<FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>, true>
-    >
+      AttributeUpdateItemInput<
+        FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>,
+        true
+      >
+    >,
   ) => $MapAttribute<
     $ATTRIBUTES,
     O.Overwrite<
@@ -144,10 +172,16 @@ export interface $MapAttribute<
     nextDefault: ValueOrGetter<
       If<
         STATE['key'],
-        AttributeKeyInput<FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>, true>,
-        AttributePutItemInput<FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>, true>
+        AttributeKeyInput<
+          FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>,
+          true
+        >,
+        AttributePutItemInput<
+          FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>,
+          true
+        >
       >
-    >
+    >,
   ) => $MapAttribute<
     $ATTRIBUTES,
     O.Overwrite<
@@ -176,9 +210,12 @@ export interface $MapAttribute<
    */
   keyLink: <SCHEMA extends Schema>(
     nextKeyDefault: ValueOrGetter<
-      AttributeKeyInput<FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>, true>,
+      AttributeKeyInput<
+        FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>,
+        true
+      >,
       [KeyInput<SCHEMA, true>]
-    >
+    >,
   ) => $MapAttribute<
     $ATTRIBUTES,
     O.Overwrite<
@@ -199,9 +236,12 @@ export interface $MapAttribute<
    */
   putLink: <SCHEMA extends Schema>(
     nextPutDefault: ValueOrGetter<
-      AttributePutItemInput<FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>, true>,
+      AttributePutItemInput<
+        FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>,
+        true
+      >,
       [PutItemInput<SCHEMA, true>]
-    >
+    >,
   ) => $MapAttribute<
     $ATTRIBUTES,
     O.Overwrite<
@@ -222,9 +262,12 @@ export interface $MapAttribute<
    */
   updateLink: <SCHEMA extends Schema>(
     nextUpdateDefault: ValueOrGetter<
-      AttributeUpdateItemInput<FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>, true>,
+      AttributeUpdateItemInput<
+        FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>,
+        true
+      >,
       [UpdateItemInput<SCHEMA, true>]
-    >
+    >,
   ) => $MapAttribute<
     $ATTRIBUTES,
     O.Overwrite<
@@ -247,11 +290,17 @@ export interface $MapAttribute<
     nextDefault: ValueOrGetter<
       If<
         STATE['key'],
-        AttributeKeyInput<FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>, true>,
-        AttributePutItemInput<FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>, true>
+        AttributeKeyInput<
+          FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>,
+          true
+        >,
+        AttributePutItemInput<
+          FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>,
+          true
+        >
       >,
       [If<STATE['key'], KeyInput<SCHEMA, true>, PutItemInput<SCHEMA, true>>]
-    >
+    >,
   ) => $MapAttribute<
     $ATTRIBUTES,
     O.Overwrite<

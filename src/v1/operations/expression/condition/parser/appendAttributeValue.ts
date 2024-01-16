@@ -9,24 +9,24 @@ export const appendAttributeValue = (
   conditionParser: ConditionParser,
   attribute: Attribute,
   expressionAttributeValue: unknown,
-  options: AppendAttributeValueOptions = {}
+  options: AppendAttributeValueOptions = {},
 ): void => {
   const { transform = false } = options
 
   const inputParser = parseAttributeClonedInput(
     attribute,
     expressionAttributeValue as AttributeValue,
-    { transform }
+    { transform },
   )
   inputParser.next() // cloned
   inputParser.next() // parsed
   const collapsedInput = inputParser.next().value
 
   const expressionAttributeValueIndex = conditionParser.expressionAttributeValues.push(
-    collapsedInput
+    collapsedInput,
   )
 
   conditionParser.appendToExpression(
-    `:${conditionParser.expressionAttributePrefix}${expressionAttributeValueIndex}`
+    `:${conditionParser.expressionAttributePrefix}${expressionAttributeValueIndex}`,
   )
 }

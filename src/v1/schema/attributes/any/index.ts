@@ -3,7 +3,7 @@ export type {
   $AnyAttributeState,
   $AnyAttributeNestedState,
   $AnyAttribute,
-  AnyAttribute
+  AnyAttribute,
 } from './interface'
 export type { FreezeAnyAttribute } from './freeze'
 export type { ResolveAnyAttribute } from './resolve'

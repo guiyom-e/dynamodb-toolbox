@@ -1,14 +1,14 @@
 import type { AnyAttribute } from '../any'
-import type {
-  ResolvedPrimitiveAttribute,
-  PrimitiveAttribute,
-  PrimitiveAttributeType
-} from '../primitive'
-import type { SetAttribute } from '../set'
+import type { AnyOfAttribute } from '../anyOf'
 import type { ListAttribute } from '../list'
 import type { MapAttribute } from '../map'
+import type {
+  PrimitiveAttribute,
+  PrimitiveAttributeType,
+  ResolvedPrimitiveAttribute,
+} from '../primitive'
 import type { RecordAttribute } from '../record'
-import type { AnyOfAttribute } from '../anyOf'
+import type { SetAttribute } from '../set'
 
 /**
  * Any attribute

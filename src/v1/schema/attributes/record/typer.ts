@@ -1,28 +1,27 @@
 import type { NarrowObject } from 'v1/types/narrowObject'
 import { overwrite } from 'v1/utils/overwrite'
 
-import type { RequiredOption, AtLeastOnce } from '../constants'
+import type { AtLeastOnce, RequiredOption } from '../constants'
 import {
-  $type,
-  $keys,
+  $defaults,
   $elements,
-  $required,
   $hidden,
   $key,
+  $keys,
+  $required,
   $savedAs,
-  $defaults
+  $type,
 } from '../constants/attributeOptions'
 import type { InferStateFromOptions } from '../shared/inferStateFromOptions'
 import type { SharedAttributeState } from '../shared/interface'
-
-import type { $RecordAttributeKeys, $RecordAttributeElements } from './types'
+import { freezeRecordAttribute } from './freeze'
 import type { $RecordAttribute } from './interface'
 import {
-  RecordAttributeOptions,
+  RECORD_DEFAULT_OPTIONS,
   RecordAttributeDefaultOptions,
-  RECORD_DEFAULT_OPTIONS
+  RecordAttributeOptions,
 } from './options'
-import { freezeRecordAttribute } from './freeze'
+import type { $RecordAttributeElements, $RecordAttributeKeys } from './types'
 
 type $RecordAttributeTyper = <
   $KEYS extends $RecordAttributeKeys,
@@ -31,7 +30,7 @@ type $RecordAttributeTyper = <
 >(
   keys: $KEYS,
   elements: $ELEMENTS,
-  state: STATE
+  state: STATE,
 ) => $RecordAttribute<$KEYS, $ELEMENTS, STATE>
 
 const $record: $RecordAttributeTyper = <
@@ -41,7 +40,7 @@ const $record: $RecordAttributeTyper = <
 >(
   keys: $KEYS,
   elements: $ELEMENTS,
-  state: STATE
+  state: STATE,
 ) => {
   const $recordAttribute: $RecordAttribute<$KEYS, $ELEMENTS, STATE> = {
     [$type]: 'record',
@@ -53,12 +52,19 @@ const $record: $RecordAttributeTyper = <
     [$savedAs]: state.savedAs,
     [$defaults]: state.defaults,
     required: <NEXT_IS_REQUIRED extends RequiredOption = AtLeastOnce>(
-      nextRequired: NEXT_IS_REQUIRED = 'atLeastOnce' as NEXT_IS_REQUIRED
+      nextRequired: NEXT_IS_REQUIRED = 'atLeastOnce' as NEXT_IS_REQUIRED,
     ) => $record(keys, elements, overwrite(state, { required: nextRequired })),
-    optional: () => $record(keys, elements, overwrite(state, { required: 'never' })),
+    optional: () =>
+      $record(keys, elements, overwrite(state, { required: 'never' })),
     hidden: () => $record(keys, elements, overwrite(state, { hidden: true })),
-    key: () => $record(keys, elements, overwrite(state, { key: true, required: 'always' })),
-    savedAs: nextSavedAs => $record(keys, elements, overwrite(state, { savedAs: nextSavedAs })),
+    key: () =>
+      $record(
+        keys,
+        elements,
+        overwrite(state, { key: true, required: 'always' }),
+      ),
+    savedAs: nextSavedAs =>
+      $record(keys, elements, overwrite(state, { savedAs: nextSavedAs })),
     keyDefault: nextKeyDefault =>
       $record(
         keys,
@@ -67,9 +73,9 @@ const $record: $RecordAttributeTyper = <
           defaults: {
             key: nextKeyDefault,
             put: state.defaults.put,
-            update: state.defaults.update
-          }
-        })
+            update: state.defaults.update,
+          },
+        }),
       ),
     putDefault: nextPutDefault =>
       $record(
@@ -79,9 +85,9 @@ const $record: $RecordAttributeTyper = <
           defaults: {
             key: state.defaults.key,
             put: nextPutDefault,
-            update: state.defaults.update
-          }
-        })
+            update: state.defaults.update,
+          },
+        }),
       ),
     updateDefault: nextUpdateDefault =>
       $record(
@@ -91,9 +97,9 @@ const $record: $RecordAttributeTyper = <
           defaults: {
             key: state.defaults.key,
             put: state.defaults.put,
-            update: nextUpdateDefault
-          }
-        })
+            update: nextUpdateDefault,
+          },
+        }),
       ),
     default: nextDefault =>
       $record(
@@ -101,9 +107,17 @@ const $record: $RecordAttributeTyper = <
         elements,
         overwrite(state, {
           defaults: state.key
-            ? { key: nextDefault, put: state.defaults.put, update: state.defaults.update }
-            : { key: state.defaults.key, put: nextDefault, update: state.defaults.update }
-        })
+            ? {
+                key: nextDefault,
+                put: state.defaults.put,
+                update: state.defaults.update,
+              }
+            : {
+                key: state.defaults.key,
+                put: nextDefault,
+                update: state.defaults.update,
+              },
+        }),
       ),
     keyLink: nextKeyDefault =>
       $record(
@@ -113,9 +127,9 @@ const $record: $RecordAttributeTyper = <
           defaults: {
             key: nextKeyDefault,
             put: state.defaults.put,
-            update: state.defaults.update
-          }
-        })
+            update: state.defaults.update,
+          },
+        }),
       ),
     putLink: nextPutDefault =>
       $record(
@@ -125,9 +139,9 @@ const $record: $RecordAttributeTyper = <
           defaults: {
             key: state.defaults.key,
             put: nextPutDefault,
-            update: state.defaults.update
-          }
-        })
+            update: state.defaults.update,
+          },
+        }),
       ),
     updateLink: nextUpdateDefault =>
       $record(
@@ -137,9 +151,9 @@ const $record: $RecordAttributeTyper = <
           defaults: {
             key: state.defaults.key,
             put: state.defaults.put,
-            update: nextUpdateDefault
-          }
-        })
+            update: nextUpdateDefault,
+          },
+        }),
       ),
     link: nextDefault =>
       $record(
@@ -147,11 +161,19 @@ const $record: $RecordAttributeTyper = <
         elements,
         overwrite(state, {
           defaults: state.key
-            ? { key: nextDefault, put: state.defaults.put, update: state.defaults.update }
-            : { key: state.defaults.key, put: nextDefault, update: state.defaults.update }
-        })
+            ? {
+                key: nextDefault,
+                put: state.defaults.put,
+                update: state.defaults.update,
+              }
+            : {
+                key: state.defaults.key,
+                put: nextDefault,
+                update: state.defaults.update,
+              },
+        }),
       ),
-    freeze: path => freezeRecordAttribute(keys, elements, state, path)
+    freeze: path => freezeRecordAttribute(keys, elements, state, path),
   }
 
   return $recordAttribute
@@ -164,11 +186,15 @@ type RecordAttributeTyper = <
 >(
   keys: $KEYS,
   elements: $ELEMENTS,
-  options?: NarrowObject<OPTIONS>
+  options?: NarrowObject<OPTIONS>,
 ) => $RecordAttribute<
   $KEYS,
   $ELEMENTS,
-  InferStateFromOptions<RecordAttributeOptions, RecordAttributeDefaultOptions, OPTIONS>
+  InferStateFromOptions<
+    RecordAttributeOptions,
+    RecordAttributeDefaultOptions,
+    OPTIONS
+  >
 >
 
 /**
@@ -191,20 +217,28 @@ export const record: RecordAttributeTyper = <
 >(
   keys: $KEYS,
   elements: $ELEMENTS,
-  options?: NarrowObject<OPTIONS>
+  options?: NarrowObject<OPTIONS>,
 ): $RecordAttribute<
   $KEYS,
   $ELEMENTS,
-  InferStateFromOptions<RecordAttributeOptions, RecordAttributeDefaultOptions, OPTIONS>
+  InferStateFromOptions<
+    RecordAttributeOptions,
+    RecordAttributeDefaultOptions,
+    OPTIONS
+  >
 > => {
   const state = {
     ...RECORD_DEFAULT_OPTIONS,
     ...options,
     defaults: {
       ...RECORD_DEFAULT_OPTIONS.defaults,
-      ...options?.defaults
-    }
-  } as InferStateFromOptions<RecordAttributeOptions, RecordAttributeDefaultOptions, OPTIONS>
+      ...options?.defaults,
+    },
+  } as InferStateFromOptions<
+    RecordAttributeOptions,
+    RecordAttributeDefaultOptions,
+    OPTIONS
+  >
 
   return $record(keys, elements, state)
 }

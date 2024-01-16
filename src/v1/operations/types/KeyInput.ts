@@ -1,25 +1,25 @@
 import type { O } from 'ts-toolbelt'
 
+import type { EntityV2 } from 'v1/entity'
 import type {
-  Schema,
+  Always,
+  AnyAttribute,
+  AnyOfAttribute,
   Attribute,
   AttributeValue,
-  ResolveAnyAttribute,
-  ResolvePrimitiveAttribute,
-  MapAttributeValue,
-  AnyAttribute,
-  PrimitiveAttribute,
-  SetAttribute,
   ListAttribute,
   MapAttribute,
+  MapAttributeValue,
+  Never,
+  PrimitiveAttribute,
   RecordAttribute,
-  AnyOfAttribute,
-  Always,
-  Never
+  ResolveAnyAttribute,
+  ResolvePrimitiveAttribute,
+  Schema,
+  SetAttribute,
 } from 'v1/schema'
-import type { OptionalizeUndefinableProperties } from 'v1/types/optionalizeUndefinableProperties'
-import type { EntityV2 } from 'v1/entity'
 import type { If } from 'v1/types/if'
+import type { OptionalizeUndefinableProperties } from 'v1/types/optionalizeUndefinableProperties'
 
 type MustBeDefined<
   ATTRIBUTE extends Attribute,
@@ -49,13 +49,16 @@ export type KeyInput<
   ? OptionalizeUndefinableProperties<
       {
         // Keep only key attributes
-        [KEY in O.SelectKeys<SCHEMA['attributes'], { key: true }>]: AttributeKeyInput<
-          SCHEMA['attributes'][KEY],
-          REQUIRED_DEFAULTS
-        >
+        [KEY in O.SelectKeys<
+          SCHEMA['attributes'],
+          { key: true }
+        >]: AttributeKeyInput<SCHEMA['attributes'][KEY], REQUIRED_DEFAULTS>
       },
       // Sadly we override optional AnyAttributes as 'unknown | undefined' => 'unknown' (undefined lost in the process)
-      O.SelectKeys<SCHEMA['attributes'], AnyAttribute & { key: true; required: Never }>
+      O.SelectKeys<
+        SCHEMA['attributes'],
+        AnyAttribute & { key: true; required: Never }
+      >
     >
   : SCHEMA extends EntityV2
   ? KeyInput<SCHEMA['schema'], REQUIRED_DEFAULTS>
@@ -86,20 +89,25 @@ export type AttributeKeyInput<
           ? OptionalizeUndefinableProperties<
               {
                 // Keep only key attributes
-                [KEY in O.SelectKeys<ATTRIBUTE['attributes'], { key: true }>]: AttributeKeyInput<
+                [KEY in O.SelectKeys<
+                  ATTRIBUTE['attributes'],
+                  { key: true }
+                >]: AttributeKeyInput<
                   ATTRIBUTE['attributes'][KEY],
                   REQUIRED_DEFAULTS
                 >
               },
               // Sadly we override optional AnyAttributes as 'unknown | undefined' => 'unknown' (undefined lost in the process)
-              O.SelectKeys<ATTRIBUTE['attributes'], AnyAttribute & { key: true; required: Never }>
+              O.SelectKeys<
+                ATTRIBUTE['attributes'],
+                AnyAttribute & { key: true; required: Never }
+              >
             >
           : ATTRIBUTE extends RecordAttribute
           ? {
-              [KEY in ResolvePrimitiveAttribute<ATTRIBUTE['keys']>]?: AttributeKeyInput<
-                ATTRIBUTE['elements'],
-                REQUIRED_DEFAULTS
-              >
+              [KEY in ResolvePrimitiveAttribute<
+                ATTRIBUTE['keys']
+              >]?: AttributeKeyInput<ATTRIBUTE['elements'], REQUIRED_DEFAULTS>
             }
           : ATTRIBUTE extends AnyOfAttribute
           ? AttributeKeyInput<ATTRIBUTE['elements'][number], REQUIRED_DEFAULTS>

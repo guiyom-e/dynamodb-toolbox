@@ -1,5 +1,10 @@
 import type { AtLeastOnce } from '../constants'
-import type { $required, $hidden, $savedAs, $defaults } from '../constants/attributeOptions'
+import type {
+  $defaults,
+  $hidden,
+  $required,
+  $savedAs,
+} from '../constants/attributeOptions'
 import type { $AttributeNestedState, Attribute } from '../types'
 
 export type $ListAttributeElements = $AttributeNestedState & {

@@ -1,6 +1,6 @@
 export const matchProjection = (
   attributeNameRegex: RegExp,
-  projectedAttributes?: string[]
+  projectedAttributes?: string[],
 ):
   | { isProjected: false; childrenAttributes?: never }
   | { isProjected: true; childrenAttributes?: string[] } => {
@@ -32,7 +32,7 @@ export const matchProjection = (
 
 export const getItemKey = ({
   partitionKey,
-  sortKey
+  sortKey,
 }: {
   partitionKey?: unknown
   sortKey?: unknown
@@ -40,7 +40,7 @@ export const getItemKey = ({
   partitionKey &&
   [
     partitionKey && `Partition key: ${String(partitionKey)}`,
-    sortKey && `Sort key: ${String(sortKey)}`
+    sortKey && `Sort key: ${String(sortKey)}`,
   ]
     .filter(Boolean)
     .join(' / ')

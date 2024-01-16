@@ -1,10 +1,10 @@
 import type { $AnyAttribute } from '../any'
-import type { $PrimitiveAttribute } from '../primitive'
-import type { $SetAttribute } from '../set'
+import type { $AnyOfAttribute } from '../anyOf'
 import type { $ListAttribute } from '../list'
 import type { $MapAttribute } from '../map'
+import type { $PrimitiveAttribute } from '../primitive'
 import type { $RecordAttribute } from '../record'
-import type { $AnyOfAttribute } from '../anyOf'
+import type { $SetAttribute } from '../set'
 
 /**
  * Any warm attribute

@@ -1,14 +1,18 @@
+import {
+  GetCommand,
+  GetCommandInput,
+  GetCommandOutput,
+} from '@aws-sdk/lib-dynamodb'
 import type { O } from 'ts-toolbelt'
-import { GetCommandInput, GetCommand, GetCommandOutput } from '@aws-sdk/lib-dynamodb'
 
 import type { EntityV2, FormattedItem } from 'v1/entity'
-import type { AnyAttributePath, KeyInput } from 'v1/operations/types'
 import { DynamoDBToolboxError } from 'v1/errors'
+import type { AnyAttributePath, KeyInput } from 'v1/operations/types'
 import { formatSavedItem } from 'v1/operations/utils/formatSavedItem'
 
-import { EntityOperation, $entity } from '../class'
-import type { GetItemOptions } from './options'
+import { $entity, EntityOperation } from '../class'
 import { getItemParams } from './getItemParams'
+import type { GetItemOptions } from './options'
 
 export const $key = Symbol('$key')
 export type $key = typeof $key
@@ -40,22 +44,28 @@ export class GetItemCommand<
   key: (key: KeyInput<ENTITY>) => GetItemCommand<ENTITY, OPTIONS>;
   [$options]: OPTIONS
   options: <NEXT_OPTIONS extends GetItemOptions<ENTITY>>(
-    nextOptions: NEXT_OPTIONS
+    nextOptions: NEXT_OPTIONS,
   ) => GetItemCommand<ENTITY, NEXT_OPTIONS>
 
-  constructor(entity: ENTITY, key?: KeyInput<ENTITY>, options: OPTIONS = {} as OPTIONS) {
+  constructor(
+    entity: ENTITY,
+    key?: KeyInput<ENTITY>,
+    options: OPTIONS = {} as OPTIONS,
+  ) {
     super(entity)
     this[$key] = key
     this[$options] = options
 
-    this.key = nextKey => new GetItemCommand(this[$entity], nextKey, this[$options])
-    this.options = nextOptions => new GetItemCommand(this[$entity], this[$key], nextOptions)
+    this.key = nextKey =>
+      new GetItemCommand(this[$entity], nextKey, this[$options])
+    this.options = nextOptions =>
+      new GetItemCommand(this[$entity], this[$key], nextOptions)
   }
 
   params = (): GetCommandInput => {
     if (!this[$key]) {
       throw new DynamoDBToolboxError('operations.incompleteCommand', {
-        message: 'GetItemCommand incomplete: Missing "key" property'
+        message: 'GetItemCommand incomplete: Missing "key" property',
       })
     }
 
@@ -66,7 +76,7 @@ export class GetItemCommand<
     const getItemParams = this.params()
 
     const commandOutput = await this[$entity].table.documentClient.send(
-      new GetCommand(getItemParams)
+      new GetCommand(getItemParams),
     )
 
     const { Item: item, ...restCommandOutput } = commandOutput
@@ -80,7 +90,7 @@ export class GetItemCommand<
 
     return {
       Item: formattedItem,
-      ...restCommandOutput
+      ...restCommandOutput,
     }
   }
 }

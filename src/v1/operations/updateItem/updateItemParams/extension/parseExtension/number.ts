@@ -1,18 +1,27 @@
 import cloneDeep from 'lodash.clonedeep'
 
-import type { AttributeBasicValue, AttributeValue, PrimitiveAttribute } from 'v1/schema'
-import type { ExtensionParser, ParsingOptions } from 'v1/validation/parseClonedInput/types'
-import { parseAttributeClonedInput } from 'v1/validation/parseClonedInput/attribute'
-import { isArray } from 'v1/utils/validation/isArray'
 import { DynamoDBToolboxError } from 'v1/errors'
-
-import type { ReferenceExtension, UpdateItemInputExtension } from 'v1/operations/updateItem/types'
-import { $SUM, $SUBTRACT, $ADD } from 'v1/operations/updateItem/constants'
+import { $ADD, $SUBTRACT, $SUM } from 'v1/operations/updateItem/constants'
+import type {
+  ReferenceExtension,
+  UpdateItemInputExtension,
+} from 'v1/operations/updateItem/types'
 import {
-  hasSumOperation,
+  hasAddOperation,
   hasSubtractOperation,
-  hasAddOperation
+  hasSumOperation,
 } from 'v1/operations/updateItem/utils'
+import type {
+  AttributeBasicValue,
+  AttributeValue,
+  PrimitiveAttribute,
+} from 'v1/schema'
+import { isArray } from 'v1/utils/validation/isArray'
+import { parseAttributeClonedInput } from 'v1/validation/parseClonedInput/attribute'
+import type {
+  ExtensionParser,
+  ParsingOptions,
+} from 'v1/validation/parseClonedInput/types'
 
 import { parseReferenceExtension } from './reference'
 
@@ -21,7 +30,7 @@ const ACCEPTABLE_LENGTH_SET = new Set<number>([1, 2])
 export const parseNumberExtension = (
   attribute: PrimitiveAttribute<'number'>,
   inputValue: AttributeValue<UpdateItemInputExtension> | undefined,
-  options: ParsingOptions<UpdateItemInputExtension>
+  options: ParsingOptions<UpdateItemInputExtension>,
 ): ReturnType<ExtensionParser<UpdateItemInputExtension>> => {
   if (hasSumOperation(inputValue)) {
     return {
@@ -36,12 +45,15 @@ export const parseNumberExtension = (
         if (isInputValueArray) {
           for (const sumElement of inputValue[$SUM]) {
             parsers.push(
-              parseAttributeClonedInput<ReferenceExtension, UpdateItemInputExtension>(
+              parseAttributeClonedInput<
+                ReferenceExtension,
+                UpdateItemInputExtension
+              >(
                 attribute,
                 sumElement,
                 // References are allowed in sums
-                { ...options, parseExtension: parseReferenceExtension }
-              )
+                { ...options, parseExtension: parseReferenceExtension },
+              ),
             )
           }
         }
@@ -49,26 +61,33 @@ export const parseNumberExtension = (
         const clonedValue = {
           [$SUM]: isInputValueArray
             ? parsers.map(parser => parser.next().value)
-            : cloneDeep(inputValue[$SUM])
+            : cloneDeep(inputValue[$SUM]),
         }
         yield clonedValue
 
-        if (!isInputValueArray || !ACCEPTABLE_LENGTH_SET.has(inputValue[$SUM].length)) {
+        if (
+          !isInputValueArray ||
+          !ACCEPTABLE_LENGTH_SET.has(inputValue[$SUM].length)
+        ) {
           throw new DynamoDBToolboxError('parsing.invalidAttributeInput', {
             message: `Sum for number attribute ${attribute.path} should be a tuple of length 1 or 2`,
             path: attribute.path,
             payload: {
-              received: inputValue[$SUM]
-            }
+              received: inputValue[$SUM],
+            },
           })
         }
 
-        const parsedValue = { [$SUM]: parsers.map(parser => parser.next().value) }
+        const parsedValue = {
+          [$SUM]: parsers.map(parser => parser.next().value),
+        }
         yield parsedValue
 
-        const collapsedValue = { [$SUM]: parsers.map(parser => parser.next().value) }
+        const collapsedValue = {
+          [$SUM]: parsers.map(parser => parser.next().value),
+        }
         return collapsedValue
-      }
+      },
     }
   }
 
@@ -85,12 +104,15 @@ export const parseNumberExtension = (
         if (isInputValueArray) {
           for (const sumElement of inputValue[$SUBTRACT]) {
             parsers.push(
-              parseAttributeClonedInput<ReferenceExtension, UpdateItemInputExtension>(
+              parseAttributeClonedInput<
+                ReferenceExtension,
+                UpdateItemInputExtension
+              >(
                 attribute,
                 sumElement,
                 // References are allowed in sums
-                { ...options, parseExtension: parseReferenceExtension }
-              )
+                { ...options, parseExtension: parseReferenceExtension },
+              ),
             )
           }
         }
@@ -98,35 +120,45 @@ export const parseNumberExtension = (
         const clonedValue = {
           [$SUBTRACT]: isInputValueArray
             ? parsers.map(parser => parser.next().value)
-            : cloneDeep(inputValue[$SUBTRACT])
+            : cloneDeep(inputValue[$SUBTRACT]),
         }
         yield clonedValue
 
-        if (!isInputValueArray || !ACCEPTABLE_LENGTH_SET.has(inputValue[$SUBTRACT].length)) {
+        if (
+          !isInputValueArray ||
+          !ACCEPTABLE_LENGTH_SET.has(inputValue[$SUBTRACT].length)
+        ) {
           throw new DynamoDBToolboxError('parsing.invalidAttributeInput', {
             message: `Subtraction for number attribute ${attribute.path} should be a tuple of length 1 or 2`,
             path: attribute.path,
             payload: {
-              received: inputValue[$SUBTRACT]
-            }
+              received: inputValue[$SUBTRACT],
+            },
           })
         }
 
-        const parsedValue = { [$SUBTRACT]: parsers.map(parser => parser.next().value) }
+        const parsedValue = {
+          [$SUBTRACT]: parsers.map(parser => parser.next().value),
+        }
         yield parsedValue
 
-        const collapsedValue = { [$SUBTRACT]: parsers.map(parser => parser.next().value) }
+        const collapsedValue = {
+          [$SUBTRACT]: parsers.map(parser => parser.next().value),
+        }
         return collapsedValue
-      }
+      },
     }
   }
 
   if (hasAddOperation(inputValue)) {
-    const parser = parseAttributeClonedInput<ReferenceExtension, UpdateItemInputExtension>(
+    const parser = parseAttributeClonedInput<
+      ReferenceExtension,
+      UpdateItemInputExtension
+    >(
       attribute,
       inputValue[$ADD],
       // References are allowed in additions
-      { ...options, parseExtension: parseReferenceExtension }
+      { ...options, parseExtension: parseReferenceExtension },
     )
 
     return {
@@ -140,12 +172,14 @@ export const parseNumberExtension = (
 
         const collapsedValue = { [$ADD]: parser.next().value }
         return collapsedValue
-      }
+      },
     }
   }
 
   return {
     isExtension: false,
-    basicInput: inputValue as AttributeBasicValue<UpdateItemInputExtension> | undefined
+    basicInput: inputValue as
+      | AttributeBasicValue<UpdateItemInputExtension>
+      | undefined,
   }
 }

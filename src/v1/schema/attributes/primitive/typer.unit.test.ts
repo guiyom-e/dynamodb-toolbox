@@ -3,20 +3,19 @@ import type { A } from 'ts-toolbelt'
 import { DynamoDBToolboxError } from 'v1/errors'
 import { prefix } from 'v1/transformers'
 
-import { Never, AtLeastOnce, Always } from '../constants'
+import { Always, AtLeastOnce, Never } from '../constants'
 import {
-  $type,
-  $required,
+  $defaults,
+  $enum,
   $hidden,
   $key,
+  $required,
   $savedAs,
-  $enum,
-  $defaults,
-  $transform
+  $transform,
+  $type,
 } from '../constants/attributeOptions'
-
-import { string, number, boolean, binary } from './typer'
-import type { PrimitiveAttribute, $PrimitiveAttribute } from './interface'
+import type { $PrimitiveAttribute, PrimitiveAttribute } from './interface'
+import { binary, boolean, number, string } from './typer'
 
 describe('primitiveAttribute', () => {
   const path = 'some.path'
@@ -48,7 +47,10 @@ describe('primitiveAttribute', () => {
       assertExtends
 
       const frozenStr = str.freeze(path)
-      const assertFrozenExtends: A.Extends<typeof frozenStr, PrimitiveAttribute> = 1
+      const assertFrozenExtends: A.Extends<
+        typeof frozenStr,
+        PrimitiveAttribute
+      > = 1
       assertFrozenExtends
 
       expect(str).toMatchObject({
@@ -61,8 +63,8 @@ describe('primitiveAttribute', () => {
         [$defaults]: {
           key: undefined,
           put: undefined,
-          update: undefined
-        }
+          update: undefined,
+        },
       })
     })
 
@@ -71,9 +73,15 @@ describe('primitiveAttribute', () => {
       const strAlways = string({ required: 'always' })
       const strNever = string({ required: 'never' })
 
-      const assertAtLeastOnce: A.Contains<typeof strAtLeastOnce, { [$required]: AtLeastOnce }> = 1
+      const assertAtLeastOnce: A.Contains<
+        typeof strAtLeastOnce,
+        { [$required]: AtLeastOnce }
+      > = 1
       assertAtLeastOnce
-      const assertAlways: A.Contains<typeof strAlways, { [$required]: Always }> = 1
+      const assertAlways: A.Contains<
+        typeof strAlways,
+        { [$required]: Always }
+      > = 1
       assertAlways
       const assertNever: A.Contains<typeof strNever, { [$required]: Never }> = 1
       assertNever
@@ -89,9 +97,15 @@ describe('primitiveAttribute', () => {
       const strNever = string().required('never')
       const strOpt = string().optional()
 
-      const assertAtLeastOnce: A.Contains<typeof strAtLeastOnce, { [$required]: AtLeastOnce }> = 1
+      const assertAtLeastOnce: A.Contains<
+        typeof strAtLeastOnce,
+        { [$required]: AtLeastOnce }
+      > = 1
       assertAtLeastOnce
-      const assertAlways: A.Contains<typeof strAlways, { [$required]: Always }> = 1
+      const assertAlways: A.Contains<
+        typeof strAlways,
+        { [$required]: Always }
+      > = 1
       assertAlways
       const assertNever: A.Contains<typeof strNever, { [$required]: Never }> = 1
       assertNever
@@ -125,7 +139,10 @@ describe('primitiveAttribute', () => {
     it('returns key string (option)', () => {
       const str = string({ key: true })
 
-      const assertStr: A.Contains<typeof str, { [$key]: true; [$required]: AtLeastOnce }> = 1
+      const assertStr: A.Contains<
+        typeof str,
+        { [$key]: true; [$required]: AtLeastOnce }
+      > = 1
       assertStr
 
       expect(str).toMatchObject({ [$key]: true, [$required]: 'atLeastOnce' })
@@ -134,7 +151,10 @@ describe('primitiveAttribute', () => {
     it('returns key string (method)', () => {
       const str = string().key()
 
-      const assertStr: A.Contains<typeof str, { [$key]: true; [$required]: Always }> = 1
+      const assertStr: A.Contains<
+        typeof str,
+        { [$key]: true; [$required]: Always }
+      > = 1
       assertStr
 
       expect(str).toMatchObject({ [$key]: true, [$required]: 'always' })
@@ -163,14 +183,17 @@ describe('primitiveAttribute', () => {
         // @ts-expect-error
         42,
         'foo',
-        'bar'
+        'bar',
       )
 
       const invalidCall = () => invalidStr.freeze(path)
 
       expect(invalidCall).toThrow(DynamoDBToolboxError)
       expect(invalidCall).toThrow(
-        expect.objectContaining({ code: 'schema.primitiveAttribute.invalidEnumValueType', path })
+        expect.objectContaining({
+          code: 'schema.primitiveAttribute.invalidEnumValueType',
+          path,
+        }),
       )
 
       const str = string().enum('foo', 'bar')
@@ -184,14 +207,17 @@ describe('primitiveAttribute', () => {
     it('returns defaulted string (option)', () => {
       const invalidStr = string({
         // TOIMPROVE: add type constraints here
-        defaults: { put: 42, update: undefined, key: undefined }
+        defaults: { put: 42, update: undefined, key: undefined },
       })
 
       const invalidCall = () => invalidStr.freeze(path)
 
       expect(invalidCall).toThrow(DynamoDBToolboxError)
       expect(invalidCall).toThrow(
-        expect.objectContaining({ code: 'schema.primitiveAttribute.invalidDefaultValueType', path })
+        expect.objectContaining({
+          code: 'schema.primitiveAttribute.invalidDefaultValueType',
+          path,
+        }),
       )
 
       string({
@@ -199,14 +225,20 @@ describe('primitiveAttribute', () => {
           key: undefined,
           put: undefined,
           // TOIMPROVE: add type constraints here
-          update: () => 42
-        }
+          update: () => 42,
+        },
       })
 
-      const strA = string({ defaults: { key: 'hello', put: undefined, update: undefined } })
-      const strB = string({ defaults: { key: undefined, put: 'world', update: undefined } })
+      const strA = string({
+        defaults: { key: 'hello', put: undefined, update: undefined },
+      })
+      const strB = string({
+        defaults: { key: undefined, put: 'world', update: undefined },
+      })
       const sayHello = () => 'hello'
-      const strC = string({ defaults: { key: undefined, put: undefined, update: sayHello } })
+      const strC = string({
+        defaults: { key: undefined, put: undefined, update: sayHello },
+      })
 
       const assertStrA: A.Contains<
         typeof strA,
@@ -215,7 +247,7 @@ describe('primitiveAttribute', () => {
       assertStrA
 
       expect(strA).toMatchObject({
-        [$defaults]: { key: 'hello', put: undefined, update: undefined }
+        [$defaults]: { key: 'hello', put: undefined, update: undefined },
       })
 
       const assertStrB: A.Contains<
@@ -225,17 +257,19 @@ describe('primitiveAttribute', () => {
       assertStrB
 
       expect(strB).toMatchObject({
-        [$defaults]: { key: undefined, put: 'world', update: undefined }
+        [$defaults]: { key: undefined, put: 'world', update: undefined },
       })
 
       const assertStrC: A.Contains<
         typeof strC,
-        { [$defaults]: { key: undefined; put: undefined; update: () => string } }
+        {
+          [$defaults]: { key: undefined; put: undefined; update: () => string }
+        }
       > = 1
       assertStrC
 
       expect(strC).toMatchObject({
-        [$defaults]: { key: undefined, put: undefined, update: sayHello }
+        [$defaults]: { key: undefined, put: undefined, update: sayHello },
       })
     })
 
@@ -248,7 +282,10 @@ describe('primitiveAttribute', () => {
 
       expect(invalidCall).toThrow(DynamoDBToolboxError)
       expect(invalidCall).toThrow(
-        expect.objectContaining({ code: 'schema.primitiveAttribute.invalidDefaultValueType', path })
+        expect.objectContaining({
+          code: 'schema.primitiveAttribute.invalidDefaultValueType',
+          path,
+        }),
       )
 
       string()
@@ -267,7 +304,7 @@ describe('primitiveAttribute', () => {
       assertStrA
 
       expect(strA).toMatchObject({
-        [$defaults]: { key: 'hello', put: undefined, update: undefined }
+        [$defaults]: { key: 'hello', put: undefined, update: undefined },
       })
 
       const assertStrB: A.Contains<
@@ -277,7 +314,7 @@ describe('primitiveAttribute', () => {
       assertStrB
 
       expect(strB).toMatchObject({
-        [$defaults]: { key: undefined, put: 'world', update: undefined }
+        [$defaults]: { key: undefined, put: 'world', update: undefined },
       })
 
       const assertStrC: A.Contains<
@@ -287,47 +324,56 @@ describe('primitiveAttribute', () => {
       assertStrC
 
       expect(strC).toMatchObject({
-        [$defaults]: { key: undefined, put: undefined, update: sayHello }
+        [$defaults]: { key: undefined, put: undefined, update: sayHello },
       })
     })
 
     it('returns string with constant value (method)', () => {
       const invalidStr = string().const(
         // @ts-expect-error
-        42
+        42,
       )
 
       const invalidCall = () => invalidStr.freeze(path)
 
       expect(invalidCall).toThrow(DynamoDBToolboxError)
       expect(invalidCall).toThrow(
-        expect.objectContaining({ code: 'schema.primitiveAttribute.invalidEnumValueType', path })
+        expect.objectContaining({
+          code: 'schema.primitiveAttribute.invalidEnumValueType',
+          path,
+        }),
       )
 
       const nonKeyStr = string().const('foo')
 
       const assertNonKeyStr: A.Contains<
         typeof nonKeyStr,
-        { [$enum]: ['foo']; [$defaults]: { key: undefined; put: unknown; update: undefined } }
+        {
+          [$enum]: ['foo']
+          [$defaults]: { key: undefined; put: unknown; update: undefined }
+        }
       > = 1
       assertNonKeyStr
 
       expect(nonKeyStr).toMatchObject({
         [$enum]: ['foo'],
-        [$defaults]: { key: undefined, put: 'foo', update: undefined }
+        [$defaults]: { key: undefined, put: 'foo', update: undefined },
       })
 
       const keyStr = string().key().const('foo')
 
       const assertKeyStr: A.Contains<
         typeof keyStr,
-        { [$enum]: ['foo']; [$defaults]: { key: unknown; put: undefined; update: undefined } }
+        {
+          [$enum]: ['foo']
+          [$defaults]: { key: unknown; put: undefined; update: undefined }
+        }
       > = 1
       assertKeyStr
 
       expect(keyStr).toMatchObject({
         [$enum]: ['foo'],
-        [$defaults]: { key: 'foo', put: undefined, update: undefined }
+        [$defaults]: { key: 'foo', put: undefined, update: undefined },
       })
     })
 
@@ -341,7 +387,7 @@ describe('primitiveAttribute', () => {
       assertStr
 
       expect(str).toMatchObject({
-        [$defaults]: { key: undefined, put: 'hello', update: undefined }
+        [$defaults]: { key: undefined, put: 'hello', update: undefined },
       })
     })
 
@@ -355,14 +401,14 @@ describe('primitiveAttribute', () => {
       assertStr
 
       expect(str).toMatchObject({
-        [$defaults]: { key: 'hello', put: undefined, update: undefined }
+        [$defaults]: { key: 'hello', put: undefined, update: undefined },
       })
     })
 
     it('default with enum values', () => {
       const invalidStr = string().enum('foo', 'bar').default(
         // @ts-expect-error
-        'baz'
+        'baz',
       )
 
       const invalidCall = () => invalidStr.freeze(path)
@@ -371,8 +417,8 @@ describe('primitiveAttribute', () => {
       expect(invalidCall).toThrow(
         expect.objectContaining({
           code: 'schema.primitiveAttribute.invalidDefaultValueRange',
-          path
-        })
+          path,
+        }),
       )
 
       const strA = string().enum('foo', 'bar').default('foo')
@@ -385,7 +431,10 @@ describe('primitiveAttribute', () => {
       > = 1
       assertStrA
 
-      expect(strA).toMatchObject({ [$defaults]: { put: 'foo' }, [$enum]: ['foo', 'bar'] })
+      expect(strA).toMatchObject({
+        [$defaults]: { put: 'foo' },
+        [$enum]: ['foo', 'bar'],
+      })
 
       const assertStrB: A.Contains<
         typeof strB,
@@ -393,7 +442,10 @@ describe('primitiveAttribute', () => {
       > = 1
       assertStrB
 
-      expect(strB).toMatchObject({ [$defaults]: { put: sayFoo }, [$enum]: ['foo', 'bar'] })
+      expect(strB).toMatchObject({
+        [$defaults]: { put: sayFoo },
+        [$enum]: ['foo', 'bar'],
+      })
     })
 
     it('returns transformed string (option)', () => {

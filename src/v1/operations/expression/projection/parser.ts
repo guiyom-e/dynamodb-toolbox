@@ -1,5 +1,8 @@
-import type { Schema, Attribute } from 'v1/schema'
-import { appendAttributePath, ExpressionParser } from 'v1/operations/expression/expressionParser'
+import {
+  appendAttributePath,
+  ExpressionParser,
+} from 'v1/operations/expression/expressionParser'
+import type { Attribute, Schema } from 'v1/schema'
 
 import type { AppendAttributePathOptions } from '../expressionParser'
 
@@ -24,7 +27,7 @@ export class ProjectionParser implements ExpressionParser {
 
   appendAttributePath = (
     attributePath: string,
-    options: AppendAttributePathOptions = {}
+    options: AppendAttributePathOptions = {},
   ): Attribute => appendAttributePath(this, attributePath, options)
 
   appendToExpression = (projectionExpressionPart: string) => {
@@ -60,7 +63,7 @@ export class ProjectionParser implements ExpressionParser {
 
     return {
       ExpressionAttributeNames,
-      ProjectionExpression
+      ProjectionExpression,
     }
   }
 

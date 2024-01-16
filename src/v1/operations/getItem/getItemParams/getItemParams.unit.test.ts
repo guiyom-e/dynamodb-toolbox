@@ -1,7 +1,14 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
-
-import { TableV2, EntityV2, schema, string, DynamoDBToolboxError, GetItemCommand, prefix } from 'v1'
+import {
+  DynamoDBToolboxError,
+  EntityV2,
+  GetItemCommand,
+  prefix,
+  schema,
+  string,
+  TableV2,
+} from 'v1'
 
 const dynamoDbClient = new DynamoDBClient({})
 
@@ -11,13 +18,13 @@ const TestTable = new TableV2({
   name: 'test-table',
   partitionKey: {
     type: 'string',
-    name: 'pk'
+    name: 'pk',
   },
   sortKey: {
     type: 'string',
-    name: 'sk'
+    name: 'sk',
   },
-  documentClient
+  documentClient,
 })
 
 const TestEntity = new EntityV2({
@@ -25,16 +32,16 @@ const TestEntity = new EntityV2({
   schema: schema({
     email: string().key().savedAs('pk'),
     sort: string().key().savedAs('sk'),
-    test: string()
+    test: string(),
   }),
-  table: TestTable
+  table: TestTable,
 })
 
 const TestTable2 = new TableV2({
   name: 'test-table',
   partitionKey: { type: 'string', name: 'pk' },
   sortKey: { type: 'string', name: 'sk' },
-  documentClient
+  documentClient,
 })
 
 const TestEntity2 = new EntityV2({
@@ -42,9 +49,9 @@ const TestEntity2 = new EntityV2({
   schema: schema({
     pk: string().key(),
     sk: string().key(),
-    test: string()
+    test: string(),
   }),
-  table: TestTable2
+  table: TestTable2,
 })
 
 describe('get', () => {
@@ -52,7 +59,7 @@ describe('get', () => {
     const { TableName, Key } = TestEntity.build(GetItemCommand)
       .key({
         email: 'test-pk',
-        sort: 'test-sk'
+        sort: 'test-sk',
       })
       .params()
 
@@ -66,7 +73,7 @@ describe('get', () => {
         email: 'test-pk',
         sort: 'test-sk',
         // @ts-expect-error
-        test: 'test'
+        test: 'test',
       })
       .params()
 
@@ -78,9 +85,9 @@ describe('get', () => {
       TestEntity.build(GetItemCommand)
         .key(
           // @ts-expect-error
-          {}
+          {},
         )
-        .params()
+        .params(),
     ).toThrow('Attribute email is required')
   })
 
@@ -89,9 +96,9 @@ describe('get', () => {
       TestEntity.build(GetItemCommand)
         .key(
           // @ts-expect-error
-          { pk: 'test-pk' }
+          { pk: 'test-pk' },
         )
-        .params()
+        .params(),
     ).toThrow('Attribute email is required')
   })
 
@@ -100,9 +107,9 @@ describe('get', () => {
       TestEntity2.build(GetItemCommand)
         .key(
           // @ts-expect-error
-          {}
+          {},
         )
-        .params()
+        .params(),
     ).toThrow('Attribute pk is required')
   })
 
@@ -111,9 +118,9 @@ describe('get', () => {
       TestEntity2.build(GetItemCommand)
         .key(
           // @ts-expect-error
-          { pk: 'test-pk' }
+          { pk: 'test-pk' },
         )
-        .params()
+        .params(),
     ).toThrow('Attribute sk is required')
   })
 
@@ -133,13 +140,13 @@ describe('get', () => {
         .key({ email: 'x', sort: 'y' })
         .options({
           // @ts-expect-error
-          capacity: 'test'
+          capacity: 'test',
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'operations.invalidCapacityOption' })
+      expect.objectContaining({ code: 'operations.invalidCapacityOption' }),
     )
   })
 
@@ -158,13 +165,13 @@ describe('get', () => {
         .key({ email: 'x', sort: 'y' })
         .options({
           // @ts-expect-error
-          consistent: 'true'
+          consistent: 'true',
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'operations.invalidConsistentOption' })
+      expect.objectContaining({ code: 'operations.invalidConsistentOption' }),
     )
   })
 
@@ -174,16 +181,20 @@ describe('get', () => {
         .key({ email: 'x', sort: 'y' })
         .options({
           // @ts-expect-error
-          extra: true
+          extra: true,
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.unknownOption' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.unknownOption' }),
+    )
   })
 
   it('parses attribute projections', () => {
-    const { ExpressionAttributeNames, ProjectionExpression } = TestEntity.build(GetItemCommand)
+    const { ExpressionAttributeNames, ProjectionExpression } = TestEntity.build(
+      GetItemCommand,
+    )
       .key({ email: 'x', sort: 'y' })
       .options({ attributes: ['email'] })
       .params()
@@ -196,7 +207,9 @@ describe('get', () => {
     const invalidCall = () => TestEntity.build(GetItemCommand).params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.incompleteCommand' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.incompleteCommand' }),
+    )
   })
 
   it('transformed key', () => {
@@ -204,9 +217,9 @@ describe('get', () => {
       name: 'TestEntity',
       schema: schema({
         email: string().key().savedAs('pk').transform(prefix('EMAIL')),
-        sort: string().key().savedAs('sk')
+        sort: string().key().savedAs('sk'),
       }),
-      table: TestTable
+      table: TestTable,
     })
 
     const { Key } = TestEntity3.build(GetItemCommand)

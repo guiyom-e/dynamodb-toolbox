@@ -3,6 +3,6 @@ export type {
   $SetAttributeState,
   $SetAttributeNestedState,
   $SetAttribute,
-  SetAttribute
+  SetAttribute,
 } from './interface'
 export type { FreezeSetAttribute } from './freeze'

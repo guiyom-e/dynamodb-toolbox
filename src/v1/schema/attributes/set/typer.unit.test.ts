@@ -2,20 +2,19 @@ import type { A } from 'ts-toolbelt'
 
 import { DynamoDBToolboxError } from 'v1/errors'
 
-import { Never, AtLeastOnce, Always } from '../constants'
-import { string } from '../primitive'
+import { Always, AtLeastOnce, Never } from '../constants'
 import {
-  $type,
+  $defaults,
   $elements,
-  $required,
   $hidden,
   $key,
+  $required,
   $savedAs,
-  $defaults
+  $type,
 } from '../constants/attributeOptions'
-
+import { string } from '../primitive'
+import { $SetAttributeState, SetAttribute } from './interface'
 import { set } from './typer'
-import { SetAttribute, $SetAttributeState } from './interface'
 
 describe('set', () => {
   const path = 'some.path'
@@ -24,56 +23,68 @@ describe('set', () => {
   it('rejects non-required elements', () => {
     const invalidSet = set(
       // @ts-expect-error
-      string().optional()
+      string().optional(),
     )
 
     const invalidCall = () => invalidSet.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.setAttribute.optionalElements', path })
+      expect.objectContaining({
+        code: 'schema.setAttribute.optionalElements',
+        path,
+      }),
     )
   })
 
   it('rejects hidden elements', () => {
     const invalidSet = set(
       // @ts-expect-error
-      strElement.hidden()
+      strElement.hidden(),
     )
 
     const invalidCall = () => invalidSet.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.setAttribute.hiddenElements', path })
+      expect.objectContaining({
+        code: 'schema.setAttribute.hiddenElements',
+        path,
+      }),
     )
   })
 
   it('rejects elements with savedAs values', () => {
     const invalidSet = set(
       // @ts-expect-error
-      strElement.savedAs('foo')
+      strElement.savedAs('foo'),
     )
 
     const invalidCall = () => invalidSet.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.setAttribute.savedAsElements', path })
+      expect.objectContaining({
+        code: 'schema.setAttribute.savedAsElements',
+        path,
+      }),
     )
   })
 
   it('rejects elements with default values', () => {
     const invalidSet = set(
       // @ts-expect-error
-      strElement.default('foo')
+      strElement.default('foo'),
     )
 
     const invalidCall = () => invalidSet.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.setAttribute.defaultedElements', path })
+      expect.objectContaining({
+        code: 'schema.setAttribute.defaultedElements',
+        path,
+      }),
     )
   })
 
@@ -115,8 +126,8 @@ describe('set', () => {
       [$defaults]: {
         key: undefined,
         put: undefined,
-        update: undefined
-      }
+        update: undefined,
+      },
     })
   })
 
@@ -125,7 +136,10 @@ describe('set', () => {
     const stAlways = set(strElement, { required: 'always' })
     const stNever = set(strElement, { required: 'never' })
 
-    const assertAtLeastOnce: A.Contains<typeof stAtLeastOnce, { [$required]: AtLeastOnce }> = 1
+    const assertAtLeastOnce: A.Contains<
+      typeof stAtLeastOnce,
+      { [$required]: AtLeastOnce }
+    > = 1
     assertAtLeastOnce
     const assertAlways: A.Contains<typeof stAlways, { [$required]: Always }> = 1
     assertAlways
@@ -143,7 +157,10 @@ describe('set', () => {
     const stNever = set(strElement).required('never')
     const stOpt = set(strElement).optional()
 
-    const assertAtLeastOnce: A.Contains<typeof stAtLeastOnce, { [$required]: AtLeastOnce }> = 1
+    const assertAtLeastOnce: A.Contains<
+      typeof stAtLeastOnce,
+      { [$required]: AtLeastOnce }
+    > = 1
     assertAtLeastOnce
     const assertAlways: A.Contains<typeof stAlways, { [$required]: Always }> = 1
     assertAlways
@@ -179,7 +196,10 @@ describe('set', () => {
   it('returns key set (option)', () => {
     const st = set(strElement, { key: true })
 
-    const assertSet: A.Contains<typeof st, { [$key]: true; [$required]: AtLeastOnce }> = 1
+    const assertSet: A.Contains<
+      typeof st,
+      { [$key]: true; [$required]: AtLeastOnce }
+    > = 1
     assertSet
 
     expect(st).toMatchObject({ [$key]: true, [$required]: 'atLeastOnce' })
@@ -188,7 +208,10 @@ describe('set', () => {
   it('returns key set (method)', () => {
     const st = set(strElement).key()
 
-    const assertSet: A.Contains<typeof st, { [$key]: true; [$required]: Always }> = 1
+    const assertSet: A.Contains<
+      typeof st,
+      { [$key]: true; [$required]: Always }
+    > = 1
     assertSet
 
     expect(st).toMatchObject({ [$key]: true, [$required]: 'always' })
@@ -214,7 +237,7 @@ describe('set', () => {
 
   it('returns defaulted set (option)', () => {
     const stA = set(strElement, {
-      defaults: { key: new Set(['foo']), put: undefined, update: undefined }
+      defaults: { key: new Set(['foo']), put: undefined, update: undefined },
     })
 
     const assertSetA: A.Contains<
@@ -224,11 +247,11 @@ describe('set', () => {
     assertSetA
 
     expect(stA).toMatchObject({
-      [$defaults]: { key: new Set(['foo']), put: undefined, update: undefined }
+      [$defaults]: { key: new Set(['foo']), put: undefined, update: undefined },
     })
 
     const stB = set(strElement, {
-      defaults: { key: undefined, put: new Set(['bar']), update: undefined }
+      defaults: { key: undefined, put: new Set(['bar']), update: undefined },
     })
 
     const assertSetB: A.Contains<
@@ -238,11 +261,11 @@ describe('set', () => {
     assertSetB
 
     expect(stB).toMatchObject({
-      [$defaults]: { key: undefined, put: new Set(['bar']), update: undefined }
+      [$defaults]: { key: undefined, put: new Set(['bar']), update: undefined },
     })
 
     const stC = set(strElement, {
-      defaults: { key: undefined, put: undefined, update: new Set(['baz']) }
+      defaults: { key: undefined, put: undefined, update: new Set(['baz']) },
     })
 
     const assertSetC: A.Contains<
@@ -252,7 +275,7 @@ describe('set', () => {
     assertSetC
 
     expect(stC).toMatchObject({
-      [$defaults]: { key: undefined, put: undefined, update: new Set(['baz']) }
+      [$defaults]: { key: undefined, put: undefined, update: new Set(['baz']) },
     })
   })
 
@@ -266,7 +289,7 @@ describe('set', () => {
     assertSetA
 
     expect(stA).toMatchObject({
-      [$defaults]: { key: new Set('foo'), put: undefined, update: undefined }
+      [$defaults]: { key: new Set('foo'), put: undefined, update: undefined },
     })
 
     const stB = set(strElement).putDefault(new Set('bar'))
@@ -278,7 +301,7 @@ describe('set', () => {
     assertSetB
 
     expect(stB).toMatchObject({
-      [$defaults]: { key: undefined, put: new Set('bar'), update: undefined }
+      [$defaults]: { key: undefined, put: new Set('bar'), update: undefined },
     })
 
     const stC = set(strElement).updateDefault(new Set('baz'))
@@ -290,7 +313,7 @@ describe('set', () => {
     assertSetC
 
     expect(stC).toMatchObject({
-      [$defaults]: { key: undefined, put: undefined, update: new Set('baz') }
+      [$defaults]: { key: undefined, put: undefined, update: new Set('baz') },
     })
   })
 
@@ -304,7 +327,7 @@ describe('set', () => {
     assertSt
 
     expect(st).toMatchObject({
-      [$defaults]: { key: undefined, put: new Set('foo'), update: undefined }
+      [$defaults]: { key: undefined, put: new Set('foo'), update: undefined },
     })
   })
 
@@ -318,7 +341,7 @@ describe('set', () => {
     assertSt
 
     expect(st).toMatchObject({
-      [$defaults]: { key: new Set('foo'), put: undefined, update: undefined }
+      [$defaults]: { key: new Set('foo'), put: undefined, update: undefined },
     })
   })
 })

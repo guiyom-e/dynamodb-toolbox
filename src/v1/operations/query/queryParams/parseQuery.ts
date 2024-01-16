@@ -1,14 +1,19 @@
-import type { O } from 'ts-toolbelt'
 import type { QueryCommandInput } from '@aws-sdk/lib-dynamodb'
-import { ConditionParser } from 'v1/operations/expression/condition/parser'
 import _pick from 'lodash.pick'
+import type { O } from 'ts-toolbelt'
 
-import type { Condition, Query } from 'v1/operations/types'
-import type { Attribute, PrimitiveAttribute, ResolvedPrimitiveAttribute, Schema } from 'v1/schema'
-import type { TableV2 } from 'v1/table'
-import type { PrimitiveAttributeExtraCondition } from 'v1/operations/types/condition'
 import { DynamoDBToolboxError } from 'v1/errors'
+import { ConditionParser } from 'v1/operations/expression/condition/parser'
+import type { Condition, Query } from 'v1/operations/types'
+import type { PrimitiveAttributeExtraCondition } from 'v1/operations/types/condition'
 import { queryOperatorSet } from 'v1/operations/types/query'
+import type {
+  Attribute,
+  PrimitiveAttribute,
+  ResolvedPrimitiveAttribute,
+  Schema,
+} from 'v1/schema'
+import type { TableV2 } from 'v1/table'
 
 const defaultSchema: Schema = {
   type: 'schema',
@@ -18,9 +23,9 @@ const defaultSchema: Schema = {
   requiredAttributeNames: {
     always: new Set(),
     atLeastOnce: new Set(),
-    never: new Set()
+    never: new Set(),
   },
-  and: undefined as any
+  and: undefined as any,
 }
 
 const defaultAttribute: Omit<Attribute, 'path' | 'type'> = {
@@ -31,21 +36,23 @@ const defaultAttribute: Omit<Attribute, 'path' | 'type'> = {
   defaults: {
     key: undefined,
     put: undefined,
-    update: undefined
-  }
+    update: undefined,
+  },
 }
 
 const pick = _pick as <OBJECT extends object, KEYS extends string[]>(
   object: OBJECT,
-  keys: KEYS
+  keys: KEYS,
 ) => O.Pick<OBJECT, KEYS[number]>
 
 export const parseQuery = <TABLE extends TableV2, QUERY extends Query<TABLE>>(
   table: TABLE,
-  query: QUERY
+  query: QUERY,
 ): Pick<
   QueryCommandInput,
-  'KeyConditionExpression' | 'ExpressionAttributeNames' | 'ExpressionAttributeValues'
+  | 'KeyConditionExpression'
+  | 'ExpressionAttributeNames'
+  | 'ExpressionAttributeValues'
 > => {
   const { index, partition, range } = query
   const { partitionKey = table.partitionKey, sortKey } =
@@ -55,7 +62,7 @@ export const parseQuery = <TABLE extends TableV2, QUERY extends Query<TABLE>>(
     throw new DynamoDBToolboxError('queryCommand.invalidPartition', {
       message: `Missing query partition. Expected: ${partitionKey.type}.`,
       path: partitionKey.name,
-      payload: { partition }
+      payload: { partition },
     })
   }
 
@@ -65,12 +72,12 @@ export const parseQuery = <TABLE extends TableV2, QUERY extends Query<TABLE>>(
     path: partitionKey.name,
     type: partitionKey.type,
     enum: undefined,
-    transform: undefined
+    transform: undefined,
   }
 
   let condition: Condition = {
     attr: partitionKey.name,
-    eq: partition
+    eq: partition,
   }
 
   if (sortKey !== undefined && range !== undefined) {
@@ -79,12 +86,12 @@ export const parseQuery = <TABLE extends TableV2, QUERY extends Query<TABLE>>(
       path: sortKey.name,
       type: sortKey.type,
       enum: undefined,
-      transform: undefined
+      transform: undefined,
     }
 
     const sortKeyCondition = ({
       attr: sortKey.name,
-      ...pick(range, [...queryOperatorSet])
+      ...pick(range, [...queryOperatorSet]),
       /**
        * @debt type "TODO: Remove this cast"
        */
@@ -96,7 +103,7 @@ export const parseQuery = <TABLE extends TableV2, QUERY extends Query<TABLE>>(
     >
 
     condition = {
-      and: [condition, sortKeyCondition]
+      and: [condition, sortKeyCondition],
     }
   }
 
@@ -105,12 +112,12 @@ export const parseQuery = <TABLE extends TableV2, QUERY extends Query<TABLE>>(
   const {
     ConditionExpression,
     ExpressionAttributeNames,
-    ExpressionAttributeValues
+    ExpressionAttributeValues,
   } = conditionParser.toCommandOptions()
 
   return {
     KeyConditionExpression: ConditionExpression,
     ExpressionAttributeNames,
-    ExpressionAttributeValues
+    ExpressionAttributeValues,
   }
 }

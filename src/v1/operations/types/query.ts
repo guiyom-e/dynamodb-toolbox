@@ -1,18 +1,18 @@
 import type { A } from 'ts-toolbelt'
 
-import type { PrimitiveAttribute, ResolvePrimitiveAttribute } from 'v1/schema'
-import type {
-  IndexableKeyType,
-  TableV2,
-  LocalIndex,
-  GlobalIndex,
-  IndexNames,
-  IndexSchema,
-  Key
-} from 'v1/table'
+import type { BetweenOperator } from 'v1/operations/expression/condition/parser/parseCondition/between/types'
 import type { RangeOperator } from 'v1/operations/expression/condition/parser/parseCondition/comparison/types'
 import type { BeginsWithOperator } from 'v1/operations/expression/condition/parser/parseCondition/twoArgsFn/types'
-import type { BetweenOperator } from 'v1/operations/expression/condition/parser/parseCondition/between/types'
+import type { PrimitiveAttribute, ResolvePrimitiveAttribute } from 'v1/schema'
+import type {
+  GlobalIndex,
+  IndexableKeyType,
+  IndexNames,
+  IndexSchema,
+  Key,
+  LocalIndex,
+  TableV2,
+} from 'v1/table'
 
 type QueryOperator = RangeOperator | BeginsWithOperator | BetweenOperator
 export const queryOperatorSet = new Set<QueryOperator>([
@@ -21,7 +21,7 @@ export const queryOperatorSet = new Set<QueryOperator>([
   'lt',
   'lte',
   'between',
-  'beginsWith'
+  'beginsWith',
 ])
 
 /**
@@ -39,7 +39,9 @@ type QueryRange<
         : never
       : never)
   | Record<BetweenOperator, [ATTRIBUTE_VALUE, ATTRIBUTE_VALUE]>
-  | (KEY_TYPE extends 'string' ? Record<BeginsWithOperator, ATTRIBUTE_VALUE> : never)
+  | (KEY_TYPE extends 'string'
+      ? Record<BeginsWithOperator, ATTRIBUTE_VALUE>
+      : never)
 
 type SecondaryIndexQuery<
   TABLE extends TableV2,
@@ -55,13 +57,17 @@ type SecondaryIndexQuery<
       }
     : INDEX_SCHEMA extends LocalIndex
     ? {
-        partition: ResolvePrimitiveAttribute<PrimitiveAttribute<TABLE['partitionKey']['type']>>
+        partition: ResolvePrimitiveAttribute<
+          PrimitiveAttribute<TABLE['partitionKey']['type']>
+        >
         range?: QueryRange<INDEX_SCHEMA['sortKey']['type']>
       }
     : never)
 >
 
-type SecondaryIndexQueries<TABLE extends TableV2> = IndexNames<TABLE> extends infer INDEX_NAME
+type SecondaryIndexQueries<
+  TABLE extends TableV2
+> = IndexNames<TABLE> extends infer INDEX_NAME
   ? INDEX_NAME extends IndexNames<TABLE>
     ? SecondaryIndexQuery<TABLE, INDEX_NAME>
     : never
@@ -72,15 +78,21 @@ type PrimaryIndexQuery<TABLE extends TableV2> = A.Compute<
     index?: never
   } & (Key extends TABLE['sortKey']
     ? {
-        partition: ResolvePrimitiveAttribute<PrimitiveAttribute<TABLE['partitionKey']['type']>>
+        partition: ResolvePrimitiveAttribute<
+          PrimitiveAttribute<TABLE['partitionKey']['type']>
+        >
         range?: never
       }
     : NonNullable<TABLE['sortKey']> extends Key
     ? {
-        partition: ResolvePrimitiveAttribute<PrimitiveAttribute<TABLE['partitionKey']['type']>>
+        partition: ResolvePrimitiveAttribute<
+          PrimitiveAttribute<TABLE['partitionKey']['type']>
+        >
         range?: QueryRange<NonNullable<TABLE['sortKey']>['type']>
       }
     : never)
 >
 
-export type Query<TABLE extends TableV2> = PrimaryIndexQuery<TABLE> | SecondaryIndexQueries<TABLE>
+export type Query<TABLE extends TableV2> =
+  | PrimaryIndexQuery<TABLE>
+  | SecondaryIndexQueries<TABLE>

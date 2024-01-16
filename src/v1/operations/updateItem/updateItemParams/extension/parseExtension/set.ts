@@ -1,15 +1,24 @@
-import type { AttributeBasicValue, AttributeValue, SetAttribute } from 'v1/schema'
-import type { ExtensionParser, ParsingOptions } from 'v1/validation/parseClonedInput/types'
-import { parseAttributeClonedInput } from 'v1/validation/parseClonedInput/attribute'
-
-import type { UpdateItemInputExtension } from 'v1/operations/updateItem/types'
 import { $ADD, $DELETE } from 'v1/operations/updateItem/constants'
-import { hasAddOperation, hasDeleteOperation } from 'v1/operations/updateItem/utils'
+import type { UpdateItemInputExtension } from 'v1/operations/updateItem/types'
+import {
+  hasAddOperation,
+  hasDeleteOperation,
+} from 'v1/operations/updateItem/utils'
+import type {
+  AttributeBasicValue,
+  AttributeValue,
+  SetAttribute,
+} from 'v1/schema'
+import { parseAttributeClonedInput } from 'v1/validation/parseClonedInput/attribute'
+import type {
+  ExtensionParser,
+  ParsingOptions,
+} from 'v1/validation/parseClonedInput/types'
 
 export const parseSetExtension = (
   attribute: SetAttribute,
   input: AttributeValue<UpdateItemInputExtension> | undefined,
-  options: ParsingOptions<UpdateItemInputExtension>
+  options: ParsingOptions<UpdateItemInputExtension>,
 ): ReturnType<ExtensionParser<UpdateItemInputExtension>> => {
   if (hasAddOperation(input)) {
     return {
@@ -18,7 +27,7 @@ export const parseSetExtension = (
         const parser = parseAttributeClonedInput(attribute, input[$ADD], {
           ...options,
           // Should a simple set of valid elements (not extended)
-          parseExtension: undefined
+          parseExtension: undefined,
         })
 
         const clonedValue = { [$ADD]: parser.next().value }
@@ -29,7 +38,7 @@ export const parseSetExtension = (
 
         const collapsedValue = { [$ADD]: parser.next().value }
         return collapsedValue
-      }
+      },
     }
   }
 
@@ -40,7 +49,7 @@ export const parseSetExtension = (
         const parser = parseAttributeClonedInput(attribute, input[$DELETE], {
           ...options,
           // Should a simple set of valid elements (not extended)
-          parseExtension: undefined
+          parseExtension: undefined,
         })
 
         const clonedValue = { [$DELETE]: parser.next().value }
@@ -51,12 +60,14 @@ export const parseSetExtension = (
 
         const collapsedValue = { [$DELETE]: parser.next().value }
         return collapsedValue
-      }
+      },
     }
   }
 
   return {
     isExtension: false,
-    basicInput: input as AttributeBasicValue<UpdateItemInputExtension> | undefined
+    basicInput: input as
+      | AttributeBasicValue<UpdateItemInputExtension>
+      | undefined,
   }
 }

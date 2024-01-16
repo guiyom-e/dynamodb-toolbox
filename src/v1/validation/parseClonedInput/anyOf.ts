@@ -1,12 +1,17 @@
 import cloneDeep from 'lodash.clonedeep'
 
-import type { AnyOfAttribute, AttributeBasicValue, Extension, AttributeValue } from 'v1/schema'
-import type { If } from 'v1/types'
 import { DynamoDBToolboxError } from 'v1/errors'
+import type {
+  AnyOfAttribute,
+  AttributeBasicValue,
+  AttributeValue,
+  Extension,
+} from 'v1/schema'
+import type { If } from 'v1/types'
 
 import type { HasExtension } from '../types'
-import type { ParsingOptions } from './types'
 import { parseAttributeClonedInput } from './attribute'
+import type { ParsingOptions } from './types'
 
 export function* parseAnyOfAttributeClonedInput<
   INPUT_EXTENSION extends Extension = never,
@@ -47,8 +52,8 @@ export function* parseAnyOfAttributeClonedInput<
       message: `Attribute ${attribute.path} does not match any of the possible sub-types`,
       path: attribute.path,
       payload: {
-        received: inputValue
-      }
+        received: inputValue,
+      },
     })
   }
 

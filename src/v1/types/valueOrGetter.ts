@@ -1,1 +1,3 @@
-export type ValueOrGetter<VALUE, ARGS extends unknown[] = []> = VALUE | ((...ags: ARGS) => VALUE)
+export type ValueOrGetter<VALUE, ARGS extends unknown[] = []> =
+  | VALUE
+  | ((...ags: ARGS) => VALUE)

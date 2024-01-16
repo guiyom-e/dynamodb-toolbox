@@ -1,19 +1,19 @@
 import cloneDeep from 'lodash.clonedeep'
 
+import { DynamoDBToolboxError } from 'v1/errors'
 import type {
-  Extension,
+  AttributeBasicValue,
   AttributeValue,
+  Extension,
   ListAttribute,
   ListAttributeBasicValue,
-  AttributeBasicValue
 } from 'v1/schema'
 import type { If } from 'v1/types'
 import { isArray } from 'v1/utils/validation/isArray'
-import { DynamoDBToolboxError } from 'v1/errors'
 
 import type { HasExtension } from '../types'
-import type { ParsingOptions } from './types'
 import { parseAttributeClonedInput } from './attribute'
+import type { ParsingOptions } from './types'
 
 export function* parseListAttributeClonedInput<
   INPUT_EXTENSION extends Extension = never,
@@ -26,13 +26,21 @@ export function* parseListAttributeClonedInput<
     [options: ParsingOptions<INPUT_EXTENSION, SCHEMA_EXTENSION>],
     [options?: ParsingOptions<INPUT_EXTENSION, SCHEMA_EXTENSION>]
   >
-): Generator<ListAttributeBasicValue<INPUT_EXTENSION>, ListAttributeBasicValue<INPUT_EXTENSION>> {
-  const parsers: Generator<AttributeValue<INPUT_EXTENSION>, AttributeValue<INPUT_EXTENSION>>[] = []
+): Generator<
+  ListAttributeBasicValue<INPUT_EXTENSION>,
+  ListAttributeBasicValue<INPUT_EXTENSION>
+> {
+  const parsers: Generator<
+    AttributeValue<INPUT_EXTENSION>,
+    AttributeValue<INPUT_EXTENSION>
+  >[] = []
 
   const isInputValueArray = isArray(inputValue)
   if (isInputValueArray) {
     for (const element of inputValue) {
-      parsers.push(parseAttributeClonedInput(listAttribute.elements, element, options))
+      parsers.push(
+        parseAttributeClonedInput(listAttribute.elements, element, options),
+      )
     }
   }
 
@@ -47,8 +55,8 @@ export function* parseListAttributeClonedInput<
       path: listAttribute.path,
       payload: {
         received: inputValue,
-        expected: listAttribute.type
-      }
+        expected: listAttribute.type,
+      },
     })
   }
 

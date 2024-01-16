@@ -2,9 +2,14 @@ import type { Condition } from 'v1/operations/types'
 
 export type LogicalCombinationOperator = 'and' | 'or'
 
-const logicalCombinationOperatorSet = new Set<LogicalCombinationOperator>(['and', 'or'])
+const logicalCombinationOperatorSet = new Set<LogicalCombinationOperator>([
+  'and',
+  'or',
+])
 
-export const isLogicalCombinationOperator = (key: string): key is LogicalCombinationOperator =>
+export const isLogicalCombinationOperator = (
+  key: string,
+): key is LogicalCombinationOperator =>
   logicalCombinationOperatorSet.has(key as LogicalCombinationOperator)
 
 export type LogicalCombinationCondition = Condition &
@@ -15,10 +20,10 @@ export type LogicalCombinationCondition = Condition &
     : never)
 
 type IsLogicalCombinationCondition = (
-  condition: Condition
+  condition: Condition,
 ) => condition is LogicalCombinationCondition
 
 export const isLogicalCombinationCondition: IsLogicalCombinationCondition = (
-  condition: Condition
+  condition: Condition,
 ): condition is LogicalCombinationCondition =>
   Object.keys(condition).some(isLogicalCombinationOperator)

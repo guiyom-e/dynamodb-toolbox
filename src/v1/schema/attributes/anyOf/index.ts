@@ -3,6 +3,6 @@ export type {
   $AnyOfAttributeState,
   $AnyOfAttributeNestedState,
   $AnyOfAttribute,
-  AnyOfAttribute
+  AnyOfAttribute,
 } from './interface'
 export type { FreezeAnyOfAttribute } from './freeze'

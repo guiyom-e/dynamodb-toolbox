@@ -1,23 +1,33 @@
 import type { TransactWriteCommandInput } from '@aws-sdk/lib-dynamodb'
 
-import { rejectExtraOptions } from 'v1/operations/utils/parseOptions/rejectExtraOptions'
-import { TransactWriteOptions } from './options'
 import { parseCapacityOption } from 'v1/operations/utils/parseOptions/parseCapacityOption'
-import { parseMetricsOption } from 'v1/operations/utils/parseOptions/parseMetricsOption'
 import { parseClientRequestToken } from 'v1/operations/utils/parseOptions/parseClientRequestToken'
+import { parseMetricsOption } from 'v1/operations/utils/parseOptions/parseMetricsOption'
+import { rejectExtraOptions } from 'v1/operations/utils/parseOptions/rejectExtraOptions'
 
-type TransactWriteCommandOptions = Partial<Omit<TransactWriteCommandInput, 'TransactItems'>>
+import { TransactWriteOptions } from './options'
+
+type TransactWriteCommandOptions = Partial<
+  Omit<TransactWriteCommandInput, 'TransactItems'>
+>
 
 export const parseTransactWriteOptions = (
-  transactWriteOptions: TransactWriteOptions
+  transactWriteOptions: TransactWriteOptions,
 ): TransactWriteCommandOptions => {
   const commandOptions: TransactWriteCommandOptions = {}
 
-  const { clientRequestToken, capacity, metrics, ...extraOptions } = transactWriteOptions
+  const {
+    clientRequestToken,
+    capacity,
+    metrics,
+    ...extraOptions
+  } = transactWriteOptions
   rejectExtraOptions(extraOptions)
 
   if (clientRequestToken !== undefined) {
-    commandOptions.ClientRequestToken = parseClientRequestToken(clientRequestToken)
+    commandOptions.ClientRequestToken = parseClientRequestToken(
+      clientRequestToken,
+    )
   }
 
   if (capacity !== undefined) {

@@ -3,6 +3,6 @@ export type {
   $RecordAttributeState,
   $RecordAttributeNestedState,
   $RecordAttribute,
-  RecordAttribute
+  RecordAttribute,
 } from './interface'
 export type { FreezeRecordAttribute } from './freeze'

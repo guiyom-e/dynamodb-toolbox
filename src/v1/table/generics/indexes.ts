@@ -6,7 +6,10 @@ import type { TableV2 } from '../class'
  * @param TABLE Table
  * @return Object
  */
-export type IndexNames<TABLE extends TableV2 = TableV2> = Extract<keyof TABLE['indexes'], string>
+export type IndexNames<TABLE extends TableV2 = TableV2> = Extract<
+  keyof TABLE['indexes'],
+  string
+>
 
 /**
  * Returns a specific index of a Table

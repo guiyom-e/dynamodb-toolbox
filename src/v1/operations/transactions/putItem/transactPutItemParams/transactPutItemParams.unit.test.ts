@@ -1,20 +1,19 @@
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
 import {
-  TableV2,
-  EntityV2,
-  schema,
   any,
   binary,
-  string,
-  number,
   boolean,
-  set,
+  DynamoDBToolboxError,
+  EntityV2,
   list,
   map,
-  DynamoDBToolboxError,
-  PutItemTransaction
+  number,
+  PutItemTransaction,
+  schema,
+  set,
+  string,
+  TableV2,
 } from 'v1'
 
 const dynamoDbClient = new DynamoDBClient({})
@@ -25,13 +24,13 @@ const TestTable = new TableV2({
   name: 'test-table',
   partitionKey: {
     type: 'string',
-    name: 'pk'
+    name: 'pk',
   },
   sortKey: {
     type: 'string',
-    name: 'sk'
+    name: 'sk',
   },
-  documentClient
+  documentClient,
 })
 
 const TestEntity = new EntityV2({
@@ -47,19 +46,19 @@ const TestEntity = new EntityV2({
     test_boolean: boolean().optional(),
     test_list: list(string()).optional(),
     test_map: map({
-      str: string()
+      str: string(),
     }).optional(),
     test_string_set: set(string()).optional(),
     test_number_set: set(number()).optional(),
-    test_binary_set: set(binary()).optional()
+    test_binary_set: set(binary()).optional(),
   }),
-  table: TestTable
+  table: TestTable,
 })
 
 const TestTable2 = new TableV2({
   name: 'test-table',
   partitionKey: { type: 'string', name: 'pk' },
-  documentClient
+  documentClient,
 })
 
 const TestEntity2 = new EntityV2({
@@ -67,17 +66,19 @@ const TestEntity2 = new EntityV2({
   schema: schema({
     email: string().key().savedAs('pk'),
     test_composite: string().optional(),
-    test_composite2: string().optional()
+    test_composite2: string().optional(),
   }).and(schema => ({
     sort: string()
       .optional()
       .savedAs('sk')
       .putLink<typeof schema>(
         ({ test_composite, test_composite2 }) =>
-          test_composite && test_composite2 && [test_composite, test_composite2].join('#')
-      )
+          test_composite &&
+          test_composite2 &&
+          [test_composite, test_composite2].join('#'),
+      ),
   })),
-  table: TestTable2
+  table: TestTable2,
 })
 
 const TestEntity3 = new EntityV2({
@@ -85,16 +86,16 @@ const TestEntity3 = new EntityV2({
   schema: schema({
     email: string().key().savedAs('pk'),
     test: any(),
-    test2: string().optional()
+    test2: string().optional(),
   }),
-  table: TestTable2
+  table: TestTable2,
 })
 
 const TestTable3 = new TableV2({
   name: 'TestTable3',
   partitionKey: { type: 'string', name: 'pk' },
   sortKey: { type: 'string', name: 'sk' },
-  documentClient
+  documentClient,
 })
 
 const TestEntity4 = new EntityV2({
@@ -102,10 +103,10 @@ const TestEntity4 = new EntityV2({
   schema: schema({
     id: number().key().savedAs('pk'),
     // sk: { hidden: true, sortKey: true, default: (data: any) => data.id },
-    xyz: any().optional().savedAs('test')
+    xyz: any().optional().savedAs('test'),
   }),
   computeKey: ({ id }) => ({ pk: String(id), sk: String(id) }),
-  table: TestTable3
+  table: TestTable3,
 })
 
 const TestEntity5 = new EntityV2({
@@ -113,9 +114,9 @@ const TestEntity5 = new EntityV2({
   schema: schema({
     pk: string().key(),
     test_required_boolean: boolean(),
-    test_required_number: number()
+    test_required_number: number(),
   }),
-  table: TestTable2
+  table: TestTable2,
 })
 
 describe('put transaction', () => {
@@ -131,7 +132,7 @@ describe('put transaction', () => {
       pk: 'test-pk',
       sk: 'test-sk',
       test_string: 'test string',
-      test_number_defaulted: 0
+      test_number_defaulted: 0,
     })
   })
 
@@ -140,7 +141,7 @@ describe('put transaction', () => {
       .item({
         email: 'test-pk',
         sort: 'test-sk',
-        count: 0
+        count: 0,
       })
       .params()
 
@@ -154,7 +155,7 @@ describe('put transaction', () => {
       .item({
         email: 'test-pk',
         sort: 'test-sk',
-        test_string: overrideValue
+        test_string: overrideValue,
       })
       .params()
 
@@ -165,7 +166,7 @@ describe('put transaction', () => {
     const { Item } = TestEntity2.build(PutItemTransaction)
       .item({
         email: 'test-pk',
-        test_composite: 'test'
+        test_composite: 'test',
       })
       .params()
 
@@ -177,7 +178,7 @@ describe('put transaction', () => {
       .item({
         email: 'test-pk',
         test_composite: 'test',
-        test_composite2: 'test2'
+        test_composite2: 'test2',
       })
       .params()
 
@@ -190,7 +191,7 @@ describe('put transaction', () => {
         email: 'test-pk',
         sort: 'override',
         test_composite: 'test',
-        test_composite2: 'test2'
+        test_composite2: 'test2',
       })
       .params()
 
@@ -202,9 +203,9 @@ describe('put transaction', () => {
       TestEntity3.build(PutItemTransaction)
         .item(
           // @ts-expect-error
-          { email: 'test-pk' }
+          { email: 'test-pk' },
         )
-        .params()
+        .params(),
     ).toThrow('Attribute test is required')
   })
 
@@ -214,7 +215,7 @@ describe('put transaction', () => {
         email: 'test-pk',
         sort: 'test-sk',
         // @ts-expect-error
-        unknown: '?'
+        unknown: '?',
       })
       .params()
 
@@ -228,9 +229,9 @@ describe('put transaction', () => {
           email: 'test-pk',
           sort: 'test-sk',
           // @ts-expect-error
-          test_string: 1
+          test_string: 1,
         })
-        .params()
+        .params(),
     ).toThrow('Attribute test_string should be a string')
   })
 
@@ -241,9 +242,9 @@ describe('put transaction', () => {
           email: 'test-pk',
           sort: 'test-sk',
           // @ts-expect-error
-          test_boolean: 'x'
+          test_boolean: 'x',
         })
-        .params()
+        .params(),
     ).toThrow('Attribute test_boolean should be a boolean')
   })
 
@@ -254,9 +255,9 @@ describe('put transaction', () => {
           email: 'test-pk',
           sort: 'test-sk',
           // @ts-expect-error
-          count: 'x'
+          count: 'x',
         })
-        .params()
+        .params(),
     ).toThrow('Attribute count should be a number')
   })
 
@@ -265,12 +266,12 @@ describe('put transaction', () => {
       .item({
         email: 'test-pk',
         sort: 'test-sk',
-        test_list: ['a', 'b']
+        test_list: ['a', 'b'],
       })
       .params()
 
     expect(Item).toMatchObject({
-      test_list: ['a', 'b']
+      test_list: ['a', 'b'],
     })
   })
 
@@ -281,9 +282,9 @@ describe('put transaction', () => {
           email: 'test-pk',
           sort: 'test-sk',
           // @ts-expect-error
-          test_list: ['a', 2]
+          test_list: ['a', 2],
         })
-        .params()
+        .params(),
     ).toThrow('Attribute test_list[n] should be a string')
   })
 
@@ -293,13 +294,13 @@ describe('put transaction', () => {
         email: 'test-pk',
         sort: 'test-sk',
         test_map: {
-          str: 'x'
-        }
+          str: 'x',
+        },
       })
       .params()
 
     expect(Item).toMatchObject({
-      test_map: { str: 'x' }
+      test_map: { str: 'x' },
     })
   })
 
@@ -310,9 +311,9 @@ describe('put transaction', () => {
           email: 'test-pk',
           sort: 'test-sk',
           // @ts-expect-error
-          test_map: { str: 2 }
+          test_map: { str: 2 },
         })
-        .params()
+        .params(),
     ).toThrow('Attribute test_map.str should be a string')
   })
 
@@ -321,12 +322,12 @@ describe('put transaction', () => {
       .item({
         email: 'test-pk',
         sort: 'test-sk',
-        test_string_set: new Set(['a', 'b', 'c'])
+        test_string_set: new Set(['a', 'b', 'c']),
       })
       .params()
 
     expect(Item).toMatchObject({
-      test_string_set: new Set(['a', 'b', 'c'])
+      test_string_set: new Set(['a', 'b', 'c']),
     })
   })
 
@@ -337,9 +338,9 @@ describe('put transaction', () => {
           email: 'test-pk',
           sort: 'test-sk',
           // @ts-expect-error
-          test_string_set: new Set(['a', 'b', 3])
+          test_string_set: new Set(['a', 'b', 3]),
         })
-        .params()
+        .params(),
     ).toThrow('Attribute test_string_set[x] should be a string')
   })
 
@@ -348,9 +349,9 @@ describe('put transaction', () => {
       TestEntity3.build(PutItemTransaction)
         .item(
           // @ts-expect-error
-          { email: 'test-pk', test2: 'test' }
+          { email: 'test-pk', test2: 'test' },
         )
-        .params()
+        .params(),
     ).toThrow('Attribute test is required')
   })
 
@@ -359,18 +360,20 @@ describe('put transaction', () => {
       .item({
         pk: 'test-pk',
         test_required_boolean: false,
-        test_required_number: 0
+        test_required_number: 0,
       })
       .params()
 
     expect(Item).toMatchObject({
       test_required_boolean: false,
-      test_required_number: 0
+      test_required_number: 0,
     })
   })
 
   it('correctly aliases pks', () => {
-    const { Item } = TestEntity4.build(PutItemTransaction).item({ id: 3, xyz: '123' }).params()
+    const { Item } = TestEntity4.build(PutItemTransaction)
+      .item({ id: 3, xyz: '123' })
+      .params()
     expect(Item).toMatchObject({ pk: '3', sk: '3' })
   })
 
@@ -381,19 +384,21 @@ describe('put transaction', () => {
         .item({ email: 'x', sort: 'y' })
         .options({
           // @ts-expect-error
-          extra: true
+          extra: true,
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.unknownOption' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.unknownOption' }),
+    )
   })
 
   it('sets condition', () => {
     const {
       ExpressionAttributeNames,
       ExpressionAttributeValues,
-      ConditionExpression
+      ConditionExpression,
     } = TestEntity.build(PutItemTransaction)
       .item({ email: 'x', sort: 'y' })
       .options({ condition: { attr: 'email', gt: 'test' } })
@@ -408,6 +413,8 @@ describe('put transaction', () => {
     const invalidCall = () => TestEntity.build(PutItemTransaction).params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.incompleteCommand' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.incompleteCommand' }),
+    )
   })
 })

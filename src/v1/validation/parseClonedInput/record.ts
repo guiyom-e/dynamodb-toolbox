@@ -1,19 +1,19 @@
 import cloneDeep from 'lodash.clonedeep'
 
+import { DynamoDBToolboxError } from 'v1/errors'
 import type {
+  AttributeBasicValue,
+  AttributeValue,
+  Extension,
   RecordAttribute,
   RecordAttributeBasicValue,
-  AttributeBasicValue,
-  Extension,
-  AttributeValue
 } from 'v1/schema'
 import type { If } from 'v1/types'
-import { DynamoDBToolboxError } from 'v1/errors'
 import { isObject } from 'v1/utils/validation/isObject'
 
 import type { HasExtension } from '../types'
-import type { ParsingOptions } from './types'
 import { parseAttributeClonedInput } from './attribute'
+import type { ParsingOptions } from './types'
 
 export function* parseRecordAttributeClonedInput<
   INPUT_EXTENSION extends Extension = never,
@@ -32,7 +32,7 @@ export function* parseRecordAttributeClonedInput<
 > {
   const parsers: [
     Generator<AttributeValue<INPUT_EXTENSION>, AttributeValue<INPUT_EXTENSION>>,
-    Generator<AttributeValue<INPUT_EXTENSION>, AttributeValue<INPUT_EXTENSION>>
+    Generator<AttributeValue<INPUT_EXTENSION>, AttributeValue<INPUT_EXTENSION>>,
   ][] = []
 
   const isInputValueObject = isObject(inputValue)
@@ -40,7 +40,7 @@ export function* parseRecordAttributeClonedInput<
     for (const [key, element] of Object.entries(inputValue)) {
       parsers.push([
         parseAttributeClonedInput(recordAttribute.keys, key, options),
-        parseAttributeClonedInput(recordAttribute.elements, element, options)
+        parseAttributeClonedInput(recordAttribute.elements, element, options),
       ])
     }
   }
@@ -48,8 +48,11 @@ export function* parseRecordAttributeClonedInput<
   const clonedValue = isInputValueObject
     ? Object.fromEntries(
         parsers
-          .map(([keyParser, elementParser]) => [keyParser.next().value, elementParser.next().value])
-          .filter(([, element]) => element !== undefined)
+          .map(([keyParser, elementParser]) => [
+            keyParser.next().value,
+            elementParser.next().value,
+          ])
+          .filter(([, element]) => element !== undefined),
       )
     : cloneDeep(inputValue)
   yield clonedValue
@@ -60,22 +63,28 @@ export function* parseRecordAttributeClonedInput<
       path: recordAttribute.path,
       payload: {
         received: inputValue,
-        expected: recordAttribute.type
-      }
+        expected: recordAttribute.type,
+      },
     })
   }
 
   const parsedValue = Object.fromEntries(
     parsers
-      .map(([keyParser, elementParser]) => [keyParser.next().value, elementParser.next().value])
-      .filter(([, element]) => element !== undefined)
+      .map(([keyParser, elementParser]) => [
+        keyParser.next().value,
+        elementParser.next().value,
+      ])
+      .filter(([, element]) => element !== undefined),
   )
   yield parsedValue
 
   const collapsedValue = Object.fromEntries(
     parsers
-      .map(([keyParser, elementParser]) => [keyParser.next().value, elementParser.next().value])
-      .filter(([, element]) => element !== undefined)
+      .map(([keyParser, elementParser]) => [
+        keyParser.next().value,
+        elementParser.next().value,
+      ])
+      .filter(([, element]) => element !== undefined),
   )
   return collapsedValue
 }

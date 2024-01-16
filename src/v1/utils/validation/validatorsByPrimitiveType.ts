@@ -12,5 +12,5 @@ export const validatorsByPrimitiveType: Record<
   string: isString,
   number: isNumber,
   boolean: isBoolean,
-  binary: isBinary
+  binary: isBinary,
 }

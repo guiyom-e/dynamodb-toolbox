@@ -1,12 +1,16 @@
 import { Always, PrimitiveAttribute } from 'v1/schema'
 
 import type { ConditionParser } from '../../parser'
-import { TwoArgsFnOperator, isTwoArgsFnOperator, TwoArgsFnCondition } from './types'
+import {
+  isTwoArgsFnOperator,
+  TwoArgsFnCondition,
+  TwoArgsFnOperator,
+} from './types'
 
 const twoArgsFnOperatorExpression: Record<TwoArgsFnOperator, string> = {
   contains: 'contains',
   beginsWith: 'begins_with',
-  type: 'attribute_type'
+  type: 'attribute_type',
 }
 
 const typeAttribute: PrimitiveAttribute<
@@ -35,31 +39,40 @@ const typeAttribute: PrimitiveAttribute<
   defaults: {
     key: undefined,
     put: undefined,
-    update: undefined
+    update: undefined,
   },
-  transform: undefined
+  transform: undefined,
 }
 
 export const parseTwoArgsFnCondition = <CONDITION extends TwoArgsFnCondition>(
   conditionParser: ConditionParser,
-  condition: CONDITION
+  condition: CONDITION,
 ): void => {
-  const comparisonOperator = Object.keys(condition).find(isTwoArgsFnOperator) as keyof CONDITION &
-    TwoArgsFnOperator
+  const comparisonOperator = Object.keys(condition).find(
+    isTwoArgsFnOperator,
+  ) as keyof CONDITION & TwoArgsFnOperator
 
   // TOIMPROVE: It doesn't make sense to use size in two args fns
   const attributePath = condition.size ?? condition.attr
   const expressionAttributeValue = condition[comparisonOperator]
   const { transform = true } = condition as { transform?: boolean }
 
-  conditionParser.resetExpression(`${twoArgsFnOperatorExpression[comparisonOperator]}(`)
-  const attribute = conditionParser.appendAttributePath(attributePath, { size: !!condition.size })
+  conditionParser.resetExpression(
+    `${twoArgsFnOperatorExpression[comparisonOperator]}(`,
+  )
+  const attribute = conditionParser.appendAttributePath(attributePath, {
+    size: !!condition.size,
+  })
   conditionParser.appendToExpression(', ')
   comparisonOperator === 'type'
     ? conditionParser.appendAttributeValue(
         { ...typeAttribute, path: attributePath },
-        expressionAttributeValue
+        expressionAttributeValue,
       )
-    : conditionParser.appendAttributeValueOrPath(attribute, expressionAttributeValue, { transform })
+    : conditionParser.appendAttributeValueOrPath(
+        attribute,
+        expressionAttributeValue,
+        { transform },
+      )
   conditionParser.appendToExpression(')')
 }

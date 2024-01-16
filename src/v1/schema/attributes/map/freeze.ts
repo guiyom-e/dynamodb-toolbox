@@ -2,19 +2,18 @@ import type { O } from 'ts-toolbelt'
 
 import { DynamoDBToolboxError } from 'v1/errors'
 
-import type { RequiredOption } from '../constants/requiredOptions'
-import type { FreezeAttribute } from '../freeze'
-import { validateAttributeProperties } from '../shared/validate'
 import {
   $attributes,
-  $required,
+  $defaults,
   $hidden,
   $key,
+  $required,
   $savedAs,
-  $defaults
 } from '../constants/attributeOptions'
-
+import type { RequiredOption } from '../constants/requiredOptions'
+import type { FreezeAttribute } from '../freeze'
 import type { SharedAttributeState } from '../shared/interface'
+import { validateAttributeProperties } from '../shared/validate'
 import type { $MapAttributeState, MapAttribute } from './interface'
 import type { $MapAttributeAttributeStates } from './types'
 
@@ -45,7 +44,7 @@ type MapAttributeFreezer = <
 >(
   attribute: $ATTRIBUTES,
   state: STATE,
-  path: string
+  path: string,
 ) => FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>>
 
 /**
@@ -62,7 +61,7 @@ export const freezeMapAttribute: MapAttributeFreezer = <
 >(
   attributes: $ATTRIBUTES,
   state: STATE,
-  path: string
+  path: string,
 ): FreezeMapAttribute<$MapAttributeState<$ATTRIBUTES, STATE>> => {
   validateAttributeProperties(state, path)
 
@@ -73,7 +72,7 @@ export const freezeMapAttribute: MapAttributeFreezer = <
   const requiredAttributeNames: Record<RequiredOption, Set<string>> = {
     always: new Set(),
     atLeastOnce: new Set(),
-    never: new Set()
+    never: new Set(),
   }
 
   const frozenAttributes: {
@@ -88,7 +87,7 @@ export const freezeMapAttribute: MapAttributeFreezer = <
       throw new DynamoDBToolboxError('schema.mapAttribute.duplicateSavedAs', {
         message: `Invalid map attributes at path ${path}: More than two attributes are saved as '${attributeSavedAs}'`,
         path,
-        payload: { savedAs: attributeSavedAs }
+        payload: { savedAs: attributeSavedAs },
       })
     }
     attributesSavedAs.add(attributeSavedAs)
@@ -100,7 +99,7 @@ export const freezeMapAttribute: MapAttributeFreezer = <
     requiredAttributeNames[attribute[$required]].add(attributeName)
 
     frozenAttributes[attributeName] = attribute.freeze(
-      [path, attributeName].join('.')
+      [path, attributeName].join('.'),
     ) as FreezeAttribute<$ATTRIBUTES[Extract<keyof $ATTRIBUTES, string>]>
   }
 
@@ -110,6 +109,6 @@ export const freezeMapAttribute: MapAttributeFreezer = <
     attributes: frozenAttributes,
     keyAttributeNames,
     requiredAttributeNames,
-    ...state
+    ...state,
   }
 }

@@ -1,19 +1,19 @@
 import cloneDeep from 'lodash.clonedeep'
 
+import { DynamoDBToolboxError } from 'v1/errors'
 import type {
-  SetAttribute,
-  AttributeValue,
   AttributeBasicValue,
+  AttributeValue,
+  Extension,
+  SetAttribute,
   SetAttributeBasicValue,
-  Extension
 } from 'v1/schema'
 import type { If } from 'v1/types'
 import { isSet } from 'v1/utils/validation/isSet'
-import { DynamoDBToolboxError } from 'v1/errors'
 
 import type { HasExtension } from '../types'
-import type { ParsingOptions } from './types'
 import { parseAttributeClonedInput } from './attribute'
+import type { ParsingOptions } from './types'
 
 export function* parseSetAttributeClonedInput<
   INPUT_EXTENSION extends Extension = never,
@@ -26,13 +26,21 @@ export function* parseSetAttributeClonedInput<
     [options: ParsingOptions<INPUT_EXTENSION, SCHEMA_EXTENSION>],
     [options?: ParsingOptions<INPUT_EXTENSION, SCHEMA_EXTENSION>]
   >
-): Generator<SetAttributeBasicValue<INPUT_EXTENSION>, SetAttributeBasicValue<INPUT_EXTENSION>> {
-  const parsers: Generator<AttributeValue<INPUT_EXTENSION>, AttributeValue<INPUT_EXTENSION>>[] = []
+): Generator<
+  SetAttributeBasicValue<INPUT_EXTENSION>,
+  SetAttributeBasicValue<INPUT_EXTENSION>
+> {
+  const parsers: Generator<
+    AttributeValue<INPUT_EXTENSION>,
+    AttributeValue<INPUT_EXTENSION>
+  >[] = []
 
   const isInputValueSet = isSet(inputValue)
   if (isInputValueSet) {
     for (const element of inputValue.values()) {
-      parsers.push(parseAttributeClonedInput(setAttribute.elements, element, options))
+      parsers.push(
+        parseAttributeClonedInput(setAttribute.elements, element, options),
+      )
     }
   }
 
@@ -47,8 +55,8 @@ export function* parseSetAttributeClonedInput<
       path: setAttribute.path,
       payload: {
         received: inputValue,
-        expected: setAttribute.type
-      }
+        expected: setAttribute.type,
+      },
     })
   }
 

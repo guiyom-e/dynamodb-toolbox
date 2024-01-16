@@ -2,19 +2,18 @@ import type { O } from 'ts-toolbelt'
 
 import { DynamoDBToolboxError } from 'v1/errors'
 
-import type { FreezeAttribute } from '../freeze'
-import { validateAttributeProperties } from '../shared/validate'
-import { hasDefinedDefault } from '../shared/hasDefinedDefault'
 import {
+  $defaults,
   $elements,
-  $required,
   $hidden,
   $key,
+  $required,
   $savedAs,
-  $defaults
 } from '../constants/attributeOptions'
-
+import type { FreezeAttribute } from '../freeze'
+import { hasDefinedDefault } from '../shared/hasDefinedDefault'
 import type { SharedAttributeState } from '../shared/interface'
+import { validateAttributeProperties } from '../shared/validate'
 import type { $ListAttributeState, ListAttribute } from './interface'
 import type { $ListAttributeElements } from './types'
 
@@ -41,7 +40,7 @@ type ListAttributeFreezer = <
 >(
   $elements: $ELEMENTS,
   state: STATE,
-  path: string
+  path: string,
 ) => FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>
 
 /**
@@ -58,44 +57,49 @@ export const freezeListAttribute: ListAttributeFreezer = <
 >(
   elements: $ELEMENTS,
   state: STATE,
-  path: string
+  path: string,
 ): FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>> => {
   validateAttributeProperties(state, path)
 
-  if (elements[$required] !== 'atLeastOnce' && elements[$required] !== 'always') {
+  if (
+    elements[$required] !== 'atLeastOnce' &&
+    elements[$required] !== 'always'
+  ) {
     throw new DynamoDBToolboxError('schema.listAttribute.optionalElements', {
       message: `Invalid list elements at path ${path}: List elements must be required`,
-      path
+      path,
     })
   }
 
   if (elements[$hidden] !== false) {
     throw new DynamoDBToolboxError('schema.listAttribute.hiddenElements', {
       message: `Invalid list elements at path ${path}: List elements cannot be hidden`,
-      path
+      path,
     })
   }
 
   if (elements[$savedAs] !== undefined) {
     throw new DynamoDBToolboxError('schema.listAttribute.savedAsElements', {
       message: `Invalid list elements at path ${path}: List elements cannot be renamed (have savedAs option)`,
-      path
+      path,
     })
   }
 
   if (hasDefinedDefault(elements)) {
     throw new DynamoDBToolboxError('schema.listAttribute.defaultedElements', {
       message: `Invalid list elements at path ${path}: List elements cannot have default values`,
-      path
+      path,
     })
   }
 
-  const frozenElements = elements.freeze(`${path}[n]`) as FreezeAttribute<$ELEMENTS>
+  const frozenElements = elements.freeze(
+    `${path}[n]`,
+  ) as FreezeAttribute<$ELEMENTS>
 
   return {
     path,
     type: 'list',
     elements: frozenElements,
-    ...state
+    ...state,
   }
 }

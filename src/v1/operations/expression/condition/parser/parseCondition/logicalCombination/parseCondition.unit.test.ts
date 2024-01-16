@@ -1,4 +1,4 @@
-import { schema, number, string, boolean } from 'v1/schema'
+import { boolean, number, schema, string } from 'v1/schema'
 
 import { parseSchemaCondition } from '../../../parse'
 
@@ -8,7 +8,7 @@ describe('parseCondition - Logical combination', () => {
     otherNum: number(),
     str: string(),
     otherStr: string(),
-    bool: boolean()
+    bool: boolean(),
   })
 
   it('combines OR children conditions (value)', () => {
@@ -16,13 +16,13 @@ describe('parseCondition - Logical combination', () => {
       parseSchemaCondition(mySchema, {
         or: [
           { attr: 'num', eq: 42 },
-          { attr: 'str', eq: 'foo' }
-        ]
-      })
+          { attr: 'str', eq: 'foo' },
+        ],
+      }),
     ).toStrictEqual({
       ConditionExpression: '(#c_1 = :c_1) OR (#c_2 = :c_2)',
       ExpressionAttributeNames: { '#c_1': 'num', '#c_2': 'str' },
-      ExpressionAttributeValues: { ':c_1': 42, ':c_2': 'foo' }
+      ExpressionAttributeValues: { ':c_1': 42, ':c_2': 'foo' },
     })
   })
 
@@ -31,18 +31,18 @@ describe('parseCondition - Logical combination', () => {
       parseSchemaCondition(mySchema, {
         or: [
           { attr: 'num', eq: { attr: 'otherNum' } },
-          { attr: 'str', eq: { attr: 'otherStr' } }
-        ]
-      })
+          { attr: 'str', eq: { attr: 'otherStr' } },
+        ],
+      }),
     ).toStrictEqual({
       ConditionExpression: '(#c_1 = #c_2) OR (#c_3 = #c_4)',
       ExpressionAttributeNames: {
         '#c_1': 'num',
         '#c_2': 'otherNum',
         '#c_3': 'str',
-        '#c_4': 'otherStr'
+        '#c_4': 'otherStr',
       },
-      ExpressionAttributeValues: {}
+      ExpressionAttributeValues: {},
     })
   })
 
@@ -51,13 +51,13 @@ describe('parseCondition - Logical combination', () => {
       parseSchemaCondition(mySchema, {
         and: [
           { attr: 'num', eq: 42 },
-          { attr: 'str', eq: 'foo' }
-        ]
-      })
+          { attr: 'str', eq: 'foo' },
+        ],
+      }),
     ).toStrictEqual({
       ConditionExpression: '(#c_1 = :c_1) AND (#c_2 = :c_2)',
       ExpressionAttributeNames: { '#c_1': 'num', '#c_2': 'str' },
-      ExpressionAttributeValues: { ':c_1': 42, ':c_2': 'foo' }
+      ExpressionAttributeValues: { ':c_1': 42, ':c_2': 'foo' },
     })
   })
 
@@ -66,18 +66,18 @@ describe('parseCondition - Logical combination', () => {
       parseSchemaCondition(mySchema, {
         and: [
           { attr: 'num', eq: { attr: 'otherNum' } },
-          { attr: 'str', eq: { attr: 'otherStr' } }
-        ]
-      })
+          { attr: 'str', eq: { attr: 'otherStr' } },
+        ],
+      }),
     ).toStrictEqual({
       ConditionExpression: '(#c_1 = #c_2) AND (#c_3 = #c_4)',
       ExpressionAttributeNames: {
         '#c_1': 'num',
         '#c_2': 'otherNum',
         '#c_3': 'str',
-        '#c_4': 'otherStr'
+        '#c_4': 'otherStr',
       },
-      ExpressionAttributeValues: {}
+      ExpressionAttributeValues: {},
     })
   })
 
@@ -88,16 +88,20 @@ describe('parseCondition - Logical combination', () => {
           {
             or: [
               { attr: 'num', eq: 42 },
-              { attr: 'bool', eq: true }
-            ]
+              { attr: 'bool', eq: true },
+            ],
           },
-          { attr: 'str', eq: 'foo' }
-        ]
-      })
+          { attr: 'str', eq: 'foo' },
+        ],
+      }),
     ).toStrictEqual({
       ConditionExpression: '((#c_1 = :c_1) OR (#c_2 = :c_2)) AND (#c_3 = :c_3)',
-      ExpressionAttributeNames: { '#c_1': 'num', '#c_2': 'bool', '#c_3': 'str' },
-      ExpressionAttributeValues: { ':c_1': 42, ':c_2': true, ':c_3': 'foo' }
+      ExpressionAttributeNames: {
+        '#c_1': 'num',
+        '#c_2': 'bool',
+        '#c_3': 'str',
+      },
+      ExpressionAttributeValues: { ':c_1': 42, ':c_2': true, ':c_3': 'foo' },
     })
   })
 })

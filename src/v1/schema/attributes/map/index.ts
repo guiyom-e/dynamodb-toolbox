@@ -3,6 +3,6 @@ export type {
   $MapAttributeState,
   $MapAttributeNestedState,
   $MapAttribute,
-  MapAttribute
+  MapAttribute,
 } from './interface'
 export type { FreezeMapAttribute } from './freeze'

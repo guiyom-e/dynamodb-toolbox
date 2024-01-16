@@ -1,8 +1,15 @@
-import { DynamoDBDocumentClient, TransactWriteCommandInput } from '@aws-sdk/lib-dynamodb'
+import {
+  DynamoDBDocumentClient,
+  TransactWriteCommandInput,
+} from '@aws-sdk/lib-dynamodb'
+
 import { EntityV2 } from 'v1/entity'
+
 import { EntityOperation } from '../class'
 
-type WriteTransaction = NonNullable<TransactWriteCommandInput['TransactItems']>[number]
+type WriteTransaction = NonNullable<
+  TransactWriteCommandInput['TransactItems']
+>[number]
 
 export type WriteTransactionItemType = keyof WriteTransaction
 

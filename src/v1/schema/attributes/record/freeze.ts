@@ -2,25 +2,26 @@ import type { O } from 'ts-toolbelt'
 
 import { DynamoDBToolboxError } from 'v1/errors'
 
-import type { FreezeAttribute } from '../freeze'
-import { validateAttributeProperties } from '../shared/validate'
-import { hasDefinedDefault } from '../shared/hasDefinedDefault'
 import {
-  $type,
-  $keys,
+  $defaults,
   $elements,
-  $required,
   $hidden,
   $key,
+  $keys,
+  $required,
   $savedAs,
-  $defaults
+  $type,
 } from '../constants/attributeOptions'
-
+import type { FreezeAttribute } from '../freeze'
+import { hasDefinedDefault } from '../shared/hasDefinedDefault'
 import type { SharedAttributeState } from '../shared/interface'
+import { validateAttributeProperties } from '../shared/validate'
 import type { $RecordAttributeState, RecordAttribute } from './interface'
 import type { $RecordAttributeElements, $RecordAttributeKeys } from './types'
 
-export type FreezeRecordAttribute<$RECORD_ATTRIBUTE extends $RecordAttributeState> =
+export type FreezeRecordAttribute<
+  $RECORD_ATTRIBUTE extends $RecordAttributeState
+> =
   // Applying void O.Update improves type display
   O.Update<
     RecordAttribute<
@@ -46,7 +47,7 @@ type RecordAttributeFreezer = <
   keys: $KEYS,
   elements: $ELEMENTS,
   state: STATE,
-  path: string
+  path: string,
 ) => FreezeRecordAttribute<$RecordAttributeState<$KEYS, $ELEMENTS, STATE>>
 
 /**
@@ -66,14 +67,14 @@ export const freezeRecordAttribute: RecordAttributeFreezer = <
   keys: $KEYS,
   elements: $ELEMENTS,
   state: STATE,
-  path: string
+  path: string,
 ): FreezeRecordAttribute<$RecordAttributeState<$KEYS, $ELEMENTS, STATE>> => {
   validateAttributeProperties(state, path)
 
   if (keys[$type] !== 'string') {
     throw new DynamoDBToolboxError('schema.recordAttribute.invalidKeys', {
       message: `Invalid record keys at path ${path}: Record keys must be a string`,
-      path
+      path,
     })
   }
 
@@ -81,35 +82,35 @@ export const freezeRecordAttribute: RecordAttributeFreezer = <
   if (keys[$key] !== false) {
     throw new DynamoDBToolboxError('schema.recordAttribute.keyKeys', {
       message: `Invalid record keys at path ${path}: Record keys cannot be part of primary key`,
-      path
+      path,
     })
   }
 
   if (keys[$required] !== 'atLeastOnce') {
     throw new DynamoDBToolboxError('schema.recordAttribute.optionalKeys', {
       message: `Invalid record keys at path ${path}: Record keys must be required`,
-      path
+      path,
     })
   }
 
   if (keys[$hidden] !== false) {
     throw new DynamoDBToolboxError('schema.recordAttribute.hiddenKeys', {
       message: `Invalid record keys at path ${path}: Record keys cannot be hidden`,
-      path
+      path,
     })
   }
 
   if (keys[$savedAs] !== undefined) {
     throw new DynamoDBToolboxError('schema.recordAttribute.savedAsKeys', {
       message: `Invalid record keys at path ${path}: Record keys cannot be renamed (have savedAs option)`,
-      path
+      path,
     })
   }
 
   if (hasDefinedDefault(keys)) {
     throw new DynamoDBToolboxError('schema.recordAttribute.defaultedKeys', {
       message: `Invalid record keys at path ${path}: Record keys cannot have default values`,
-      path
+      path,
     })
   }
 
@@ -117,46 +118,48 @@ export const freezeRecordAttribute: RecordAttributeFreezer = <
   if (elements[$key] !== false) {
     throw new DynamoDBToolboxError('schema.recordAttribute.keyElements', {
       message: `Invalid record elements at path ${path}: Record elements cannot be part of primary key`,
-      path
+      path,
     })
   }
 
   if (elements[$required] !== 'atLeastOnce') {
     throw new DynamoDBToolboxError('schema.recordAttribute.optionalElements', {
       message: `Invalid record elements at path ${path}: Record elements must be required`,
-      path
+      path,
     })
   }
 
   if (elements[$hidden] !== false) {
     throw new DynamoDBToolboxError('schema.recordAttribute.hiddenElements', {
       message: `Invalid record elements at path ${path}: Record elements cannot be hidden`,
-      path
+      path,
     })
   }
 
   if (elements[$savedAs] !== undefined) {
     throw new DynamoDBToolboxError('schema.recordAttribute.savedAsElements', {
       message: `Invalid record elements at path ${path}: Record elements cannot be renamed (have savedAs option)`,
-      path
+      path,
     })
   }
 
   if (hasDefinedDefault(elements)) {
     throw new DynamoDBToolboxError('schema.recordAttribute.defaultedElements', {
       message: `Invalid record elements at path ${path}: Records elements cannot have default values`,
-      path
+      path,
     })
   }
 
   const frozenKeys = keys.freeze(`${path} (KEY)`) as FreezeAttribute<$KEYS>
-  const frozenElements = elements.freeze(`${path}[string]`) as FreezeAttribute<$ELEMENTS>
+  const frozenElements = elements.freeze(
+    `${path}[string]`,
+  ) as FreezeAttribute<$ELEMENTS>
 
   return {
     path,
     type: 'record',
     keys: frozenKeys,
     elements: frozenElements,
-    ...state
+    ...state,
   }
 }

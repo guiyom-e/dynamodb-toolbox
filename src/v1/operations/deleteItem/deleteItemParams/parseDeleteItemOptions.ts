@@ -1,24 +1,33 @@
 import type { DeleteCommandInput } from '@aws-sdk/lib-dynamodb'
 import isEmpty from 'lodash.isempty'
 
+import type { EntityV2 } from 'v1/entity'
+import { parseCondition } from 'v1/operations/expression/condition/parse'
 import { parseCapacityOption } from 'v1/operations/utils/parseOptions/parseCapacityOption'
 import { parseMetricsOption } from 'v1/operations/utils/parseOptions/parseMetricsOption'
 import { parseReturnValuesOption } from 'v1/operations/utils/parseOptions/parseReturnValuesOption'
 import { rejectExtraOptions } from 'v1/operations/utils/parseOptions/rejectExtraOptions'
-import { parseCondition } from 'v1/operations/expression/condition/parse'
-import type { EntityV2 } from 'v1/entity'
 
-import { deleteItemCommandReturnValuesOptionsSet, DeleteItemOptions } from '../options'
+import {
+  deleteItemCommandReturnValuesOptionsSet,
+  DeleteItemOptions,
+} from '../options'
 
 type CommandOptions = Omit<DeleteCommandInput, 'TableName' | 'Key'>
 
 export const parseDeleteItemOptions = <ENTITY extends EntityV2>(
   entity: ENTITY,
-  deleteItemOptions: DeleteItemOptions<ENTITY>
+  deleteItemOptions: DeleteItemOptions<ENTITY>,
 ): CommandOptions => {
   const commandOptions: CommandOptions = {}
 
-  const { capacity, metrics, returnValues, condition, ...extraOptions } = deleteItemOptions
+  const {
+    capacity,
+    metrics,
+    returnValues,
+    condition,
+    ...extraOptions
+  } = deleteItemOptions
 
   if (capacity !== undefined) {
     commandOptions.ReturnConsumedCapacity = parseCapacityOption(capacity)
@@ -31,7 +40,7 @@ export const parseDeleteItemOptions = <ENTITY extends EntityV2>(
   if (returnValues !== undefined) {
     commandOptions.ReturnValues = parseReturnValuesOption(
       deleteItemCommandReturnValuesOptionsSet,
-      returnValues
+      returnValues,
     )
   }
 
@@ -39,7 +48,7 @@ export const parseDeleteItemOptions = <ENTITY extends EntityV2>(
     const {
       ExpressionAttributeNames,
       ExpressionAttributeValues,
-      ConditionExpression
+      ConditionExpression,
     } = parseCondition(entity, condition)
 
     if (!isEmpty(ExpressionAttributeNames)) {

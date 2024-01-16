@@ -1,14 +1,17 @@
 import type { NativeAttributeValue } from '@aws-sdk/util-dynamodb'
 
-import type { Schema, Attribute } from 'v1/schema'
 import type { Condition } from 'v1/operations/types'
+import type { Attribute, Schema } from 'v1/schema'
 
 import {
-  ExpressionParser,
   appendAttributePath,
-  AppendAttributePathOptions
+  AppendAttributePathOptions,
+  ExpressionParser,
 } from '../../expressionParser'
-import { appendAttributeValue, AppendAttributeValueOptions } from './appendAttributeValue'
+import {
+  appendAttributeValue,
+  AppendAttributeValueOptions,
+} from './appendAttributeValue'
 import { appendAttributeValueOrPath } from './appendAttributeValueOrPath'
 import { parseCondition } from './parseCondition'
 import { toCommandOptions } from './toCommandOptions'
@@ -36,26 +39,34 @@ export class ConditionParser implements ExpressionParser {
 
   appendAttributePath = (
     attributePath: string,
-    options: AppendAttributePathOptions = {}
+    options: AppendAttributePathOptions = {},
   ): Attribute => appendAttributePath(this, attributePath, options)
 
   appendAttributeValue = (
     attribute: Attribute,
     expressionAttributeValue: unknown,
-    options: AppendAttributeValueOptions = {}
-  ): void => appendAttributeValue(this, attribute, expressionAttributeValue, options)
+    options: AppendAttributeValueOptions = {},
+  ): void =>
+    appendAttributeValue(this, attribute, expressionAttributeValue, options)
 
   appendAttributeValueOrPath = (
     attribute: Attribute,
     expressionAttributeValueOrPath: unknown,
-    options: AppendAttributePathOptions & AppendAttributeValueOptions = {}
-  ): void => appendAttributeValueOrPath(this, attribute, expressionAttributeValueOrPath, options)
+    options: AppendAttributePathOptions & AppendAttributeValueOptions = {},
+  ): void =>
+    appendAttributeValueOrPath(
+      this,
+      attribute,
+      expressionAttributeValueOrPath,
+      options,
+    )
 
   appendToExpression = (conditionExpressionPart: string) => {
     this.expression += conditionExpressionPart
   }
 
-  parseCondition = (condition: Condition): void => parseCondition(this, condition)
+  parseCondition = (condition: Condition): void =>
+    parseCondition(this, condition)
 
   toCommandOptions = (): {
     ConditionExpression: string

@@ -1,9 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
-import type { Query } from 'v1/operations'
 
-import { PrimaryKey, TableV2, EntityAttributeSavedAs, IndexNames, IndexSchema } from 'v1/table'
+import type { Query } from 'v1/operations'
+import {
+  EntityAttributeSavedAs,
+  IndexNames,
+  IndexSchema,
+  PrimaryKey,
+  TableV2,
+} from 'v1/table'
 
 const dynamoDbClient = new DynamoDBClient({})
 
@@ -13,11 +19,11 @@ export const MyTable = new TableV2({
   name: 'MySuperTable',
   partitionKey: {
     name: 'userId',
-    type: 'string'
+    type: 'string',
   },
   sortKey: {
     name: 'sk',
-    type: 'number'
+    type: 'number',
   },
   documentClient,
   indexes: {
@@ -25,21 +31,21 @@ export const MyTable = new TableV2({
       type: 'local',
       sortKey: {
         name: 'lsi_sk',
-        type: 'string'
-      }
+        type: 'string',
+      },
     },
     gsi: {
       type: 'global',
       partitionKey: {
         name: 'GSI1_PK',
-        type: 'string'
+        type: 'string',
       },
       sortKey: {
         name: 'GSI1_SK',
-        type: 'binary'
-      }
-    }
-  }
+        type: 'binary',
+      },
+    },
+  },
 })
 
 type PK = PrimaryKey<typeof MyTable>

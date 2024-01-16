@@ -1,22 +1,30 @@
 import type { NativeAttributeValue } from '@aws-sdk/util-dynamodb'
 
-import type { Schema, Attribute } from 'v1/schema'
-import { isObject } from 'v1/utils/validation/isObject'
+import type { Attribute, Schema } from 'v1/schema'
 import { isArray } from 'v1/utils/validation/isArray'
+import { isObject } from 'v1/utils/validation/isObject'
 
-import type { UpdateItemInput, AttributeUpdateItemInput } from '../types'
-import { $SET, $REMOVE, $SUM, $SUBTRACT, $ADD, $DELETE, $APPEND, $PREPEND } from '../constants'
 import {
-  hasSetOperation,
-  hasGetOperation,
-  hasSumOperation,
-  hasSubtractOperation,
+  $ADD,
+  $APPEND,
+  $DELETE,
+  $PREPEND,
+  $REMOVE,
+  $SET,
+  $SUBTRACT,
+  $SUM,
+} from '../constants'
+import type { AttributeUpdateItemInput, UpdateItemInput } from '../types'
+import {
   hasAddOperation,
-  hasDeleteOperation,
   hasAppendOperation,
-  hasPrependOperation
+  hasDeleteOperation,
+  hasGetOperation,
+  hasPrependOperation,
+  hasSetOperation,
+  hasSubtractOperation,
+  hasSumOperation,
 } from '../utils'
-
 import type { ParsedUpdate } from './type'
 import { UpdateExpressionVerbParser } from './verbParser'
 
@@ -37,7 +45,7 @@ export class UpdateExpressionParser {
 
   parseUpdate = (
     input: UpdateItemInput | AttributeUpdateItemInput,
-    currentPath: (string | number)[] = []
+    currentPath: (string | number)[] = [],
   ): void => {
     if (input === undefined) {
       return
@@ -159,7 +167,7 @@ export class UpdateExpressionParser {
       ['SET', this.set],
       ['REMOVE', this.remove],
       ['ADD', this.add],
-      ['DELETE', this.delete]
+      ['DELETE', this.delete],
     ] as const) {
       const verbCommandOptions = parser.toCommandOptions()
 
@@ -174,14 +182,20 @@ export class UpdateExpressionParser {
       UpdateExpression += ' '
       UpdateExpression += verbCommandOptions.UpdateExpression
 
-      Object.assign(ExpressionAttributeNames, verbCommandOptions.ExpressionAttributeNames)
-      Object.assign(ExpressionAttributeValues, verbCommandOptions.ExpressionAttributeValues)
+      Object.assign(
+        ExpressionAttributeNames,
+        verbCommandOptions.ExpressionAttributeNames,
+      )
+      Object.assign(
+        ExpressionAttributeValues,
+        verbCommandOptions.ExpressionAttributeValues,
+      )
     }
 
     return {
       UpdateExpression,
       ExpressionAttributeNames,
-      ExpressionAttributeValues
+      ExpressionAttributeValues,
     }
   }
 }

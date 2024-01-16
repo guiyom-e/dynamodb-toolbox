@@ -1,6 +1,6 @@
 import type { EntityV2, FormattedItem } from 'v1/entity'
-import type { Item } from 'v1/schema'
 import type { AnyAttributePath } from 'v1/operations/types'
+import type { Item } from 'v1/schema'
 
 import { formatSavedAttribute } from './attribute'
 import { matchProjection } from './utils'
@@ -16,7 +16,7 @@ export const formatSavedItem = <
 >(
   entity: ENTITY,
   savedItem: Item,
-  { attributes, partial = false }: OPTIONS = {} as OPTIONS
+  { attributes, partial = false }: OPTIONS = {} as OPTIONS,
 ): OPTIONS['attributes'] extends AnyAttributePath<ENTITY>[]
   ? FormattedItem<ENTITY, { attributes: OPTIONS['attributes'][number] }>
   : FormattedItem<ENTITY> => {
@@ -34,7 +34,7 @@ export const formatSavedItem = <
 
     const { isProjected, childrenAttributes } = matchProjection(
       new RegExp('^' + attributeName),
-      attributes
+      attributes,
     )
 
     if (!isProjected) {
@@ -43,12 +43,16 @@ export const formatSavedItem = <
 
     const attributeSavedAs = attribute.savedAs ?? attributeName
 
-    const formattedAttribute = formatSavedAttribute(attribute, savedItem[attributeSavedAs], {
-      projectedAttributes: childrenAttributes,
-      partial,
-      ...(partitionKey !== undefined ? { partitionKey } : {}),
-      ...(sortKey !== undefined ? { sortKey } : {})
-    })
+    const formattedAttribute = formatSavedAttribute(
+      attribute,
+      savedItem[attributeSavedAs],
+      {
+        projectedAttributes: childrenAttributes,
+        partial,
+        ...(partitionKey !== undefined ? { partitionKey } : {}),
+        ...(sortKey !== undefined ? { sortKey } : {}),
+      },
+    )
 
     if (formattedAttribute !== undefined) {
       formattedItem[attributeName] = formattedAttribute

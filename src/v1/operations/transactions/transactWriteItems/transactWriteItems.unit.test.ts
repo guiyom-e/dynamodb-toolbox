@@ -1,26 +1,30 @@
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
 import {
-  EntityV2,
-  TableV2,
-  PutItemTransaction,
-  DeleteItemTransaction,
+  $add,
+  $append,
+  $set,
   any,
   binary,
   boolean,
+  DeleteItemTransaction,
+  DynamoDBToolboxError,
+  EntityV2,
   list,
   map,
   number,
+  PutItemTransaction,
   schema,
   set,
   string,
-  DynamoDBToolboxError,
+  TableV2,
   UpdateItemTransaction,
-  $append,
-  $set,
-  $add
 } from 'v1'
-import { transactWriteItems, getTransactWriteCommandInput } from './transactWriteItems'
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+
+import {
+  getTransactWriteCommandInput,
+  transactWriteItems,
+} from './transactWriteItems'
 
 const dynamoDbClient = new DynamoDBClient({ region: 'eu-west-1' })
 
@@ -30,13 +34,13 @@ const TestTable = new TableV2({
   name: 'test-table',
   partitionKey: {
     type: 'string',
-    name: 'pk'
+    name: 'pk',
   },
   sortKey: {
     type: 'string',
-    name: 'sk'
+    name: 'sk',
   },
-  documentClient
+  documentClient,
 })
 
 const TestEntity = new EntityV2({
@@ -52,19 +56,19 @@ const TestEntity = new EntityV2({
     test_boolean: boolean().optional(),
     test_list: list(string()).optional(),
     test_map: map({
-      str: string()
+      str: string(),
     }).optional(),
     test_string_set: set(string()).optional(),
     test_number_set: set(number()).optional(),
-    test_binary_set: set(binary()).optional()
+    test_binary_set: set(binary()).optional(),
   }),
-  table: TestTable
+  table: TestTable,
 })
 
 const TestTable2 = new TableV2({
   name: 'test-table-2',
   partitionKey: { type: 'string', name: 'pk' },
-  documentClient
+  documentClient,
 })
 
 const TestEntity2 = new EntityV2({
@@ -72,17 +76,19 @@ const TestEntity2 = new EntityV2({
   schema: schema({
     email: string().key().savedAs('pk'),
     test_composite: string().optional(),
-    test_composite2: string().optional()
+    test_composite2: string().optional(),
   }).and(schema => ({
     sort: string()
       .optional()
       .savedAs('sk')
       .putLink<typeof schema>(
         ({ test_composite, test_composite2 }) =>
-          test_composite && test_composite2 && [test_composite, test_composite2].join('#')
-      )
+          test_composite &&
+          test_composite2 &&
+          [test_composite, test_composite2].join('#'),
+      ),
   })),
-  table: TestTable2
+  table: TestTable2,
 })
 
 describe('transactWriteItems', () => {
@@ -98,16 +104,19 @@ describe('transactWriteItems', () => {
     const commands: PutItemTransaction[] = []
     const options = {}
     await expect(transactWriteItems(commands, options)).rejects.toThrow(
-      'DynamoDBDocumentClient not found'
+      'DynamoDBDocumentClient not found',
     )
   })
 
   it('should send a transaction with the correct parameters', async () => {
     const commands = [
-      TestEntity.build(PutItemTransaction).item({ email: 'titi@example.com', sort: 'titi' }),
+      TestEntity.build(PutItemTransaction).item({
+        email: 'titi@example.com',
+        sort: 'titi',
+      }),
       TestEntity2.build(PutItemTransaction).item({
-        email: 'toto@example.com'
-      })
+        email: 'toto@example.com',
+      }),
     ]
     const options = { dynamoDBDocumentClient: documentClient }
 
@@ -132,19 +141,21 @@ describe('generateTransactWriteCommandInput', () => {
     const transactions = [
       TestEntity.build(PutItemTransaction).item({
         email: 'titi@example.com',
-        sort: 'titi'
-      })
+        sort: 'titi',
+      }),
     ]
 
     const invalidTransactWriteCommandInputGeneration = () =>
       getTransactWriteCommandInput(transactions, {
         // @ts-expect-error
-        extra: true
+        extra: true,
       })
 
-    expect(invalidTransactWriteCommandInputGeneration).toThrow(DynamoDBToolboxError)
     expect(invalidTransactWriteCommandInputGeneration).toThrow(
-      expect.objectContaining({ code: 'operations.unknownOption' })
+      DynamoDBToolboxError,
+    )
+    expect(invalidTransactWriteCommandInputGeneration).toThrow(
+      expect.objectContaining({ code: 'operations.unknownOption' }),
     )
   })
   it('should generate a transaction with the correct parameters', async () => {
@@ -161,28 +172,34 @@ describe('generateTransactWriteCommandInput', () => {
         test_map: { str: 'A' },
         test_string_set: new Set(['titi', 'tata']),
         test_number_set: new Set([1, 2, 3]),
-        test_binary_set: new Set([Buffer.from('a'), Buffer.from('b')])
+        test_binary_set: new Set([Buffer.from('a'), Buffer.from('b')]),
       }),
-      TestEntity.build(DeleteItemTransaction).key({ email: 'tata@example.com', sort: 'tata' }),
+      TestEntity.build(DeleteItemTransaction).key({
+        email: 'tata@example.com',
+        sort: 'tata',
+      }),
       TestEntity.build(UpdateItemTransaction).item({
         email: 'titi@example.com',
         sort: 'titi',
         count: $add(3),
         test_map: $set({ str: 'B' }),
-        test_list: $append(['toutou'])
+        test_list: $append(['toutou']),
       }),
       TestEntity2.build(PutItemTransaction).item({
         email: 'toto@example.com',
         test_composite: 'hey',
-        test_composite2: 'ho'
-      })
+        test_composite2: 'ho',
+      }),
     ]
 
-    const transactWriteCommandInput = getTransactWriteCommandInput(transactions, {
-      clientRequestToken: 'string',
-      capacity: 'NONE',
-      metrics: 'SIZE'
-    })
+    const transactWriteCommandInput = getTransactWriteCommandInput(
+      transactions,
+      {
+        clientRequestToken: 'string',
+        capacity: 'NONE',
+        metrics: 'SIZE',
+      },
+    )
 
     expect(transactWriteCommandInput).toEqual({
       ClientRequestToken: 'string',
@@ -203,31 +220,31 @@ describe('generateTransactWriteCommandInput', () => {
               test_boolean: true,
               test_list: ['titi', 'tata'],
               test_map: {
-                str: 'A'
+                str: 'A',
               },
               test_number: 5,
               test_number_defaulted: 0,
               test_number_set: new Set([1, 2, 3]),
               test_string: 'test string',
-              test_string_set: new Set(['titi', 'tata'])
+              test_string_set: new Set(['titi', 'tata']),
             },
-            TableName: 'test-table'
-          }
+            TableName: 'test-table',
+          },
         },
         {
           Delete: {
             Key: {
               pk: 'tata@example.com',
-              sk: 'tata'
+              sk: 'tata',
             },
-            TableName: 'test-table'
-          }
+            TableName: 'test-table',
+          },
         },
         {
           Update: {
             Key: {
               pk: 'titi@example.com',
-              sk: 'titi'
+              sk: 'titi',
             },
             UpdateExpression:
               'SET #s_1 = list_append(#s_1, :s_1), #s_2 = :s_2, #s_3 = if_not_exists(#s_4, :s_3), #s_5 = if_not_exists(#s_6, :s_4), #s_7 = :s_5 ADD #a_1 :a_1',
@@ -239,20 +256,20 @@ describe('generateTransactWriteCommandInput', () => {
               '#s_4': '_et',
               '#s_5': '_ct',
               '#s_6': '_ct',
-              '#s_7': '_md'
+              '#s_7': '_md',
             },
             ExpressionAttributeValues: {
               ':a_1': 3,
               ':s_1': ['toutou'],
               ':s_2': {
-                str: 'B'
+                str: 'B',
               },
               ':s_3': 'TestEntity',
               ':s_4': mockDate,
-              ':s_5': mockDate
+              ':s_5': mockDate,
             },
-            TableName: 'test-table'
-          }
+            TableName: 'test-table',
+          },
         },
         {
           Put: {
@@ -263,12 +280,12 @@ describe('generateTransactWriteCommandInput', () => {
               pk: 'toto@example.com',
               sk: 'hey#ho',
               test_composite: 'hey',
-              test_composite2: 'ho'
+              test_composite2: 'ho',
             },
-            TableName: 'test-table-2'
-          }
-        }
-      ]
+            TableName: 'test-table-2',
+          },
+        },
+      ],
     })
   })
 })

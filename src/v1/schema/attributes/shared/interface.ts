@@ -1,5 +1,11 @@
+import type {
+  $defaults,
+  $hidden,
+  $key,
+  $required,
+  $savedAs,
+} from '../constants/attributeOptions'
 import type { RequiredOption } from '../constants/requiredOptions'
-import type { $required, $hidden, $key, $savedAs, $defaults } from '../constants/attributeOptions'
 
 interface SharedAttributeStateConstraint {
   required: RequiredOption

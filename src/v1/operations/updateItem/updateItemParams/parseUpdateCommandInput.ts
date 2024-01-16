@@ -7,16 +7,19 @@ import { parseUpdateExtension } from './extension/parseExtension'
 
 type EntityUpdateCommandInputParser = (
   entity: EntityV2,
-  input: Item<UpdateItemInputExtension>
+  input: Item<UpdateItemInputExtension>,
 ) => Generator<Item<UpdateItemInputExtension>, Item<UpdateItemInputExtension>>
 
 const requiringOptions = new Set<RequiredOption>(['always'])
 
-export const parseEntityUpdateCommandInput: EntityUpdateCommandInputParser = (entity, input) => {
+export const parseEntityUpdateCommandInput: EntityUpdateCommandInputParser = (
+  entity,
+  input,
+) => {
   const parser = parseSchemaClonedInput(entity.schema, input, {
     operationName: 'update',
     requiringOptions,
-    parseExtension: parseUpdateExtension
+    parseExtension: parseUpdateExtension,
   })
 
   parser.next() // cloned

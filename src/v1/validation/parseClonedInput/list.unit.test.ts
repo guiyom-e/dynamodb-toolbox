@@ -1,12 +1,12 @@
 import { DynamoDBToolboxError } from 'v1/errors'
 import { list, string } from 'v1/schema'
 
-import { parseListAttributeClonedInput } from './list'
 import * as parseAttributeClonedInputModule from './attribute'
+import { parseListAttributeClonedInput } from './list'
 
 const parseAttributeClonedInput = jest.spyOn(
   parseAttributeClonedInputModule,
-  'parseAttributeClonedInput'
+  'parseAttributeClonedInput',
 )
 
 const listAttr = list(string()).freeze('path')
@@ -30,7 +30,9 @@ describe('parseListAttributeClonedInput', () => {
     }
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'parsing.invalidAttributeInput' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'parsing.invalidAttributeInput' }),
+    )
   })
 
   it('applies parseAttributeClonesInput on input elements otherwise (and pass options)', () => {
@@ -39,7 +41,7 @@ describe('parseListAttributeClonedInput', () => {
       listAttr,
       ['foo', 'bar'],
       // @ts-expect-error we don't really care about the type here
-      options
+      options,
     )
 
     const clonedState = parser.next()
@@ -47,8 +49,16 @@ describe('parseListAttributeClonedInput', () => {
     expect(clonedState.value).toStrictEqual(['foo', 'bar'])
 
     expect(parseAttributeClonedInput).toHaveBeenCalledTimes(2)
-    expect(parseAttributeClonedInput).toHaveBeenCalledWith(listAttr.elements, 'foo', options)
-    expect(parseAttributeClonedInput).toHaveBeenCalledWith(listAttr.elements, 'bar', options)
+    expect(parseAttributeClonedInput).toHaveBeenCalledWith(
+      listAttr.elements,
+      'foo',
+      options,
+    )
+    expect(parseAttributeClonedInput).toHaveBeenCalledWith(
+      listAttr.elements,
+      'bar',
+      options,
+    )
 
     const parsedState = parser.next()
     expect(parsedState.done).toBe(false)

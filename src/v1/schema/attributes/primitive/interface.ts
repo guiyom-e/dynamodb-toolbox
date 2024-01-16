@@ -1,27 +1,34 @@
 import type { O } from 'ts-toolbelt'
 
-import type { If, ValueOrGetter } from 'v1/types'
 import type {
   AttributeKeyInput,
   AttributePutItemInput,
   AttributeUpdateItemInput,
   KeyInput,
   PutItemInput,
-  UpdateItemInput
+  UpdateItemInput,
 } from 'v1/operations'
+import type { If, ValueOrGetter } from 'v1/types'
 
 import type { Schema } from '../../interface'
-import type { RequiredOption, AtLeastOnce, Never, Always } from '../constants/requiredOptions'
-import type { $type, $enum, $transform } from '../constants/attributeOptions'
-import type { $SharedAttributeState, SharedAttributeState } from '../shared/interface'
-
+import type { $enum, $transform, $type } from '../constants/attributeOptions'
 import type {
+  Always,
+  AtLeastOnce,
+  Never,
+  RequiredOption,
+} from '../constants/requiredOptions'
+import type {
+  $SharedAttributeState,
+  SharedAttributeState,
+} from '../shared/interface'
+import type { FreezePrimitiveAttribute } from './freeze'
+import type {
+  PrimitiveAttributeState,
   PrimitiveAttributeType,
   ResolvePrimitiveAttributeType,
-  PrimitiveAttributeState,
-  Transformer
+  Transformer,
 } from './types'
-import type { FreezePrimitiveAttribute } from './freeze'
 
 export interface $PrimitiveAttributeState<
   TYPE extends PrimitiveAttributeType = PrimitiveAttributeType,
@@ -36,7 +43,9 @@ export interface $PrimitiveAttributeNestedState<
   TYPE extends PrimitiveAttributeType = PrimitiveAttributeType,
   STATE extends PrimitiveAttributeState<TYPE> = PrimitiveAttributeState<TYPE>
 > extends $PrimitiveAttributeState<TYPE, STATE> {
-  freeze: (path: string) => FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>
+  freeze: (
+    path: string,
+  ) => FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>
 }
 
 /**
@@ -55,12 +64,18 @@ export interface $PrimitiveAttribute<
    * @param nextRequired RequiredOption
    */
   required: <NEXT_IS_REQUIRED extends RequiredOption = AtLeastOnce>(
-    nextRequired?: NEXT_IS_REQUIRED
-  ) => $PrimitiveAttribute<TYPE, O.Overwrite<STATE, { required: NEXT_IS_REQUIRED }>>
+    nextRequired?: NEXT_IS_REQUIRED,
+  ) => $PrimitiveAttribute<
+    TYPE,
+    O.Overwrite<STATE, { required: NEXT_IS_REQUIRED }>
+  >
   /**
    * Shorthand for `required('never')`
    */
-  optional: () => $PrimitiveAttribute<TYPE, O.Overwrite<STATE, { required: Never }>>
+  optional: () => $PrimitiveAttribute<
+    TYPE,
+    O.Overwrite<STATE, { required: Never }>
+  >
   /**
    * Hide attribute after fetch commands and formatting
    */
@@ -68,12 +83,15 @@ export interface $PrimitiveAttribute<
   /**
    * Tag attribute as needed for Primary Key computing
    */
-  key: () => $PrimitiveAttribute<TYPE, O.Overwrite<STATE, { required: Always; key: true }>>
+  key: () => $PrimitiveAttribute<
+    TYPE,
+    O.Overwrite<STATE, { required: Always; key: true }>
+  >
   /**
    * Rename attribute before save commands
    */
   savedAs: <NEXT_SAVED_AS extends string | undefined>(
-    nextSavedAs: NEXT_SAVED_AS
+    nextSavedAs: NEXT_SAVED_AS,
   ) => $PrimitiveAttribute<TYPE, O.Overwrite<STATE, { savedAs: NEXT_SAVED_AS }>>
   /**
    * Provide a finite list of possible values for attribute
@@ -97,7 +115,7 @@ export interface $PrimitiveAttribute<
    * string().const('foo')
    */
   const: <CONSTANT extends ResolvePrimitiveAttributeType<TYPE>>(
-    constant: CONSTANT
+    constant: CONSTANT,
   ) => $PrimitiveAttribute<
     TYPE,
     O.Overwrite<
@@ -127,8 +145,11 @@ export interface $PrimitiveAttribute<
    */
   keyDefault: (
     nextKeyDefault: ValueOrGetter<
-      AttributeKeyInput<FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>, true>
-    >
+      AttributeKeyInput<
+        FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>,
+        true
+      >
+    >,
   ) => $PrimitiveAttribute<
     TYPE,
     O.Overwrite<
@@ -149,8 +170,11 @@ export interface $PrimitiveAttribute<
    */
   putDefault: (
     nextPutDefault: ValueOrGetter<
-      AttributePutItemInput<FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>, true>
-    >
+      AttributePutItemInput<
+        FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>,
+        true
+      >
+    >,
   ) => $PrimitiveAttribute<
     TYPE,
     O.Overwrite<
@@ -175,7 +199,7 @@ export interface $PrimitiveAttribute<
         FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>,
         true
       >
-    >
+    >,
   ) => $PrimitiveAttribute<
     TYPE,
     O.Overwrite<
@@ -198,10 +222,16 @@ export interface $PrimitiveAttribute<
     nextDefault: ValueOrGetter<
       If<
         STATE['key'],
-        AttributeKeyInput<FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>, true>,
-        AttributePutItemInput<FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>, true>
+        AttributeKeyInput<
+          FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>,
+          true
+        >,
+        AttributePutItemInput<
+          FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>,
+          true
+        >
       >
-    >
+    >,
   ) => $PrimitiveAttribute<
     TYPE,
     O.Overwrite<
@@ -233,7 +263,10 @@ export interface $PrimitiveAttribute<
       Exclude<
         If<
           STATE['key'],
-          AttributeKeyInput<FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>, true>,
+          AttributeKeyInput<
+            FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>,
+            true
+          >,
           AttributePutItemInput<
             FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>,
             true
@@ -242,7 +275,7 @@ export interface $PrimitiveAttribute<
         undefined
       >,
       ResolvePrimitiveAttributeType<TYPE>
-    >
+    >,
   ) => $PrimitiveAttribute<TYPE, O.Overwrite<STATE, { transform: unknown }>>
   /**
    * Provide a **linked** default value for attribute in Primary Key computing
@@ -251,9 +284,12 @@ export interface $PrimitiveAttribute<
    */
   keyLink: <SCHEMA extends Schema>(
     nextKeyDefault: ValueOrGetter<
-      AttributeKeyInput<FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>, true>,
+      AttributeKeyInput<
+        FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>,
+        true
+      >,
       [KeyInput<SCHEMA, true>]
-    >
+    >,
   ) => $PrimitiveAttribute<
     TYPE,
     O.Overwrite<
@@ -274,9 +310,12 @@ export interface $PrimitiveAttribute<
    */
   putLink: <SCHEMA extends Schema>(
     nextPutDefault: ValueOrGetter<
-      AttributePutItemInput<FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>, true>,
+      AttributePutItemInput<
+        FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>,
+        true
+      >,
       [PutItemInput<SCHEMA, true>]
-    >
+    >,
   ) => $PrimitiveAttribute<
     TYPE,
     O.Overwrite<
@@ -302,7 +341,7 @@ export interface $PrimitiveAttribute<
         true
       >,
       [UpdateItemInput<SCHEMA, true>]
-    >
+    >,
   ) => $PrimitiveAttribute<
     TYPE,
     O.Overwrite<
@@ -325,11 +364,17 @@ export interface $PrimitiveAttribute<
     nextDefault: ValueOrGetter<
       If<
         STATE['key'],
-        AttributeKeyInput<FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>, true>,
-        AttributePutItemInput<FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>, true>
+        AttributeKeyInput<
+          FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>,
+          true
+        >,
+        AttributePutItemInput<
+          FreezePrimitiveAttribute<$PrimitiveAttributeState<TYPE, STATE>>,
+          true
+        >
       >,
       [If<STATE['key'], KeyInput<SCHEMA, true>, PutItemInput<SCHEMA, true>>]
-    >
+    >,
   ) => $PrimitiveAttribute<
     TYPE,
     O.Overwrite<

@@ -4,8 +4,12 @@ export type {
   Condition,
   SchemaCondition,
   AnyAttributeCondition,
-  NonLogicalCondition
+  NonLogicalCondition,
 } from './condition'
-export type { SchemaAttributePath, AnyAttributePath, AnyCommonAttributePath } from './paths'
+export type {
+  SchemaAttributePath,
+  AnyAttributePath,
+  AnyCommonAttributePath,
+} from './paths'
 export type { KeyInput, AttributeKeyInput } from './KeyInput'
 export type { Query } from './query'

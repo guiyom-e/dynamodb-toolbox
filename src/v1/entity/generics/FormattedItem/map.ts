@@ -1,5 +1,6 @@
 import type { O } from 'ts-toolbelt'
-import type { Schema, AtLeastOnce, Always, MapAttribute } from 'v1/schema'
+
+import type { Always, AtLeastOnce, MapAttribute, Schema } from 'v1/schema'
 import type { If } from 'v1/types/if'
 
 import type { FormattedAttribute } from './attribute'

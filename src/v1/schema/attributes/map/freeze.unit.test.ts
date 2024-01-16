@@ -1,14 +1,13 @@
 import { DynamoDBToolboxError } from 'v1/errors'
 
+import { $attributes } from '../constants'
 import { string } from '../primitive'
 import { validateAttributeProperties } from '../shared/validate'
-
 import { map } from './typer'
-import { $attributes } from '../constants'
 
 jest.mock('../shared/validate', () => ({
   ...jest.requireActual<Record<string, unknown>>('../shared/validate'),
-  validateAttributeProperties: jest.fn()
+  validateAttributeProperties: jest.fn(),
 }))
 
 const validateAttributePropertiesMock = validateAttributeProperties as jest.MockedFunction<
@@ -21,7 +20,10 @@ describe('map properties freeze', () => {
   const stringAttr = string()
   const string1Name = 'string1'
   const string2Name = 'string2'
-  const mapInstance = map({ [string1Name]: stringAttr, [string2Name]: stringAttr })
+  const mapInstance = map({
+    [string1Name]: stringAttr,
+    [string2Name]: stringAttr,
+  })
 
   beforeEach(() => {
     validateAttributePropertiesMock.mockClear()
@@ -36,35 +38,44 @@ describe('map properties freeze', () => {
 
   it('applies freezeAttribute on attributes', () => {
     mapInstance[$attributes][string1Name].freeze = jest.fn(
-      mapInstance[$attributes][string1Name].freeze
+      mapInstance[$attributes][string1Name].freeze,
     )
     mapInstance[$attributes][string2Name].freeze = jest.fn(
-      mapInstance[$attributes][string2Name].freeze
+      mapInstance[$attributes][string2Name].freeze,
     )
     mapInstance.freeze(pathMock)
 
     expect(mapInstance[$attributes][string1Name].freeze).toHaveBeenCalledWith(
-      [pathMock, string1Name].join('.')
+      [pathMock, string1Name].join('.'),
     )
     expect(mapInstance[$attributes][string2Name].freeze).toHaveBeenCalledWith(
-      [pathMock, string2Name].join('.')
+      [pathMock, string2Name].join('.'),
     )
   })
 
   it('throws if map attribute has duplicate savedAs', () => {
-    const invalidCallA = () => map({ a: stringAttr, b: stringAttr.savedAs('a') }).freeze(pathMock)
+    const invalidCallA = () =>
+      map({ a: stringAttr, b: stringAttr.savedAs('a') }).freeze(pathMock)
 
     expect(invalidCallA).toThrow(DynamoDBToolboxError)
     expect(invalidCallA).toThrow(
-      expect.objectContaining({ code: 'schema.mapAttribute.duplicateSavedAs', path: pathMock })
+      expect.objectContaining({
+        code: 'schema.mapAttribute.duplicateSavedAs',
+        path: pathMock,
+      }),
     )
 
     const invalidCallB = () =>
-      map({ a: stringAttr.savedAs('c'), b: stringAttr.savedAs('c') }).freeze(pathMock)
+      map({ a: stringAttr.savedAs('c'), b: stringAttr.savedAs('c') }).freeze(
+        pathMock,
+      )
 
     expect(invalidCallB).toThrow(DynamoDBToolboxError)
     expect(invalidCallB).toThrow(
-      expect.objectContaining({ code: 'schema.mapAttribute.duplicateSavedAs', path: pathMock })
+      expect.objectContaining({
+        code: 'schema.mapAttribute.duplicateSavedAs',
+        path: pathMock,
+      }),
     )
   })
 })

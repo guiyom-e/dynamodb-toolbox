@@ -6,7 +6,6 @@ import { parseEntityKeyInput } from 'v1/operations/utils/parseKeyInput'
 import { parsePrimaryKey } from 'v1/operations/utils/parsePrimaryKey'
 
 import type { DeleteItemOptions } from '../options'
-
 import { parseDeleteItemOptions } from './parseDeleteItemOptions'
 
 export const deleteItemParams = <
@@ -15,13 +14,15 @@ export const deleteItemParams = <
 >(
   entity: ENTITY,
   input: KeyInput<ENTITY>,
-  deleteItemOptions: OPTIONS = {} as OPTIONS
+  deleteItemOptions: OPTIONS = {} as OPTIONS,
 ): DeleteCommandInput => {
   const validKeyInputParser = parseEntityKeyInput(entity, input)
   const validKeyInput = validKeyInputParser.next().value
   const collapsedInput = validKeyInputParser.next().value
 
-  const keyInput = entity.computeKey ? entity.computeKey(validKeyInput) : collapsedInput
+  const keyInput = entity.computeKey
+    ? entity.computeKey(validKeyInput)
+    : collapsedInput
   const primaryKey = parsePrimaryKey(entity, keyInput)
 
   const options = parseDeleteItemOptions(entity, deleteItemOptions)
@@ -29,6 +30,6 @@ export const deleteItemParams = <
   return {
     TableName: entity.table.getName(),
     Key: primaryKey,
-    ...options
+    ...options,
   }
 }

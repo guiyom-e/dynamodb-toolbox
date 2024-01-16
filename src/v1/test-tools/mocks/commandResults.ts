@@ -16,7 +16,9 @@ export class CommandResults<INPUT, OPTIONS> {
 
     this.args = (at: number) => {
       if (!isInteger(at)) {
-        throw new Error('Please provide an integer when searching for received command arguments')
+        throw new Error(
+          'Please provide an integer when searching for received command arguments',
+        )
       }
 
       return this[$receivedCommands][at]

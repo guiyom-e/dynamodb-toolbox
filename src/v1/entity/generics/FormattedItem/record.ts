@@ -1,6 +1,7 @@
 import type { O } from 'ts-toolbelt'
 
 import type { RecordAttribute, ResolvePrimitiveAttribute } from 'v1/schema'
+
 import type { FormattedAttribute } from './attribute'
 import type { MatchKeys } from './utils'
 import type { FormattedItemOptions } from './utils'

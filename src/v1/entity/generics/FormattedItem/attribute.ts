@@ -1,16 +1,17 @@
 import type {
-  Schema,
-  Attribute,
   AnyAttribute,
-  PrimitiveAttribute,
-  SetAttribute,
+  AnyOfAttribute,
+  Attribute,
   ListAttribute,
   MapAttribute,
+  PrimitiveAttribute,
   RecordAttribute,
-  AnyOfAttribute,
   ResolveAnyAttribute,
-  ResolvePrimitiveAttribute
+  ResolvePrimitiveAttribute,
+  Schema,
+  SetAttribute,
 } from 'v1/schema'
+
 import type { FormattedListAttribute } from './list'
 import type { FormattedMapAttribute } from './map'
 import type { FormattedRecordAttribute } from './record'

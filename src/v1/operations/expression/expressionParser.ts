@@ -1,5 +1,10 @@
-import type { AnyAttribute, Attribute, PrimitiveAttribute, Schema } from 'v1/schema'
 import { DynamoDBToolboxError } from 'v1/errors'
+import type {
+  AnyAttribute,
+  Attribute,
+  PrimitiveAttribute,
+  Schema,
+} from 'v1/schema'
 import { isObject } from 'v1/utils/validation/isObject'
 import { isString } from 'v1/utils/validation/isString'
 import { parseAttributeClonedInput } from 'v1/validation/parseClonedInput'
@@ -14,7 +19,10 @@ export interface ExpressionParser {
   expression: string
   resetExpression: (str?: string) => void
   appendToExpression: (str: string) => void
-  appendAttributePath: (path: string, options?: AppendAttributePathOptions) => Attribute
+  appendAttributePath: (
+    path: string,
+    options?: AppendAttributePathOptions,
+  ) => Attribute
 }
 
 const defaultAnyAttribute: Omit<AnyAttribute, 'path'> = {
@@ -26,9 +34,9 @@ const defaultAnyAttribute: Omit<AnyAttribute, 'path'> = {
   defaults: {
     key: undefined,
     put: undefined,
-    update: undefined
+    update: undefined,
   },
-  castAs: undefined
+  castAs: undefined,
 }
 
 const defaultNumberAttribute: Omit<PrimitiveAttribute<'number'>, 'path'> = {
@@ -40,37 +48,42 @@ const defaultNumberAttribute: Omit<PrimitiveAttribute<'number'>, 'path'> = {
   defaults: {
     key: undefined,
     put: undefined,
-    update: undefined
+    update: undefined,
   },
   enum: undefined,
-  transform: undefined
+  transform: undefined,
 }
 
 class InvalidExpressionAttributePathError extends DynamoDBToolboxError<'operations.invalidExpressionAttributePath'> {
   constructor(attributePath: string) {
     super('operations.invalidExpressionAttributePath', {
       message: `Unable to match expression attribute path with schema: ${attributePath}`,
-      payload: { attributePath }
+      payload: { attributePath },
     })
   }
 }
 
-const isListAccessor = (accessor: string): accessor is `[${number}]` => /\[\d+\]/g.test(accessor)
+const isListAccessor = (accessor: string): accessor is `[${number}]` =>
+  /\[\d+\]/g.test(accessor)
 
-export const isAttributePath = (candidate: unknown): candidate is { attr: string } =>
+export const isAttributePath = (
+  candidate: unknown,
+): candidate is { attr: string } =>
   isObject(candidate) && 'attr' in candidate && isString(candidate.attr)
 
 export const appendAttributePath = (
   parser: ExpressionParser,
   attributePath: string,
-  options: AppendAttributePathOptions = {}
+  options: AppendAttributePathOptions = {},
 ): Attribute => {
   const { size = false } = options
 
   const expressionAttributePrefix = parser.expressionAttributePrefix
   let parentAttribute: Schema | Attribute = parser.schema
   let expressionPath = ''
-  let attributeMatches = [...attributePath.matchAll(/\[(\d+)\]|\w+(?=(\.|$|\[))/g)]
+  let attributeMatches = [
+    ...attributePath.matchAll(/\[(\d+)\]|\w+(?=(\.|$|\[))/g),
+  ]
 
   while (attributeMatches.length > 0) {
     const attributeMatch = attributeMatches.shift() as RegExpMatchArray
@@ -84,16 +97,16 @@ export const appendAttributePath = (
           expressionPath += childAttributeAccessor
         } else {
           const expressionAttributeNameIndex = parser.expressionAttributeNames.push(
-            childAttributeAccessor
+            childAttributeAccessor,
           )
           expressionPath += `.#${expressionAttributePrefix}${expressionAttributeNameIndex}`
         }
 
         parentAttribute = {
           path: [parentAttribute.path, childAttributeAccessor].join(
-            isChildAttributeInList ? '' : '.'
+            isChildAttributeInList ? '' : '.',
           ),
-          ...defaultAnyAttribute
+          ...defaultAnyAttribute,
         }
         break
       }
@@ -106,12 +119,17 @@ export const appendAttributePath = (
 
       case 'record': {
         const keyAttribute = parentAttribute.keys
-        const keyParser = parseAttributeClonedInput(keyAttribute, childAttributeAccessor)
+        const keyParser = parseAttributeClonedInput(
+          keyAttribute,
+          childAttributeAccessor,
+        )
         keyParser.next() // cloned
         keyParser.next() // parsed
         const collapsedKey = keyParser.next().value as string
 
-        const expressionAttributeNameIndex = parser.expressionAttributeNames.push(collapsedKey)
+        const expressionAttributeNameIndex = parser.expressionAttributeNames.push(
+          collapsedKey,
+        )
         expressionPath += `.#${expressionAttributePrefix}${expressionAttributeNameIndex}`
 
         parentAttribute = parentAttribute.elements
@@ -119,13 +137,14 @@ export const appendAttributePath = (
       }
       case 'schema':
       case 'map': {
-        const childAttribute = parentAttribute.attributes[childAttributeAccessor]
+        const childAttribute =
+          parentAttribute.attributes[childAttributeAccessor]
         if (!childAttribute) {
           throw new InvalidExpressionAttributePathError(attributePath)
         }
 
         const expressionAttributeNameIndex = parser.expressionAttributeNames.push(
-          childAttribute.savedAs ?? childAttributeAccessor
+          childAttribute.savedAs ?? childAttributeAccessor,
         )
         expressionPath +=
           parentAttribute.type === 'schema'
@@ -146,7 +165,9 @@ export const appendAttributePath = (
         break
       }
       case 'anyOf': {
-        let validElementExpressionParser: ExpressionParser | undefined = undefined
+        let validElementExpressionParser:
+          | ExpressionParser
+          | undefined = undefined
         const subPath = attributePath.slice(attributeMatch.index)
 
         for (const element of parentAttribute.elements) {
@@ -154,7 +175,10 @@ export const appendAttributePath = (
             parentAttribute = element
             const elementExpressionParser = parser.clone(element)
             elementExpressionParser.resetExpression()
-            parentAttribute = elementExpressionParser.appendAttributePath(subPath, options)
+            parentAttribute = elementExpressionParser.appendAttributePath(
+              subPath,
+              options,
+            )
             validElementExpressionParser = elementExpressionParser
             /* eslint-disable no-empty */
           } catch {}
@@ -164,7 +188,8 @@ export const appendAttributePath = (
           throw new InvalidExpressionAttributePathError(attributePath)
         }
 
-        parser.expressionAttributeNames = validElementExpressionParser.expressionAttributeNames
+        parser.expressionAttributeNames =
+          validElementExpressionParser.expressionAttributeNames
         expressionPath += validElementExpressionParser.expression
         // No need to go over the rest of the path
         attributeMatches = []
@@ -183,7 +208,7 @@ export const appendAttributePath = (
   return size
     ? {
         path: parentAttribute.path,
-        ...defaultNumberAttribute
+        ...defaultNumberAttribute,
       }
     : parentAttribute
 }

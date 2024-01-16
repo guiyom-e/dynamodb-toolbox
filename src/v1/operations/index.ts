@@ -14,14 +14,22 @@ export {
   $add,
   $delete,
   $append,
-  $prepend
+  $prepend,
 } from './updateItem'
-export type { UpdateItemInput, UpdateItemOptions, UpdateItemResponse } from './updateItem'
+export type {
+  UpdateItemInput,
+  UpdateItemOptions,
+  UpdateItemResponse,
+} from './updateItem'
 export { ScanCommand } from './scan'
 export type { ScanOptions, ScanResponse } from './scan'
 export { QueryCommand } from './query'
 export type { QueryOptions, QueryResponse } from './query'
-export { PutItemTransaction, DeleteItemTransaction, UpdateItemTransaction } from './transactions'
+export {
+  PutItemTransaction,
+  DeleteItemTransaction,
+  UpdateItemTransaction,
+} from './transactions'
 export { formatSavedItem } from './utils/formatSavedItem'
 export { parseCondition } from './expression/condition/parse'
 export { parseProjection } from './expression/projection/parse'

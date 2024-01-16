@@ -1,21 +1,23 @@
 import type { O } from 'ts-toolbelt'
 
-import type { If, ValueOrGetter } from 'v1/types'
 import type {
   AttributeKeyInput,
   AttributePutItemInput,
   AttributeUpdateItemInput,
   KeyInput,
   PutItemInput,
-  UpdateItemInput
+  UpdateItemInput,
 } from 'v1/operations'
+import type { If, ValueOrGetter } from 'v1/types'
 
 import type { Schema } from '../../interface'
-import type { RequiredOption, AtLeastOnce, Never, Always } from '../constants'
-import type { $type, $elements } from '../constants/attributeOptions'
-import type { $SharedAttributeState, SharedAttributeState } from '../shared/interface'
+import type { Always, AtLeastOnce, Never, RequiredOption } from '../constants'
+import type { $elements, $type } from '../constants/attributeOptions'
+import type {
+  $SharedAttributeState,
+  SharedAttributeState,
+} from '../shared/interface'
 import type { Attribute } from '../types'
-
 import type { FreezeAnyOfAttribute } from './freeze'
 import type { $AnyOfAttributeElements } from './types'
 
@@ -31,7 +33,9 @@ export interface $AnyOfAttributeNestedState<
   $ELEMENTS extends $AnyOfAttributeElements[] = $AnyOfAttributeElements[],
   STATE extends SharedAttributeState = SharedAttributeState
 > extends $AnyOfAttributeState<$ELEMENTS, STATE> {
-  freeze: (path: string) => FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>
+  freeze: (
+    path: string,
+  ) => FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>
 }
 
 /**
@@ -50,12 +54,18 @@ export interface $AnyOfAttribute<
    * @param nextRequired RequiredOption
    */
   required: <NEXT_IS_REQUIRED extends RequiredOption = AtLeastOnce>(
-    nextRequired?: NEXT_IS_REQUIRED
-  ) => $AnyOfAttribute<$ELEMENTS, O.Overwrite<STATE, { required: NEXT_IS_REQUIRED }>>
+    nextRequired?: NEXT_IS_REQUIRED,
+  ) => $AnyOfAttribute<
+    $ELEMENTS,
+    O.Overwrite<STATE, { required: NEXT_IS_REQUIRED }>
+  >
   /**
    * Shorthand for `required('never')`
    */
-  optional: () => $AnyOfAttribute<$ELEMENTS, O.Overwrite<STATE, { required: Never }>>
+  optional: () => $AnyOfAttribute<
+    $ELEMENTS,
+    O.Overwrite<STATE, { required: Never }>
+  >
   /**
    * Hide attribute after fetch commands and formatting
    */
@@ -63,13 +73,19 @@ export interface $AnyOfAttribute<
   /**
    * Tag attribute as needed for Primary Key computing
    */
-  key: () => $AnyOfAttribute<$ELEMENTS, O.Overwrite<STATE, { required: Always; key: true }>>
+  key: () => $AnyOfAttribute<
+    $ELEMENTS,
+    O.Overwrite<STATE, { required: Always; key: true }>
+  >
   /**
    * Rename attribute before save commands
    */
   savedAs: <NEXT_SAVED_AS extends string | undefined>(
-    nextSavedAs: NEXT_SAVED_AS
-  ) => $AnyOfAttribute<$ELEMENTS, O.Overwrite<STATE, { savedAs: NEXT_SAVED_AS }>>
+    nextSavedAs: NEXT_SAVED_AS,
+  ) => $AnyOfAttribute<
+    $ELEMENTS,
+    O.Overwrite<STATE, { savedAs: NEXT_SAVED_AS }>
+  >
   /**
    * Provide a default value for attribute in Primary Key computing
    *
@@ -77,8 +93,11 @@ export interface $AnyOfAttribute<
    */
   keyDefault: (
     nextKeyDefault: ValueOrGetter<
-      AttributeKeyInput<FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>, true>
-    >
+      AttributeKeyInput<
+        FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>,
+        true
+      >
+    >,
   ) => $AnyOfAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -99,8 +118,11 @@ export interface $AnyOfAttribute<
    */
   putDefault: (
     nextPutDefault: ValueOrGetter<
-      AttributePutItemInput<FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>, true>
-    >
+      AttributePutItemInput<
+        FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>,
+        true
+      >
+    >,
   ) => $AnyOfAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -121,8 +143,11 @@ export interface $AnyOfAttribute<
    */
   updateDefault: (
     nextUpdateDefault: ValueOrGetter<
-      AttributeUpdateItemInput<FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>, true>
-    >
+      AttributeUpdateItemInput<
+        FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>,
+        true
+      >
+    >,
   ) => $AnyOfAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -145,10 +170,16 @@ export interface $AnyOfAttribute<
     nextDefault: ValueOrGetter<
       If<
         STATE['key'],
-        AttributeKeyInput<FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>, true>,
-        AttributePutItemInput<FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>, true>
+        AttributeKeyInput<
+          FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>,
+          true
+        >,
+        AttributePutItemInput<
+          FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>,
+          true
+        >
       >
-    >
+    >,
   ) => $AnyOfAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -177,9 +208,12 @@ export interface $AnyOfAttribute<
    */
   keyLink: <SCHEMA extends Schema>(
     nextKeyDefault: ValueOrGetter<
-      AttributeKeyInput<FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>, true>,
+      AttributeKeyInput<
+        FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>,
+        true
+      >,
       [KeyInput<SCHEMA, true>]
-    >
+    >,
   ) => $AnyOfAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -200,9 +234,12 @@ export interface $AnyOfAttribute<
    */
   putLink: <SCHEMA extends Schema>(
     nextPutDefault: ValueOrGetter<
-      AttributePutItemInput<FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>, true>,
+      AttributePutItemInput<
+        FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>,
+        true
+      >,
       [PutItemInput<SCHEMA, true>]
-    >
+    >,
   ) => $AnyOfAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -223,9 +260,12 @@ export interface $AnyOfAttribute<
    */
   updateLink: <SCHEMA extends Schema>(
     nextUpdateDefault: ValueOrGetter<
-      AttributeUpdateItemInput<FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>, true>,
+      AttributeUpdateItemInput<
+        FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>,
+        true
+      >,
       [UpdateItemInput<SCHEMA, true>]
-    >
+    >,
   ) => $AnyOfAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -248,11 +288,17 @@ export interface $AnyOfAttribute<
     nextDefault: ValueOrGetter<
       If<
         STATE['key'],
-        AttributeKeyInput<FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>, true>,
-        AttributePutItemInput<FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>, true>
+        AttributeKeyInput<
+          FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>,
+          true
+        >,
+        AttributePutItemInput<
+          FreezeAnyOfAttribute<$AnyOfAttributeState<$ELEMENTS, STATE>>,
+          true
+        >
       >,
       [If<STATE['key'], KeyInput<SCHEMA, true>, PutItemInput<SCHEMA, true>>]
-    >
+    >,
   ) => $AnyOfAttribute<
     $ELEMENTS,
     O.Overwrite<

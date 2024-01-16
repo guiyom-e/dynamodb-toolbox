@@ -1,26 +1,26 @@
 import type { O } from 'ts-toolbelt'
 
+import type { EntityV2 } from 'v1/entity/class'
 import type {
-  Schema,
-  Attribute,
-  Item,
-  AttributeValue,
-  ResolveAnyAttribute,
-  ResolvePrimitiveAttribute,
+  Always,
   AnyAttribute,
-  PrimitiveAttribute,
-  SetAttribute,
-  ListAttribute,
-  MapAttribute,
-  RecordAttribute,
   AnyOfAttribute,
   AtLeastOnce,
-  Always,
-  Never
+  Attribute,
+  AttributeValue,
+  Item,
+  ListAttribute,
+  MapAttribute,
+  Never,
+  PrimitiveAttribute,
+  RecordAttribute,
+  ResolveAnyAttribute,
+  ResolvePrimitiveAttribute,
+  Schema,
+  SetAttribute,
 } from 'v1/schema'
-import type { OptionalizeUndefinableProperties } from 'v1/types/optionalizeUndefinableProperties'
-import type { EntityV2 } from 'v1/entity/class'
 import type { If } from 'v1/types/if'
+import type { OptionalizeUndefinableProperties } from 'v1/types/optionalizeUndefinableProperties'
 
 export type MustBeDefined<
   ATTRIBUTE extends Attribute,
@@ -96,15 +96,23 @@ export type AttributePutItemInput<
                 >
               },
               // Sadly we override optional AnyAttributes as 'unknown | undefined' => 'unknown' (undefined lost in the process)
-              O.SelectKeys<ATTRIBUTE['attributes'], AnyAttribute & { required: Never }>
+              O.SelectKeys<
+                ATTRIBUTE['attributes'],
+                AnyAttribute & { required: Never }
+              >
             >
           : ATTRIBUTE extends RecordAttribute
           ? {
-              [KEY in ResolvePrimitiveAttribute<ATTRIBUTE['keys']>]?: AttributePutItemInput<
+              [KEY in ResolvePrimitiveAttribute<
+                ATTRIBUTE['keys']
+              >]?: AttributePutItemInput<
                 ATTRIBUTE['elements'],
                 REQUIRED_DEFAULTS
               >
             }
           : ATTRIBUTE extends AnyOfAttribute
-          ? AttributePutItemInput<ATTRIBUTE['elements'][number], REQUIRED_DEFAULTS>
+          ? AttributePutItemInput<
+              ATTRIBUTE['elements'][number],
+              REQUIRED_DEFAULTS
+            >
           : never)

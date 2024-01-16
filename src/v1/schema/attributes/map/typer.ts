@@ -1,30 +1,33 @@
 import type { NarrowObject } from 'v1/types/narrowObject'
 import { overwrite } from 'v1/utils/overwrite'
 
-import type { RequiredOption, AtLeastOnce } from '../constants'
+import type { AtLeastOnce, RequiredOption } from '../constants'
 import {
-  $type,
   $attributes,
-  $required,
+  $defaults,
   $hidden,
   $key,
+  $required,
   $savedAs,
-  $defaults
+  $type,
 } from '../constants/attributeOptions'
 import type { InferStateFromOptions } from '../shared/inferStateFromOptions'
 import type { SharedAttributeState } from '../shared/interface'
-
-import type { $MapAttribute } from './interface'
-import type { $MapAttributeAttributeStates } from './types'
-import { MapAttributeOptions, MapAttributeDefaultOptions, MAP_DEFAULT_OPTIONS } from './options'
 import { freezeMapAttribute } from './freeze'
+import type { $MapAttribute } from './interface'
+import {
+  MAP_DEFAULT_OPTIONS,
+  MapAttributeDefaultOptions,
+  MapAttributeOptions,
+} from './options'
+import type { $MapAttributeAttributeStates } from './types'
 
 type $MapAttributeTyper = <
   $ATTRIBUTES extends $MapAttributeAttributeStates,
   STATE extends SharedAttributeState = SharedAttributeState
 >(
   attributes: NarrowObject<$ATTRIBUTES>,
-  state: STATE
+  state: STATE,
 ) => $MapAttribute<$ATTRIBUTES, STATE>
 
 const $map: $MapAttributeTyper = <
@@ -32,7 +35,7 @@ const $map: $MapAttributeTyper = <
   STATE extends SharedAttributeState = SharedAttributeState
 >(
   attributes: NarrowObject<$ATTRIBUTES>,
-  state: STATE
+  state: STATE,
 ) => {
   const $mapAttribute: $MapAttribute<$ATTRIBUTES, STATE> = {
     [$type]: 'map',
@@ -43,74 +46,119 @@ const $map: $MapAttributeTyper = <
     [$savedAs]: state.savedAs,
     [$defaults]: state.defaults,
     required: <NEXT_REQUIRED extends RequiredOption = AtLeastOnce>(
-      nextRequired: NEXT_REQUIRED = ('atLeastOnce' as unknown) as NEXT_REQUIRED
+      nextRequired: NEXT_REQUIRED = ('atLeastOnce' as unknown) as NEXT_REQUIRED,
     ) => $map(attributes, overwrite(state, { required: nextRequired })),
-    optional: () => $map(attributes, overwrite(state, { required: 'never' as const })),
+    optional: () =>
+      $map(attributes, overwrite(state, { required: 'never' as const })),
     hidden: () => $map(attributes, overwrite(state, { hidden: true as const })),
     key: () =>
-      $map(attributes, overwrite(state, { required: 'always' as const, key: true as const })),
-    savedAs: nextSavedAs => $map(attributes, overwrite(state, { savedAs: nextSavedAs })),
+      $map(
+        attributes,
+        overwrite(state, { required: 'always' as const, key: true as const }),
+      ),
+    savedAs: nextSavedAs =>
+      $map(attributes, overwrite(state, { savedAs: nextSavedAs })),
     keyDefault: nextKeyDefault =>
       $map(
         attributes,
         overwrite(state, {
-          defaults: { key: nextKeyDefault, put: state.defaults.put, update: state.defaults.update }
-        })
+          defaults: {
+            key: nextKeyDefault,
+            put: state.defaults.put,
+            update: state.defaults.update,
+          },
+        }),
       ),
     putDefault: nextPutDefault =>
       $map(
         attributes,
         overwrite(state, {
-          defaults: { key: state.defaults.key, put: nextPutDefault, update: state.defaults.update }
-        })
+          defaults: {
+            key: state.defaults.key,
+            put: nextPutDefault,
+            update: state.defaults.update,
+          },
+        }),
       ),
     updateDefault: nextUpdateDefault =>
       $map(
         attributes,
         overwrite(state, {
-          defaults: { key: state.defaults.key, put: state.defaults.put, update: nextUpdateDefault }
-        })
+          defaults: {
+            key: state.defaults.key,
+            put: state.defaults.put,
+            update: nextUpdateDefault,
+          },
+        }),
       ),
     default: nextDefault =>
       $map(
         attributes,
         overwrite(state, {
           defaults: state.key
-            ? { key: nextDefault, put: state.defaults.put, update: state.defaults.update }
-            : { key: state.defaults.key, put: nextDefault, update: state.defaults.update }
-        })
+            ? {
+                key: nextDefault,
+                put: state.defaults.put,
+                update: state.defaults.update,
+              }
+            : {
+                key: state.defaults.key,
+                put: nextDefault,
+                update: state.defaults.update,
+              },
+        }),
       ),
     keyLink: nextKeyDefault =>
       $map(
         attributes,
         overwrite(state, {
-          defaults: { key: nextKeyDefault, put: state.defaults.put, update: state.defaults.update }
-        })
+          defaults: {
+            key: nextKeyDefault,
+            put: state.defaults.put,
+            update: state.defaults.update,
+          },
+        }),
       ),
     putLink: nextPutDefault =>
       $map(
         attributes,
         overwrite(state, {
-          defaults: { key: state.defaults.key, put: nextPutDefault, update: state.defaults.update }
-        })
+          defaults: {
+            key: state.defaults.key,
+            put: nextPutDefault,
+            update: state.defaults.update,
+          },
+        }),
       ),
     updateLink: nextUpdateDefault =>
       $map(
         attributes,
         overwrite(state, {
-          defaults: { key: state.defaults.key, put: state.defaults.put, update: nextUpdateDefault }
-        })
+          defaults: {
+            key: state.defaults.key,
+            put: state.defaults.put,
+            update: nextUpdateDefault,
+          },
+        }),
       ),
     link: nextDefault =>
       $map(
         attributes,
         overwrite(state, {
           defaults: state.key
-            ? { key: nextDefault, put: state.defaults.put, update: state.defaults.update }
-            : { key: state.defaults.key, put: nextDefault, update: state.defaults.update }
-        })
+            ? {
+                key: nextDefault,
+                put: state.defaults.put,
+                update: state.defaults.update,
+              }
+            : {
+                key: state.defaults.key,
+                put: nextDefault,
+                update: state.defaults.update,
+              },
+        }),
       ),
-    freeze: path => freezeMapAttribute(attributes, state, path)
+    freeze: path => freezeMapAttribute(attributes, state, path),
   }
 
   return $mapAttribute
@@ -121,10 +169,14 @@ type MapAttributeTyper = <
   OPTIONS extends Partial<MapAttributeOptions> = MapAttributeDefaultOptions
 >(
   attributes: NarrowObject<ATTRIBUTES>,
-  options?: NarrowObject<OPTIONS>
+  options?: NarrowObject<OPTIONS>,
 ) => $MapAttribute<
   ATTRIBUTES,
-  InferStateFromOptions<MapAttributeOptions, MapAttributeDefaultOptions, OPTIONS>
+  InferStateFromOptions<
+    MapAttributeOptions,
+    MapAttributeDefaultOptions,
+    OPTIONS
+  >
 >
 
 /**
@@ -138,16 +190,24 @@ export const map: MapAttributeTyper = <
   OPTIONS extends Partial<MapAttributeOptions> = MapAttributeDefaultOptions
 >(
   attributes: NarrowObject<ATTRIBUTES>,
-  options?: OPTIONS
+  options?: OPTIONS,
 ): $MapAttribute<
   ATTRIBUTES,
-  InferStateFromOptions<MapAttributeOptions, MapAttributeDefaultOptions, OPTIONS>
+  InferStateFromOptions<
+    MapAttributeOptions,
+    MapAttributeDefaultOptions,
+    OPTIONS
+  >
 > => {
   const state = {
     ...MAP_DEFAULT_OPTIONS,
     ...options,
-    defaults: { ...MAP_DEFAULT_OPTIONS.defaults, ...options?.defaults }
-  } as InferStateFromOptions<MapAttributeOptions, MapAttributeDefaultOptions, OPTIONS>
+    defaults: { ...MAP_DEFAULT_OPTIONS.defaults, ...options?.defaults },
+  } as InferStateFromOptions<
+    MapAttributeOptions,
+    MapAttributeDefaultOptions,
+    OPTIONS
+  >
 
   return $map(attributes, state)
 }

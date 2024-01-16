@@ -2,19 +2,18 @@ import type { A } from 'ts-toolbelt'
 
 import { DynamoDBToolboxError } from 'v1/errors'
 
-import { string } from '../primitive'
-import { Never, AtLeastOnce, Always } from '../constants'
+import { Always, AtLeastOnce, Never } from '../constants'
 import {
-  $type,
+  $defaults,
   $elements,
-  $required,
   $hidden,
   $key,
+  $required,
   $savedAs,
-  $defaults
+  $type,
 } from '../constants/attributeOptions'
-
-import type { AnyOfAttribute, $AnyOfAttributeState } from './interface'
+import { string } from '../primitive'
+import type { $AnyOfAttributeState, AnyOfAttribute } from './interface'
 import { anyOf } from './typer'
 
 describe('anyOf', () => {
@@ -28,7 +27,10 @@ describe('anyOf', () => {
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.anyOfAttribute.missingElements', path })
+      expect.objectContaining({
+        code: 'schema.anyOfAttribute.missingElements',
+        path,
+      }),
     )
   })
 
@@ -36,14 +38,17 @@ describe('anyOf', () => {
     const invalidAnyOf = anyOf(
       str,
       // @ts-expect-error
-      str.optional()
+      str.optional(),
     )
 
     const invalidCall = () => invalidAnyOf.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.anyOfAttribute.optionalElements', path })
+      expect.objectContaining({
+        code: 'schema.anyOfAttribute.optionalElements',
+        path,
+      }),
     )
   })
 
@@ -51,14 +56,17 @@ describe('anyOf', () => {
     const invalidAnyOf = anyOf(
       str,
       // @ts-expect-error
-      str.hidden()
+      str.hidden(),
     )
 
     const invalidCall = () => invalidAnyOf.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.anyOfAttribute.hiddenElements', path })
+      expect.objectContaining({
+        code: 'schema.anyOfAttribute.hiddenElements',
+        path,
+      }),
     )
   })
 
@@ -66,14 +74,17 @@ describe('anyOf', () => {
     const invalidAnyOf = anyOf(
       str,
       // @ts-expect-error
-      str.savedAs('foo')
+      str.savedAs('foo'),
     )
 
     const invalidCall = () => invalidAnyOf.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.anyOfAttribute.savedAsElements', path })
+      expect.objectContaining({
+        code: 'schema.anyOfAttribute.savedAsElements',
+        path,
+      }),
     )
   })
 
@@ -81,14 +92,17 @@ describe('anyOf', () => {
     const invalidAnyOf = anyOf(
       str,
       // @ts-expect-error
-      str.putDefault('foo')
+      str.putDefault('foo'),
     )
 
     const invalidCall = () => invalidAnyOf.freeze(path)
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'schema.anyOfAttribute.defaultedElements', path })
+      expect.objectContaining({
+        code: 'schema.anyOfAttribute.defaultedElements',
+        path,
+      }),
     )
   })
 
@@ -130,8 +144,8 @@ describe('anyOf', () => {
       [$defaults]: {
         key: undefined,
         put: undefined,
-        update: undefined
-      }
+        update: undefined,
+      },
     })
   })
 
@@ -159,9 +173,15 @@ describe('anyOf', () => {
     const anyOfNever = anyOf(str).required('never')
     const anyOfOpt = anyOf(str).optional()
 
-    const assertAtLeastOnce: A.Contains<typeof anyOfAtLeastOnce, { [$required]: AtLeastOnce }> = 1
+    const assertAtLeastOnce: A.Contains<
+      typeof anyOfAtLeastOnce,
+      { [$required]: AtLeastOnce }
+    > = 1
     assertAtLeastOnce
-    const assertAlways: A.Contains<typeof anyOfAlways, { [$required]: Always }> = 1
+    const assertAlways: A.Contains<
+      typeof anyOfAlways,
+      { [$required]: Always }
+    > = 1
     assertAlways
     const assertNever: A.Contains<typeof anyOfNever, { [$required]: Never }> = 1
     assertNever
@@ -205,7 +225,10 @@ describe('anyOf', () => {
   it('returns key anyOf (method)', () => {
     const anyOfAttr = anyOf(str).key()
 
-    const assertAnyOf: A.Contains<typeof anyOfAttr, { [$key]: true; [$required]: Always }> = 1
+    const assertAnyOf: A.Contains<
+      typeof anyOfAttr,
+      { [$key]: true; [$required]: Always }
+    > = 1
     assertAnyOf
 
     expect(anyOfAttr).toMatchObject({ [$key]: true, [$required]: 'always' })
@@ -259,7 +282,7 @@ describe('anyOf', () => {
     assertAnyOf
 
     expect(anyOfAttr).toMatchObject({
-      [$defaults]: { key: undefined, put: undefined, update: 'bar' }
+      [$defaults]: { key: undefined, put: undefined, update: 'bar' },
     })
   })
 
@@ -273,7 +296,7 @@ describe('anyOf', () => {
     assertAnyOf
 
     expect(anyOfAttr).toMatchObject({
-      [$defaults]: { key: undefined, put: 'foo', update: undefined }
+      [$defaults]: { key: undefined, put: 'foo', update: undefined },
     })
   })
 
@@ -287,7 +310,7 @@ describe('anyOf', () => {
     assertAnyOf
 
     expect(anyOfAttr).toMatchObject({
-      [$defaults]: { key: 'foo', put: undefined, update: undefined }
+      [$defaults]: { key: 'foo', put: undefined, update: undefined },
     })
   })
 
@@ -323,8 +346,8 @@ describe('anyOf', () => {
       [$defaults]: {
         key: undefined,
         put: undefined,
-        update: undefined
-      }
+        update: undefined,
+      },
     })
   })
 })

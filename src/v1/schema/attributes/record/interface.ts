@@ -1,26 +1,29 @@
 import type { O } from 'ts-toolbelt'
 
-import type { If, ValueOrGetter } from 'v1/types'
 import type {
   AttributeKeyInput,
   AttributePutItemInput,
   AttributeUpdateItemInput,
   KeyInput,
   PutItemInput,
-  UpdateItemInput
+  UpdateItemInput,
 } from 'v1/operations'
+import type { If, ValueOrGetter } from 'v1/types'
 
 import type { Schema } from '../../interface'
-import type { RequiredOption, AtLeastOnce, Never, Always } from '../constants'
-import type { $type, $elements, $keys } from '../constants/attributeOptions'
-import type { $SharedAttributeState, SharedAttributeState } from '../shared/interface'
+import type { Always, AtLeastOnce, Never, RequiredOption } from '../constants'
+import type { $elements, $keys, $type } from '../constants/attributeOptions'
 import type {
-  $RecordAttributeKeys,
-  RecordAttributeKeys,
-  $RecordAttributeElements,
-  RecordAttributeElements
-} from './types'
+  $SharedAttributeState,
+  SharedAttributeState,
+} from '../shared/interface'
 import type { FreezeRecordAttribute } from './freeze'
+import type {
+  $RecordAttributeElements,
+  $RecordAttributeKeys,
+  RecordAttributeElements,
+  RecordAttributeKeys,
+} from './types'
 
 export interface $RecordAttributeState<
   $KEYS extends $RecordAttributeKeys = $RecordAttributeKeys,
@@ -37,7 +40,9 @@ export interface $RecordAttributeNestedState<
   $ELEMENTS extends $RecordAttributeElements = $RecordAttributeElements,
   STATE extends SharedAttributeState = SharedAttributeState
 > extends $RecordAttributeState<$KEYS, $ELEMENTS, STATE> {
-  freeze: (path: string) => FreezeRecordAttribute<$RecordAttributeState<$KEYS, $ELEMENTS, STATE>>
+  freeze: (
+    path: string,
+  ) => FreezeRecordAttribute<$RecordAttributeState<$KEYS, $ELEMENTS, STATE>>
 }
 
 /**
@@ -57,26 +62,46 @@ export interface $RecordAttribute<
    * @param nextRequired RequiredOption
    */
   required: <NEXT_IS_REQUIRED extends RequiredOption = AtLeastOnce>(
-    nextRequired?: NEXT_IS_REQUIRED
-  ) => $RecordAttribute<$KEYS, $ELEMENTS, O.Overwrite<STATE, { required: NEXT_IS_REQUIRED }>>
+    nextRequired?: NEXT_IS_REQUIRED,
+  ) => $RecordAttribute<
+    $KEYS,
+    $ELEMENTS,
+    O.Overwrite<STATE, { required: NEXT_IS_REQUIRED }>
+  >
   /**
    * Shorthand for `required('never')`
    */
-  optional: () => $RecordAttribute<$KEYS, $ELEMENTS, O.Overwrite<STATE, { required: Never }>>
+  optional: () => $RecordAttribute<
+    $KEYS,
+    $ELEMENTS,
+    O.Overwrite<STATE, { required: Never }>
+  >
   /**
    * Hide attribute after fetch commands and formatting
    */
-  hidden: () => $RecordAttribute<$KEYS, $ELEMENTS, O.Overwrite<STATE, { hidden: true }>>
+  hidden: () => $RecordAttribute<
+    $KEYS,
+    $ELEMENTS,
+    O.Overwrite<STATE, { hidden: true }>
+  >
   /**
    * Tag attribute as needed for Primary Key computing
    */
-  key: () => $RecordAttribute<$KEYS, $ELEMENTS, O.Overwrite<STATE, { key: true; required: Always }>>
+  key: () => $RecordAttribute<
+    $KEYS,
+    $ELEMENTS,
+    O.Overwrite<STATE, { key: true; required: Always }>
+  >
   /**
    * Rename attribute before save commands
    */
   savedAs: <NEXT_SAVED_AS extends string | undefined>(
-    nextSavedAs: NEXT_SAVED_AS
-  ) => $RecordAttribute<$KEYS, $ELEMENTS, O.Overwrite<STATE, { savedAs: NEXT_SAVED_AS }>>
+    nextSavedAs: NEXT_SAVED_AS,
+  ) => $RecordAttribute<
+    $KEYS,
+    $ELEMENTS,
+    O.Overwrite<STATE, { savedAs: NEXT_SAVED_AS }>
+  >
   /**
    * Provide a default value for attribute in Primary Key computing
    *
@@ -84,8 +109,11 @@ export interface $RecordAttribute<
    */
   keyDefault: (
     nextKeyDefault: ValueOrGetter<
-      AttributeKeyInput<FreezeRecordAttribute<$RecordAttributeState<$KEYS, $ELEMENTS, STATE>>, true>
-    >
+      AttributeKeyInput<
+        FreezeRecordAttribute<$RecordAttributeState<$KEYS, $ELEMENTS, STATE>>,
+        true
+      >
+    >,
   ) => $RecordAttribute<
     $KEYS,
     $ELEMENTS,
@@ -111,7 +139,7 @@ export interface $RecordAttribute<
         FreezeRecordAttribute<$RecordAttributeState<$KEYS, $ELEMENTS, STATE>>,
         true
       >
-    >
+    >,
   ) => $RecordAttribute<
     $KEYS,
     $ELEMENTS,
@@ -137,7 +165,7 @@ export interface $RecordAttribute<
         FreezeRecordAttribute<$RecordAttributeState<$KEYS, $ELEMENTS, STATE>>,
         true
       >
-    >
+    >,
   ) => $RecordAttribute<
     $KEYS,
     $ELEMENTS,
@@ -170,7 +198,7 @@ export interface $RecordAttribute<
           true
         >
       >
-    >
+    >,
   ) => $RecordAttribute<
     $KEYS,
     $ELEMENTS,
@@ -205,7 +233,7 @@ export interface $RecordAttribute<
         true
       >,
       [KeyInput<SCHEMA, true>]
-    >
+    >,
   ) => $RecordAttribute<
     $KEYS,
     $ELEMENTS,
@@ -232,7 +260,7 @@ export interface $RecordAttribute<
         true
       >,
       [PutItemInput<SCHEMA, true>]
-    >
+    >,
   ) => $RecordAttribute<
     $KEYS,
     $ELEMENTS,
@@ -259,7 +287,7 @@ export interface $RecordAttribute<
         true
       >,
       [UpdateItemInput<SCHEMA, true>]
-    >
+    >,
   ) => $RecordAttribute<
     $KEYS,
     $ELEMENTS,
@@ -293,7 +321,7 @@ export interface $RecordAttribute<
         >
       >,
       [If<STATE['key'], KeyInput<SCHEMA, true>, PutItemInput<SCHEMA, true>>]
-    >
+    >,
   ) => $RecordAttribute<
     $KEYS,
     $ELEMENTS,

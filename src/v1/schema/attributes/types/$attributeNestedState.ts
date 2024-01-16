@@ -1,10 +1,10 @@
 import type { $AnyAttributeNestedState } from '../any'
-import type { $PrimitiveAttributeNestedState } from '../primitive'
-import type { $SetAttributeNestedState } from '../set'
+import type { $AnyOfAttributeNestedState } from '../anyOf'
 import type { $ListAttributeNestedState } from '../list'
 import type { $MapAttributeNestedState } from '../map'
+import type { $PrimitiveAttributeNestedState } from '../primitive'
 import type { $RecordAttributeNestedState } from '../record'
-import type { $AnyOfAttributeNestedState } from '../anyOf'
+import type { $SetAttributeNestedState } from '../set'
 
 /**
  * Any warm attribute nested state (i.e. with `freeze` method)

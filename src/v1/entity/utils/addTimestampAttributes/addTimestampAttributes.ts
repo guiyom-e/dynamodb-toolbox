@@ -1,30 +1,62 @@
+import { $get } from 'v1/operations/updateItem/utils'
 import type { Schema } from 'v1/schema'
 import type { If } from 'v1/types/if'
-import { $get } from 'v1/operations/updateItem/utils'
 
-import { WithInternalAttribute, addInternalAttribute } from '../addInternalAttribute'
-
-import type { TimestampsOptions } from './timestampOptions'
-import type { TimestampAttribute } from './timestampAttribute'
 import {
+  addInternalAttribute,
+  WithInternalAttribute,
+} from '../addInternalAttribute'
+import type { TimestampAttribute } from './timestampAttribute'
+import type { TimestampsOptions } from './timestampOptions'
+import {
+  getTimestampOptionValue,
   IsTimestampEnabled,
   isTimestampEnabled,
   TimestampOptionValue,
-  getTimestampOptionValue
 } from './utils'
 
 export type WithTimestampAttributes<
   SCHEMA extends Schema,
   ENTITY_NAME extends string,
   TIMESTAMP_OPTIONS extends TimestampsOptions,
-  IS_CREATED_ENABLED extends boolean = IsTimestampEnabled<TIMESTAMP_OPTIONS, 'created'>,
-  CREATED_NAME extends string = TimestampOptionValue<TIMESTAMP_OPTIONS, 'created', 'name'>,
-  CREATED_SAVED_AS extends string = TimestampOptionValue<TIMESTAMP_OPTIONS, 'created', 'savedAs'>,
-  CREATED_HIDDEN extends boolean = TimestampOptionValue<TIMESTAMP_OPTIONS, 'created', 'hidden'>,
-  IS_MODIFIED_ENABLED extends boolean = IsTimestampEnabled<TIMESTAMP_OPTIONS, 'modified'>,
-  MODIFIED_NAME extends string = TimestampOptionValue<TIMESTAMP_OPTIONS, 'modified', 'name'>,
-  MODIFIED_SAVED_AS extends string = TimestampOptionValue<TIMESTAMP_OPTIONS, 'modified', 'savedAs'>,
-  MODIFIED_HIDDEN extends boolean = TimestampOptionValue<TIMESTAMP_OPTIONS, 'modified', 'hidden'>
+  IS_CREATED_ENABLED extends boolean = IsTimestampEnabled<
+    TIMESTAMP_OPTIONS,
+    'created'
+  >,
+  CREATED_NAME extends string = TimestampOptionValue<
+    TIMESTAMP_OPTIONS,
+    'created',
+    'name'
+  >,
+  CREATED_SAVED_AS extends string = TimestampOptionValue<
+    TIMESTAMP_OPTIONS,
+    'created',
+    'savedAs'
+  >,
+  CREATED_HIDDEN extends boolean = TimestampOptionValue<
+    TIMESTAMP_OPTIONS,
+    'created',
+    'hidden'
+  >,
+  IS_MODIFIED_ENABLED extends boolean = IsTimestampEnabled<
+    TIMESTAMP_OPTIONS,
+    'modified'
+  >,
+  MODIFIED_NAME extends string = TimestampOptionValue<
+    TIMESTAMP_OPTIONS,
+    'modified',
+    'name'
+  >,
+  MODIFIED_SAVED_AS extends string = TimestampOptionValue<
+    TIMESTAMP_OPTIONS,
+    'modified',
+    'savedAs'
+  >,
+  MODIFIED_HIDDEN extends boolean = TimestampOptionValue<
+    TIMESTAMP_OPTIONS,
+    'modified',
+    'hidden'
+  >
 > = string extends ENTITY_NAME
   ? SCHEMA
   : If<
@@ -73,7 +105,7 @@ export const addTimestampAttributes: TimestampAttributesAdder = <
   TIMESTAMP_OPTIONS extends TimestampsOptions
 >({
   schema,
-  timestamps: $timestamps
+  timestamps: $timestamps,
 }: {
   schema: SCHEMA
   entityName: ENTITY_NAME
@@ -101,12 +133,16 @@ export const addTimestampAttributes: TimestampAttributesAdder = <
       defaults: {
         key: undefined,
         put: () => new Date().toISOString(),
-        update: () => $get(createdName, new Date().toISOString())
+        update: () => $get(createdName, new Date().toISOString()),
       },
-      transform: undefined
+      transform: undefined,
     }
 
-    schemaWithTimestamps = addInternalAttribute(schemaWithTimestamps, createdName, createdAttribute)
+    schemaWithTimestamps = addInternalAttribute(
+      schemaWithTimestamps,
+      createdName,
+      createdAttribute,
+    )
   }
 
   const isModifiedEnable = isTimestampEnabled(timestamps, 'modified')
@@ -127,17 +163,21 @@ export const addTimestampAttributes: TimestampAttributesAdder = <
       defaults: {
         key: undefined,
         put: () => new Date().toISOString(),
-        update: () => new Date().toISOString()
+        update: () => new Date().toISOString(),
       },
-      transform: undefined
+      transform: undefined,
     }
 
     schemaWithTimestamps = addInternalAttribute(
       schemaWithTimestamps,
       modifiedName,
-      modifiedAttribute
+      modifiedAttribute,
     )
   }
 
-  return schemaWithTimestamps as WithTimestampAttributes<SCHEMA, ENTITY_NAME, TIMESTAMP_OPTIONS>
+  return schemaWithTimestamps as WithTimestampAttributes<
+    SCHEMA,
+    ENTITY_NAME,
+    TIMESTAMP_OPTIONS
+  >
 }

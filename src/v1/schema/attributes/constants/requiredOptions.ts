@@ -27,4 +27,8 @@ export type RequiredOption = Never | AtLeastOnce | Always
 /**
  * Available options for attributes required options as Set
  */
-export const requiredOptionsSet = new Set<RequiredOption>(['never', 'atLeastOnce', 'always'])
+export const requiredOptionsSet = new Set<RequiredOption>([
+  'never',
+  'atLeastOnce',
+  'always',
+])

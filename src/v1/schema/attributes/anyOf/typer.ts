@@ -1,21 +1,20 @@
 import { overwrite } from 'v1/utils/overwrite'
 
-import type { RequiredOption, AtLeastOnce } from '../constants'
+import type { AtLeastOnce, RequiredOption } from '../constants'
 import {
-  $type,
+  $defaults,
   $elements,
-  $required,
   $hidden,
   $key,
+  $required,
   $savedAs,
-  $defaults
+  $type,
 } from '../constants/attributeOptions'
 import type { SharedAttributeState } from '../shared/interface'
-
-import type { $AnyOfAttribute } from './interface'
-import type { $AnyOfAttributeElements } from './types'
-import { AnyOfAttributeDefaultOptions, ANY_OF_DEFAULT_OPTIONS } from './options'
 import { freezeAnyOfAttribute } from './freeze'
+import type { $AnyOfAttribute } from './interface'
+import { ANY_OF_DEFAULT_OPTIONS, AnyOfAttributeDefaultOptions } from './options'
+import type { $AnyOfAttributeElements } from './types'
 
 type $AnyOfAttributeTyper = <
   $ELEMENTS extends $AnyOfAttributeElements[],
@@ -41,22 +40,25 @@ const $anyOf: $AnyOfAttributeTyper = <
     [$savedAs]: state.savedAs,
     [$defaults]: state.defaults,
     required: <NEXT_IS_REQUIRED extends RequiredOption = AtLeastOnce>(
-      nextRequired: NEXT_IS_REQUIRED = 'atLeastOnce' as NEXT_IS_REQUIRED
+      nextRequired: NEXT_IS_REQUIRED = 'atLeastOnce' as NEXT_IS_REQUIRED,
     ) => $anyOf(overwrite(state, { required: nextRequired }), ...elements),
-    optional: () => $anyOf(overwrite(state, { required: 'never' }), ...elements),
+    optional: () =>
+      $anyOf(overwrite(state, { required: 'never' }), ...elements),
     hidden: () => $anyOf(overwrite(state, { hidden: true }), ...elements),
-    key: () => $anyOf(overwrite(state, { key: true, required: 'always' }), ...elements),
-    savedAs: nextSavedAs => $anyOf(overwrite(state, { savedAs: nextSavedAs }), ...elements),
+    key: () =>
+      $anyOf(overwrite(state, { key: true, required: 'always' }), ...elements),
+    savedAs: nextSavedAs =>
+      $anyOf(overwrite(state, { savedAs: nextSavedAs }), ...elements),
     keyDefault: nextKeyDefault =>
       $anyOf(
         overwrite(state, {
           defaults: {
             key: nextKeyDefault,
             put: state.defaults.put,
-            update: state.defaults.update
-          }
+            update: state.defaults.update,
+          },
         }),
-        ...elements
+        ...elements,
       ),
     putDefault: nextPutDefault =>
       $anyOf(
@@ -64,10 +66,10 @@ const $anyOf: $AnyOfAttributeTyper = <
           defaults: {
             key: state.defaults.key,
             put: nextPutDefault,
-            update: state.defaults.update
-          }
+            update: state.defaults.update,
+          },
         }),
-        ...elements
+        ...elements,
       ),
     updateDefault: nextUpdateDefault =>
       $anyOf(
@@ -75,19 +77,27 @@ const $anyOf: $AnyOfAttributeTyper = <
           defaults: {
             key: state.defaults.key,
             put: state.defaults.put,
-            update: nextUpdateDefault
-          }
+            update: nextUpdateDefault,
+          },
         }),
-        ...elements
+        ...elements,
       ),
     default: nextDefault =>
       $anyOf(
         overwrite(state, {
           defaults: state.key
-            ? { key: nextDefault, put: state.defaults.put, update: state.defaults.update }
-            : { key: state.defaults.key, put: nextDefault, update: state.defaults.update }
+            ? {
+                key: nextDefault,
+                put: state.defaults.put,
+                update: state.defaults.update,
+              }
+            : {
+                key: state.defaults.key,
+                put: nextDefault,
+                update: state.defaults.update,
+              },
         }),
-        ...elements
+        ...elements,
       ),
     keyLink: nextKeyDefault =>
       $anyOf(
@@ -95,10 +105,10 @@ const $anyOf: $AnyOfAttributeTyper = <
           defaults: {
             key: nextKeyDefault,
             put: state.defaults.put,
-            update: state.defaults.update
-          }
+            update: state.defaults.update,
+          },
         }),
-        ...elements
+        ...elements,
       ),
     putLink: nextPutDefault =>
       $anyOf(
@@ -106,10 +116,10 @@ const $anyOf: $AnyOfAttributeTyper = <
           defaults: {
             key: state.defaults.key,
             put: nextPutDefault,
-            update: state.defaults.update
-          }
+            update: state.defaults.update,
+          },
         }),
-        ...elements
+        ...elements,
       ),
     updateLink: nextUpdateDefault =>
       $anyOf(
@@ -117,21 +127,29 @@ const $anyOf: $AnyOfAttributeTyper = <
           defaults: {
             key: state.defaults.key,
             put: state.defaults.put,
-            update: nextUpdateDefault
-          }
+            update: nextUpdateDefault,
+          },
         }),
-        ...elements
+        ...elements,
       ),
     link: nextDefault =>
       $anyOf(
         overwrite(state, {
           defaults: state.key
-            ? { key: nextDefault, put: state.defaults.put, update: state.defaults.update }
-            : { key: state.defaults.key, put: nextDefault, update: state.defaults.update }
+            ? {
+                key: nextDefault,
+                put: state.defaults.put,
+                update: state.defaults.update,
+              }
+            : {
+                key: state.defaults.key,
+                put: nextDefault,
+                update: state.defaults.update,
+              },
         }),
-        ...elements
+        ...elements,
       ),
-    freeze: path => freezeAnyOfAttribute(elements, state, path)
+    freeze: path => freezeAnyOfAttribute(elements, state, path),
   }
 
   return $anyOfAttribute
@@ -146,6 +164,8 @@ type AnyOfAttributeTyper = <ELEMENTS extends $AnyOfAttributeElements[]>(
  * @param elements Attribute[]
  * @param options _(optional)_ AnyOf Options
  */
-export const anyOf: AnyOfAttributeTyper = <$ELEMENTS extends $AnyOfAttributeElements[]>(
+export const anyOf: AnyOfAttributeTyper = <
+  $ELEMENTS extends $AnyOfAttributeElements[]
+>(
   ...elements: $ELEMENTS
 ) => $anyOf(ANY_OF_DEFAULT_OPTIONS, ...elements)

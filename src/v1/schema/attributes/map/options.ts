@@ -1,4 +1,4 @@
-import type { RequiredOption, AtLeastOnce } from '../constants'
+import type { AtLeastOnce, RequiredOption } from '../constants'
 
 // Note: May look like a duplicate of AnyAttributeState but actually adds JSDocs
 
@@ -55,6 +55,6 @@ export const MAP_DEFAULT_OPTIONS: MapAttributeDefaultOptions = {
   defaults: {
     key: undefined,
     put: undefined,
-    update: undefined
-  }
+    update: undefined,
+  },
 }

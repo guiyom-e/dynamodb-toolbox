@@ -3,6 +3,6 @@ export type {
   $ListAttributeState,
   $ListAttributeNestedState,
   $ListAttribute,
-  ListAttribute
+  ListAttribute,
 } from './interface'
 export type { FreezeListAttribute } from './freeze'

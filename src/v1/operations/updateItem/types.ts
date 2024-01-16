@@ -1,44 +1,44 @@
 import type { O } from 'ts-toolbelt'
 
+import type { EntityV2 } from 'v1/entity/class'
+import type { SchemaAttributePath } from 'v1/operations/types'
 import type {
-  Schema,
+  Always,
+  AnyAttribute,
+  AnyOfAttribute,
+  AtLeastOnce,
   Attribute,
   AttributeValue,
-  ResolveAnyAttribute,
-  ResolvePrimitiveAttribute,
   Item,
-  AnyAttribute,
-  PrimitiveAttribute,
-  PrimitiveAttributeValue,
-  SetAttribute,
-  SetAttributeValue,
   ListAttribute,
   ListAttributeValue,
   MapAttribute,
   MapAttributeValue,
+  Never,
+  PrimitiveAttribute,
+  PrimitiveAttributeValue,
   RecordAttribute,
   RecordAttributeValue,
-  AnyOfAttribute,
-  AtLeastOnce,
-  Always,
-  Never
+  ResolveAnyAttribute,
+  ResolvePrimitiveAttribute,
+  Schema,
+  SetAttribute,
+  SetAttributeValue,
 } from 'v1/schema'
-import type { OptionalizeUndefinableProperties } from 'v1/types/optionalizeUndefinableProperties'
-import type { EntityV2 } from 'v1/entity/class'
 import type { If } from 'v1/types/if'
-import type { SchemaAttributePath } from 'v1/operations/types'
+import type { OptionalizeUndefinableProperties } from 'v1/types/optionalizeUndefinableProperties'
 
 import {
-  $HAS_VERB,
-  $SET,
-  $GET,
-  $REMOVE,
-  $SUM,
-  $SUBTRACT,
   $ADD,
-  $DELETE,
   $APPEND,
-  $PREPEND
+  $DELETE,
+  $GET,
+  $HAS_VERB,
+  $PREPEND,
+  $REMOVE,
+  $SET,
+  $SUBTRACT,
+  $SUM,
 } from './constants'
 
 // Distinguishing verbal syntax vs non-verbal for type inference & parsing
@@ -57,7 +57,9 @@ export type NonVerbal<VALUE> = { [$HAS_VERB]?: false } & VALUE
 
 export type ReferenceExtension = {
   type: '*'
-  value: Verbal<{ [$GET]: [ref: string, fallback?: AttributeValue<ReferenceExtension>] }>
+  value: Verbal<{
+    [$GET]: [ref: string, fallback?: AttributeValue<ReferenceExtension>]
+  }>
 }
 
 export type UpdateItemInputExtension =
@@ -70,28 +72,42 @@ export type UpdateItemInputExtension =
         | Verbal<{
             [$SUM]: [
               PrimitiveAttributeValue<ReferenceExtension>,
-              PrimitiveAttributeValue<ReferenceExtension>
+              PrimitiveAttributeValue<ReferenceExtension>,
             ]
           }>
         | Verbal<{
             [$SUBTRACT]: [
               PrimitiveAttributeValue<ReferenceExtension>,
-              PrimitiveAttributeValue<ReferenceExtension>
+              PrimitiveAttributeValue<ReferenceExtension>,
             ]
           }>
     }
   | {
       type: 'set'
-      value: Verbal<{ [$ADD]: SetAttributeValue } | { [$DELETE]: SetAttributeValue }>
+      value: Verbal<
+        { [$ADD]: SetAttributeValue } | { [$DELETE]: SetAttributeValue }
+      >
     }
   | {
       type: 'list'
       value:
-        | NonVerbal<{ [INDEX in number]: AttributeValue<UpdateItemInputExtension> | undefined }>
+        | NonVerbal<
+            {
+              [INDEX in number]:
+                | AttributeValue<UpdateItemInputExtension>
+                | undefined
+            }
+          >
         | Verbal<{ [$SET]: ListAttributeValue }>
         | Verbal<
-            | { [$APPEND]: AttributeValue<ReferenceExtension> | AttributeValue[] }
-            | { [$PREPEND]: AttributeValue<ReferenceExtension> | AttributeValue[] }
+            | {
+                [$APPEND]: AttributeValue<ReferenceExtension> | AttributeValue[]
+              }
+            | {
+                [$PREPEND]:
+                  | AttributeValue<ReferenceExtension>
+                  | AttributeValue[]
+              }
             // TODO: CONCAT to join two unrelated lists
           >
     }
@@ -118,7 +134,9 @@ type MustBeDefined<
   ? true
   : false
 
-type CanBeRemoved<ATTRIBUTE extends Attribute> = ATTRIBUTE extends { required: Never }
+type CanBeRemoved<ATTRIBUTE extends Attribute> = ATTRIBUTE extends {
+  required: Never
+}
   ? true
   : false
 
@@ -146,7 +164,10 @@ export type UpdateItemInput<
         >
       },
       // Sadly we override optional AnyAttributes as 'unknown | undefined' => 'unknown' (undefined lost in the process)
-      O.SelectKeys<SCHEMA['attributes'], AnyAttribute & { required: AtLeastOnce | Never }>
+      O.SelectKeys<
+        SCHEMA['attributes'],
+        AnyAttribute & { required: AtLeastOnce | Never }
+      >
     >
   : SCHEMA extends EntityV2
   ? UpdateItemInput<SCHEMA['schema'], REQUIRED_DEFAULTS>
@@ -160,11 +181,13 @@ export type Reference<
     ref: SCHEMA_ATTRIBUTE_PATHS,
     fallback?:
       | AttributeUpdateItemCompleteInput<ATTRIBUTE>
-      | Reference<ATTRIBUTE, SCHEMA_ATTRIBUTE_PATHS>
+      | Reference<ATTRIBUTE, SCHEMA_ATTRIBUTE_PATHS>,
   ]
 >
 
-type AttributeUpdateItemCompleteInput<ATTRIBUTE extends Attribute> = Attribute extends ATTRIBUTE
+type AttributeUpdateItemCompleteInput<
+  ATTRIBUTE extends Attribute
+> = Attribute extends ATTRIBUTE
   ? AttributeValue | undefined
   :
       | (ATTRIBUTE extends { required: Never } ? undefined : never)
@@ -184,7 +207,10 @@ type AttributeUpdateItemCompleteInput<ATTRIBUTE extends Attribute> = Attribute e
                 >
               },
               // Sadly we override optional AnyAttributes as 'unknown | undefined' => 'unknown' (undefined lost in the process)
-              O.SelectKeys<ATTRIBUTE['attributes'], AnyAttribute & { required: Never }>
+              O.SelectKeys<
+                ATTRIBUTE['attributes'],
+                AnyAttribute & { required: Never }
+              >
             >
           : ATTRIBUTE extends RecordAttribute
           ? {
@@ -218,7 +244,7 @@ export type AttributeUpdateItemInput<
             ref: SCHEMA_ATTRIBUTE_PATHS,
             fallback?:
               | AttributeUpdateItemCompleteInput<ATTRIBUTE>
-              | Reference<ATTRIBUTE, SCHEMA_ATTRIBUTE_PATHS>
+              | Reference<ATTRIBUTE, SCHEMA_ATTRIBUTE_PATHS>,
           ]
         >
       | (ATTRIBUTE extends AnyAttribute
@@ -235,7 +261,12 @@ export type AttributeUpdateItemInput<
                           | GET<
                               [
                                 ref: SCHEMA_ATTRIBUTE_PATHS,
-                                fallback?: number | Reference<ATTRIBUTE, SCHEMA_ATTRIBUTE_PATHS>
+                                fallback?:
+                                  | number
+                                  | Reference<
+                                      ATTRIBUTE,
+                                      SCHEMA_ATTRIBUTE_PATHS
+                                    >,
                               ]
                             >,
                           // Not using Reference<...> for improved type display
@@ -243,7 +274,12 @@ export type AttributeUpdateItemInput<
                           | GET<
                               [
                                 ref: SCHEMA_ATTRIBUTE_PATHS,
-                                fallback?: number | Reference<ATTRIBUTE, SCHEMA_ATTRIBUTE_PATHS>
+                                fallback?:
+                                  | number
+                                  | Reference<
+                                      ATTRIBUTE,
+                                      SCHEMA_ATTRIBUTE_PATHS
+                                    >,
                               ]
                             >
                         >
@@ -253,7 +289,12 @@ export type AttributeUpdateItemInput<
                           | GET<
                               [
                                 ref: SCHEMA_ATTRIBUTE_PATHS,
-                                fallback?: number | Reference<ATTRIBUTE, SCHEMA_ATTRIBUTE_PATHS>
+                                fallback?:
+                                  | number
+                                  | Reference<
+                                      ATTRIBUTE,
+                                      SCHEMA_ATTRIBUTE_PATHS
+                                    >,
                               ]
                             >,
                           // Not using Reference<...> for improved type display
@@ -261,7 +302,12 @@ export type AttributeUpdateItemInput<
                           | GET<
                               [
                                 ref: SCHEMA_ATTRIBUTE_PATHS,
-                                fallback?: number | Reference<ATTRIBUTE, SCHEMA_ATTRIBUTE_PATHS>
+                                fallback?:
+                                  | number
+                                  | Reference<
+                                      ATTRIBUTE,
+                                      SCHEMA_ATTRIBUTE_PATHS
+                                    >,
                               ]
                             >
                         >
@@ -269,8 +315,12 @@ export type AttributeUpdateItemInput<
           : ATTRIBUTE extends SetAttribute
           ?
               | Set<AttributeUpdateItemCompleteInput<ATTRIBUTE['elements']>>
-              | ADD<Set<AttributeUpdateItemCompleteInput<ATTRIBUTE['elements']>>>
-              | DELETE<Set<AttributeUpdateItemCompleteInput<ATTRIBUTE['elements']>>>
+              | ADD<
+                  Set<AttributeUpdateItemCompleteInput<ATTRIBUTE['elements']>>
+                >
+              | DELETE<
+                  Set<AttributeUpdateItemCompleteInput<ATTRIBUTE['elements']>>
+                >
           : ATTRIBUTE extends ListAttribute
           ?
               | NonVerbal<
@@ -291,8 +341,10 @@ export type AttributeUpdateItemInput<
                       [
                         ref: SCHEMA_ATTRIBUTE_PATHS,
                         fallback?:
-                          | AttributeUpdateItemCompleteInput<ATTRIBUTE['elements']>[]
-                          | Reference<ATTRIBUTE, SCHEMA_ATTRIBUTE_PATHS>
+                          | AttributeUpdateItemCompleteInput<
+                              ATTRIBUTE['elements']
+                            >[]
+                          | Reference<ATTRIBUTE, SCHEMA_ATTRIBUTE_PATHS>,
                       ]
                     >
                   | AttributeUpdateItemCompleteInput<ATTRIBUTE['elements']>[]
@@ -302,8 +354,10 @@ export type AttributeUpdateItemInput<
                       [
                         ref: SCHEMA_ATTRIBUTE_PATHS,
                         fallback?:
-                          | AttributeUpdateItemCompleteInput<ATTRIBUTE['elements']>[]
-                          | Reference<ATTRIBUTE, SCHEMA_ATTRIBUTE_PATHS>
+                          | AttributeUpdateItemCompleteInput<
+                              ATTRIBUTE['elements']
+                            >[]
+                          | Reference<ATTRIBUTE, SCHEMA_ATTRIBUTE_PATHS>,
                       ]
                     >
                   | AttributeUpdateItemCompleteInput<ATTRIBUTE['elements']>[]

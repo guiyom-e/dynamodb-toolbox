@@ -3,5 +3,7 @@ export type NarrowObject<OBJECT extends object> = {
 }
 
 export type NarrowObjectRec<OBJECT extends object> = {
-  [KEY in keyof OBJECT]: OBJECT[KEY] extends object ? NarrowObjectRec<OBJECT[KEY]> : OBJECT[KEY]
+  [KEY in keyof OBJECT]: OBJECT[KEY] extends object
+    ? NarrowObjectRec<OBJECT[KEY]>
+    : OBJECT[KEY]
 }

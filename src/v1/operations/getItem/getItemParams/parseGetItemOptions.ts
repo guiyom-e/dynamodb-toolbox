@@ -1,11 +1,11 @@
 import type { GetCommandInput } from '@aws-sdk/lib-dynamodb'
 import isEmpty from 'lodash.isempty'
 
-import { parseCapacityOption } from 'v1/operations/utils/parseOptions/parseCapacityOption'
-import { rejectExtraOptions } from 'v1/operations/utils/parseOptions/rejectExtraOptions'
-import { parseConsistentOption } from 'v1/operations/utils/parseOptions/parseConsistentOption'
-import { parseProjection } from 'v1/operations/expression/projection/parse'
 import { EntityV2 } from 'v1/entity'
+import { parseProjection } from 'v1/operations/expression/projection/parse'
+import { parseCapacityOption } from 'v1/operations/utils/parseOptions/parseCapacityOption'
+import { parseConsistentOption } from 'v1/operations/utils/parseOptions/parseConsistentOption'
+import { rejectExtraOptions } from 'v1/operations/utils/parseOptions/rejectExtraOptions'
 
 import type { GetItemOptions } from '../options'
 
@@ -13,7 +13,7 @@ type CommandOptions = Omit<GetCommandInput, 'TableName' | 'Key'>
 
 export const parseGetItemOptions = <ENTITY extends EntityV2>(
   entity: ENTITY,
-  getItemOptions: GetItemOptions<ENTITY>
+  getItemOptions: GetItemOptions<ENTITY>,
 ): CommandOptions => {
   const commandOptions: CommandOptions = {}
 
@@ -28,7 +28,10 @@ export const parseGetItemOptions = <ENTITY extends EntityV2>(
   }
 
   if (attributes !== undefined) {
-    const { ExpressionAttributeNames, ProjectionExpression } = parseProjection(entity, attributes)
+    const { ExpressionAttributeNames, ProjectionExpression } = parseProjection(
+      entity,
+      attributes,
+    )
 
     if (!isEmpty(ExpressionAttributeNames)) {
       commandOptions.ExpressionAttributeNames = ExpressionAttributeNames

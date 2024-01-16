@@ -1,3 +1,11 @@
+import { any } from './any'
+import { anyOf } from './anyOf'
+import { list } from './list'
+import { map } from './map'
+import { binary, boolean, number, string } from './primitive'
+import { record } from './record'
+import { set } from './set'
+
 export * from './any'
 export * from './primitive'
 export * from './set'
@@ -8,14 +16,6 @@ export * from './anyOf'
 
 export * from './constants'
 export * from './types'
-
-import { any } from './any'
-import { binary, boolean, number, string } from './primitive'
-import { set } from './set'
-import { list } from './list'
-import { map } from './map'
-import { record } from './record'
-import { anyOf } from './anyOf'
 
 export const attribute: {
   any: typeof any
@@ -38,6 +38,6 @@ export const attribute: {
   list,
   map,
   record,
-  anyOf
+  anyOf,
 }
 export const attr = attribute

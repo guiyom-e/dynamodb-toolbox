@@ -1,23 +1,32 @@
 import type { UpdateCommandInput } from '@aws-sdk/lib-dynamodb'
 
 import type { EntityV2 } from 'v1/entity'
+import { parseCondition } from 'v1/operations/expression/condition/parse'
 import { parseCapacityOption } from 'v1/operations/utils/parseOptions/parseCapacityOption'
 import { parseMetricsOption } from 'v1/operations/utils/parseOptions/parseMetricsOption'
 import { parseReturnValuesOption } from 'v1/operations/utils/parseOptions/parseReturnValuesOption'
 import { rejectExtraOptions } from 'v1/operations/utils/parseOptions/rejectExtraOptions'
-import { parseCondition } from 'v1/operations/expression/condition/parse'
 
-import { updateItemCommandReturnValuesOptionsSet, UpdateItemOptions } from '../options'
+import {
+  updateItemCommandReturnValuesOptionsSet,
+  UpdateItemOptions,
+} from '../options'
 
 type CommandOptions = Omit<UpdateCommandInput, 'TableName' | 'Item' | 'Key'>
 
 export const parseUpdateItemOptions = <ENTITY extends EntityV2>(
   entity: ENTITY,
-  updateItemOptions: UpdateItemOptions<ENTITY>
+  updateItemOptions: UpdateItemOptions<ENTITY>,
 ): CommandOptions => {
   const commandOptions: CommandOptions = {}
 
-  const { capacity, metrics, returnValues, condition, ...extraOptions } = updateItemOptions
+  const {
+    capacity,
+    metrics,
+    returnValues,
+    condition,
+    ...extraOptions
+  } = updateItemOptions
   rejectExtraOptions(extraOptions)
 
   if (capacity !== undefined) {
@@ -31,7 +40,7 @@ export const parseUpdateItemOptions = <ENTITY extends EntityV2>(
   if (returnValues !== undefined) {
     commandOptions.ReturnValues = parseReturnValuesOption(
       updateItemCommandReturnValuesOptionsSet,
-      returnValues
+      returnValues,
     )
   }
 
@@ -39,7 +48,7 @@ export const parseUpdateItemOptions = <ENTITY extends EntityV2>(
     const {
       ExpressionAttributeNames,
       ExpressionAttributeValues,
-      ConditionExpression
+      ConditionExpression,
     } = parseCondition(entity, condition)
 
     commandOptions.ExpressionAttributeNames = ExpressionAttributeNames

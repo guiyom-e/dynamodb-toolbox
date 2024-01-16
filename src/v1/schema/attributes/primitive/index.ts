@@ -3,13 +3,13 @@ export type {
   PrimitiveAttributeType,
   ResolvePrimitiveAttributeType,
   ResolvedPrimitiveAttribute,
-  Transformer
+  Transformer,
 } from './types'
 export type {
   $PrimitiveAttributeState,
   $PrimitiveAttributeNestedState,
   $PrimitiveAttribute,
-  PrimitiveAttribute
+  PrimitiveAttribute,
 } from './interface'
 export type { FreezePrimitiveAttribute } from './freeze'
 export type { ResolvePrimitiveAttribute } from './resolve'

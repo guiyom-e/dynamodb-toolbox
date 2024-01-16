@@ -1,11 +1,11 @@
 import type { Schema } from 'v1/schema'
 import type { TableV2 } from 'v1/table'
 
-import { WithEntityAttribute, addEntityAttribute } from './addEntityAttribute'
+import { addEntityAttribute, WithEntityAttribute } from './addEntityAttribute'
 import {
-  WithTimestampAttributes,
   addTimestampAttributes,
-  TimestampsOptions
+  TimestampsOptions,
+  WithTimestampAttributes,
 } from './addTimestampAttributes'
 
 export type WithInternalAttributes<
@@ -34,14 +34,20 @@ type InternalAttributesAdder = <
   schema,
   table,
   entityAttributeName,
-  entityName
+  entityName,
 }: {
   schema: SCHEMA
   table: TABLE
   entityAttributeName: ENTITY_ATTRIBUTE_NAME
   entityName: ENTITY_NAME
   timestamps: TIMESTAMP_OPTIONS
-}) => WithInternalAttributes<SCHEMA, TABLE, ENTITY_ATTRIBUTE_NAME, ENTITY_NAME, TIMESTAMP_OPTIONS>
+}) => WithInternalAttributes<
+  SCHEMA,
+  TABLE,
+  ENTITY_ATTRIBUTE_NAME,
+  ENTITY_NAME,
+  TIMESTAMP_OPTIONS
+>
 
 export const addInternalAttributes: InternalAttributesAdder = <
   SCHEMA extends Schema,
@@ -54,7 +60,7 @@ export const addInternalAttributes: InternalAttributesAdder = <
   table,
   entityAttributeName,
   entityName,
-  timestamps
+  timestamps,
 }: {
   schema: SCHEMA
   table: TABLE
@@ -66,7 +72,7 @@ export const addInternalAttributes: InternalAttributesAdder = <
     schema,
     table,
     entityAttributeName,
-    entityName
+    entityName,
   })
 
   if (timestamps === false) {
@@ -82,7 +88,7 @@ export const addInternalAttributes: InternalAttributesAdder = <
   const withTimestampAttributes = addTimestampAttributes({
     schema: withEntityAttribute,
     entityName,
-    timestamps
+    timestamps,
   })
 
   return withTimestampAttributes as WithInternalAttributes<

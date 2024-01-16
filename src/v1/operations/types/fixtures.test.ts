@@ -1,15 +1,15 @@
 import {
-  schema,
   any,
-  string,
-  number,
-  boolean,
+  anyOf,
   binary,
-  set,
+  boolean,
   list,
   map,
+  number,
   record,
-  anyOf
+  schema,
+  set,
+  string,
 } from 'v1/schema'
 
 export const mySchema = schema({
@@ -27,9 +27,9 @@ export const mySchema = schema({
     num: number(),
     stringList: list(string()),
     map: map({
-      num: number()
-    })
+      num: number(),
+    }),
   }),
   record: record(string().enum('foo', 'bar'), map({ num: number() })),
-  union: anyOf(map({ str: string() }), map({ num: number() }))
+  union: anyOf(map({ str: string() }), map({ num: number() })),
 })

@@ -1,18 +1,19 @@
+import { TransactWriteItemsInput } from '@aws-sdk/client-dynamodb'
 import {
   DynamoDBDocumentClient,
   TransactWriteCommand,
-  TransactWriteCommandOutput
+  TransactWriteCommandOutput,
 } from '@aws-sdk/lib-dynamodb'
-import { TransactWriteItemsInput } from '@aws-sdk/client-dynamodb'
 
-import { WriteItemTransaction } from 'v1/operations/transactions/types'
 import { DynamoDBToolboxError } from 'v1/errors'
+import { WriteItemTransaction } from 'v1/operations/transactions/types'
+
 import { TransactWriteOptions } from './options'
 import { parseTransactWriteOptions } from './parseTransactWriteOptions'
 
 export const getTransactWriteCommandInput = (
   commands: WriteItemTransaction[],
-  transactWriteOptions: TransactWriteOptions = {}
+  transactWriteOptions: TransactWriteOptions = {},
 ): TransactWriteItemsInput => {
   const options = parseTransactWriteOptions(transactWriteOptions ?? {})
 
@@ -21,8 +22,8 @@ export const getTransactWriteCommandInput = (
     TransactItems: commands
       .map(command => command.get())
       .map(({ params, type }) => ({
-        [type]: params
-      }))
+        [type]: params,
+      })),
   }
 }
 
@@ -31,7 +32,9 @@ export const getTransactWriteCommandInput = (
  * @param transactions
  * @param options
  */
-export const transactWriteItems = async <TRANSACTIONS extends WriteItemTransaction[]>(
+export const transactWriteItems = async <
+  TRANSACTIONS extends WriteItemTransaction[]
+>(
   /** Array of Write Item transactions */
   transactions: TRANSACTIONS,
   options?: {
@@ -39,21 +42,24 @@ export const transactWriteItems = async <TRANSACTIONS extends WriteItemTransacti
     dynamoDBDocumentClient?: DynamoDBDocumentClient
     /** Options passed to top-level  TransactWriteItems */
     transactWriteOptions?: TransactWriteOptions
-  }
+  },
 ): Promise<TransactWriteCommandOutput> => {
   const dynamoDBDocumentClient =
     options?.dynamoDBDocumentClient || transactions?.[0]?.get()?.documentClient
 
   if (!dynamoDBDocumentClient) {
     throw new DynamoDBToolboxError('operations.incompleteCommand', {
-      message: 'DynamoDBDocumentClient not found'
+      message: 'DynamoDBDocumentClient not found',
     })
   }
 
   const response = await dynamoDBDocumentClient.send(
     new TransactWriteCommand(
-      getTransactWriteCommandInput(transactions, options?.transactWriteOptions ?? {})
-    )
+      getTransactWriteCommandInput(
+        transactions,
+        options?.transactWriteOptions ?? {},
+      ),
+    ),
   )
 
   return response

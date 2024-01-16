@@ -1,18 +1,26 @@
 import type { NarrowObject } from 'v1/types'
 
-import type { SchemaAttributes, RequiredOption, $SchemaAttributeNestedStates } from './attributes'
+import type {
+  $SchemaAttributeNestedStates,
+  RequiredOption,
+  SchemaAttributes,
+} from './attributes'
 import type { FreezeAttribute } from './attributes/freeze'
 
-export interface Schema<ATTRIBUTES extends SchemaAttributes = SchemaAttributes> {
+export interface Schema<
+  ATTRIBUTES extends SchemaAttributes = SchemaAttributes
+> {
   type: 'schema'
   savedAttributeNames: Set<string>
   keyAttributeNames: Set<string>
   requiredAttributeNames: Record<RequiredOption, Set<string>>
   attributes: ATTRIBUTES
-  and: <$ADDITIONAL_ATTRIBUTES extends $SchemaAttributeNestedStates = $SchemaAttributeNestedStates>(
+  and: <
+    $ADDITIONAL_ATTRIBUTES extends $SchemaAttributeNestedStates = $SchemaAttributeNestedStates
+  >(
     additionalAttributes:
       | NarrowObject<$ADDITIONAL_ATTRIBUTES>
-      | ((schema: Schema<ATTRIBUTES>) => NarrowObject<$ADDITIONAL_ATTRIBUTES>)
+      | ((schema: Schema<ATTRIBUTES>) => NarrowObject<$ADDITIONAL_ATTRIBUTES>),
   ) => Schema<
     {
       [KEY in

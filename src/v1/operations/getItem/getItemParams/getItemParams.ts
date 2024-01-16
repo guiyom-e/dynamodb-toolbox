@@ -6,19 +6,23 @@ import { parseEntityKeyInput } from 'v1/operations/utils/parseKeyInput'
 import { parsePrimaryKey } from 'v1/operations/utils/parsePrimaryKey'
 
 import type { GetItemOptions } from '../options'
-
 import { parseGetItemOptions } from './parseGetItemOptions'
 
-export const getItemParams = <ENTITY extends EntityV2, OPTIONS extends GetItemOptions<ENTITY>>(
+export const getItemParams = <
+  ENTITY extends EntityV2,
+  OPTIONS extends GetItemOptions<ENTITY>
+>(
   entity: ENTITY,
   input: KeyInput<ENTITY>,
-  getItemOptions: OPTIONS = {} as OPTIONS
+  getItemOptions: OPTIONS = {} as OPTIONS,
 ): GetCommandInput => {
   const validKeyInputParser = parseEntityKeyInput(entity, input)
   const validKeyInput = validKeyInputParser.next().value
   const collapsedInput = validKeyInputParser.next().value
 
-  const keyInput = entity.computeKey ? entity.computeKey(validKeyInput) : collapsedInput
+  const keyInput = entity.computeKey
+    ? entity.computeKey(validKeyInput)
+    : collapsedInput
   const primaryKey = parsePrimaryKey(entity, keyInput)
 
   const options = parseGetItemOptions(entity, getItemOptions)
@@ -26,6 +30,6 @@ export const getItemParams = <ENTITY extends EntityV2, OPTIONS extends GetItemOp
   return {
     TableName: entity.table.getName(),
     Key: primaryKey,
-    ...options
+    ...options,
   }
 }

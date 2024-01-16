@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
+  any,
   binary,
   boolean,
-  number,
-  string,
-  map,
-  list,
-  any,
-  schema,
-  PutItemInput,
   FormattedAttribute,
+  KeyInput,
+  list,
+  map,
+  number,
+  PutItemInput,
   SavedItem,
-  KeyInput
+  schema,
+  string,
 } from 'v1'
 
 const playgroundSchema1 = schema({
@@ -23,59 +23,68 @@ const playgroundSchema1 = schema({
   bin: binary().optional(),
   map: map({
     nestedMap: map({
-      str: string().optional()
-    }).optional()
+      str: string().optional(),
+    }).optional(),
   }).optional(),
   reqMap: map({
-    str: string().optional()
+    str: string().optional(),
   }),
   hiddenMap: map({
-    str: string().optional()
+    str: string().optional(),
   })
     .optional()
     .hidden(),
   reqList: list(
     map({
-      str: string().optional()
-    })
+      str: string().optional(),
+    }),
   ),
-  hiddenList: list(string()).optional().hidden()
+  hiddenList: list(string()).optional().hidden(),
 })
 
 type PlaygroundSchema1PutItemInput = PutItemInput<typeof playgroundSchema1>
-type PlaygroundSchema1FormattedItem = FormattedAttribute<typeof playgroundSchema1>
+type PlaygroundSchema1FormattedItem = FormattedAttribute<
+  typeof playgroundSchema1
+>
 
 const allCasesOfProps = {
   optProp: string().optional(),
   optPropWithIndepDef: string().optional().putDefault('foo'),
   reqProp: string(),
-  reqPropWithIndepDef: string().putDefault('baz')
+  reqPropWithIndepDef: string().putDefault('baz'),
 }
 
 const playgroundSchema2 = schema({
   ...allCasesOfProps,
   map: map(allCasesOfProps),
-  list: list(map(allCasesOfProps))
+  list: list(map(allCasesOfProps)),
 }).and(schema => ({
   optLink: string()
     .optional()
     .putLink<typeof schema>(({ optPropWithIndepDef }) => optPropWithIndepDef),
-  reqLink: string().putLink<typeof schema>(({ reqPropWithIndepDef }) => reqPropWithIndepDef)
+  reqLink: string().putLink<typeof schema>(
+    ({ reqPropWithIndepDef }) => reqPropWithIndepDef,
+  ),
 }))
 
-type PlaygroundSchema2FormattedItem = FormattedAttribute<typeof playgroundSchema2>
+type PlaygroundSchema2FormattedItem = FormattedAttribute<
+  typeof playgroundSchema2
+>
 type PlaygroundSchema2PutItemInput = PutItemInput<typeof playgroundSchema2>
-type PlaygroundSchema2PutItemInputWithDefaults = PutItemInput<typeof playgroundSchema2, true>
+type PlaygroundSchema2PutItemInputWithDefaults = PutItemInput<
+  typeof playgroundSchema2,
+  true
+>
 
 const playgroundSchema3 = schema({
   keyEl: string().key(),
   nonKeyEl: string().optional(),
   coucou: map({
-    renamed: string().savedAs('bar').key()
+    renamed: string().savedAs('bar').key(),
   })
     .savedAs('baz')
     .key(),
-  anyvalue: any()
+  anyvalue: any(),
 })
 
 type PlaygroundSchema3SavedItem = SavedItem<typeof playgroundSchema3>

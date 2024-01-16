@@ -1,22 +1,21 @@
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
 import {
-  TableV2,
-  EntityV2,
-  schema,
   any,
   binary,
-  string,
-  number,
   boolean,
-  set,
+  DynamoDBToolboxError,
+  EntityV2,
   list,
   map,
-  record,
-  DynamoDBToolboxError,
+  number,
+  prefix,
   PutItemCommand,
-  prefix
+  record,
+  schema,
+  set,
+  string,
+  TableV2,
 } from 'v1'
 
 const dynamoDbClient = new DynamoDBClient({})
@@ -27,13 +26,13 @@ const TestTable = new TableV2({
   name: 'test-table',
   partitionKey: {
     type: 'string',
-    name: 'pk'
+    name: 'pk',
   },
   sortKey: {
     type: 'string',
-    name: 'sk'
+    name: 'sk',
   },
-  documentClient
+  documentClient,
 })
 
 const TestEntity = new EntityV2({
@@ -49,19 +48,19 @@ const TestEntity = new EntityV2({
     test_boolean: boolean().optional(),
     test_list: list(string()).optional(),
     test_map: map({
-      str: string()
+      str: string(),
     }).optional(),
     test_string_set: set(string()).optional(),
     test_number_set: set(number()).optional(),
-    test_binary_set: set(binary()).optional()
+    test_binary_set: set(binary()).optional(),
   }),
-  table: TestTable
+  table: TestTable,
 })
 
 const TestTable2 = new TableV2({
   name: 'test-table',
   partitionKey: { type: 'string', name: 'pk' },
-  documentClient
+  documentClient,
 })
 
 const TestEntity2 = new EntityV2({
@@ -69,17 +68,19 @@ const TestEntity2 = new EntityV2({
   schema: schema({
     email: string().key().savedAs('pk'),
     test_composite: string().optional(),
-    test_composite2: string().optional()
+    test_composite2: string().optional(),
   }).and(schema => ({
     sort: string()
       .optional()
       .savedAs('sk')
       .putLink<typeof schema>(
         ({ test_composite, test_composite2 }) =>
-          test_composite && test_composite2 && [test_composite, test_composite2].join('#')
-      )
+          test_composite &&
+          test_composite2 &&
+          [test_composite, test_composite2].join('#'),
+      ),
   })),
-  table: TestTable2
+  table: TestTable2,
 })
 
 const TestEntity3 = new EntityV2({
@@ -87,16 +88,16 @@ const TestEntity3 = new EntityV2({
   schema: schema({
     email: string().key().savedAs('pk'),
     test: any(),
-    test2: string().optional()
+    test2: string().optional(),
   }),
-  table: TestTable2
+  table: TestTable2,
 })
 
 const TestTable3 = new TableV2({
   name: 'TestTable3',
   partitionKey: { type: 'string', name: 'pk' },
   sortKey: { type: 'string', name: 'sk' },
-  documentClient
+  documentClient,
 })
 
 const TestEntity4 = new EntityV2({
@@ -104,10 +105,10 @@ const TestEntity4 = new EntityV2({
   schema: schema({
     id: number().key().savedAs('pk'),
     // sk: { hidden: true, sortKey: true, default: (data: any) => data.id },
-    xyz: any().optional().savedAs('test')
+    xyz: any().optional().savedAs('test'),
   }),
   computeKey: ({ id }) => ({ pk: String(id), sk: String(id) }),
-  table: TestTable3
+  table: TestTable3,
 })
 
 const TestEntity5 = new EntityV2({
@@ -115,9 +116,9 @@ const TestEntity5 = new EntityV2({
   schema: schema({
     pk: string().key(),
     test_required_boolean: boolean(),
-    test_required_number: number()
+    test_required_number: number(),
   }),
-  table: TestTable2
+  table: TestTable2,
 })
 
 describe('put', () => {
@@ -133,7 +134,7 @@ describe('put', () => {
       pk: 'test-pk',
       sk: 'test-sk',
       test_string: 'test string',
-      test_number_defaulted: 0
+      test_number_defaulted: 0,
     })
   })
 
@@ -142,7 +143,7 @@ describe('put', () => {
       .item({
         email: 'test-pk',
         sort: 'test-sk',
-        count: 0
+        count: 0,
       })
       .params()
 
@@ -156,7 +157,7 @@ describe('put', () => {
       .item({
         email: 'test-pk',
         sort: 'test-sk',
-        test_string: overrideValue
+        test_string: overrideValue,
       })
       .params()
 
@@ -167,7 +168,7 @@ describe('put', () => {
     const { Item } = TestEntity2.build(PutItemCommand)
       .item({
         email: 'test-pk',
-        test_composite: 'test'
+        test_composite: 'test',
       })
       .params()
 
@@ -179,7 +180,7 @@ describe('put', () => {
       .item({
         email: 'test-pk',
         test_composite: 'test',
-        test_composite2: 'test2'
+        test_composite2: 'test2',
       })
       .params()
 
@@ -192,7 +193,7 @@ describe('put', () => {
         email: 'test-pk',
         sort: 'override',
         test_composite: 'test',
-        test_composite2: 'test2'
+        test_composite2: 'test2',
       })
       .params()
 
@@ -204,9 +205,9 @@ describe('put', () => {
       TestEntity3.build(PutItemCommand)
         .item(
           // @ts-expect-error
-          { email: 'test-pk' }
+          { email: 'test-pk' },
         )
-        .params()
+        .params(),
     ).toThrow('Attribute test is required')
   })
 
@@ -216,7 +217,7 @@ describe('put', () => {
         email: 'test-pk',
         sort: 'test-sk',
         // @ts-expect-error
-        unknown: '?'
+        unknown: '?',
       })
       .params()
 
@@ -230,9 +231,9 @@ describe('put', () => {
           email: 'test-pk',
           sort: 'test-sk',
           // @ts-expect-error
-          test_string: 1
+          test_string: 1,
         })
-        .params()
+        .params(),
     ).toThrow('Attribute test_string should be a string')
   })
 
@@ -243,9 +244,9 @@ describe('put', () => {
           email: 'test-pk',
           sort: 'test-sk',
           // @ts-expect-error
-          test_boolean: 'x'
+          test_boolean: 'x',
         })
-        .params()
+        .params(),
     ).toThrow('Attribute test_boolean should be a boolean')
   })
 
@@ -256,9 +257,9 @@ describe('put', () => {
           email: 'test-pk',
           sort: 'test-sk',
           // @ts-expect-error
-          count: 'x'
+          count: 'x',
         })
-        .params()
+        .params(),
     ).toThrow('Attribute count should be a number')
   })
 
@@ -267,12 +268,12 @@ describe('put', () => {
       .item({
         email: 'test-pk',
         sort: 'test-sk',
-        test_list: ['a', 'b']
+        test_list: ['a', 'b'],
       })
       .params()
 
     expect(Item).toMatchObject({
-      test_list: ['a', 'b']
+      test_list: ['a', 'b'],
     })
   })
 
@@ -283,9 +284,9 @@ describe('put', () => {
           email: 'test-pk',
           sort: 'test-sk',
           // @ts-expect-error
-          test_list: ['a', 2]
+          test_list: ['a', 2],
         })
-        .params()
+        .params(),
     ).toThrow('Attribute test_list[n] should be a string')
   })
 
@@ -295,13 +296,13 @@ describe('put', () => {
         email: 'test-pk',
         sort: 'test-sk',
         test_map: {
-          str: 'x'
-        }
+          str: 'x',
+        },
       })
       .params()
 
     expect(Item).toMatchObject({
-      test_map: { str: 'x' }
+      test_map: { str: 'x' },
     })
   })
 
@@ -312,9 +313,9 @@ describe('put', () => {
           email: 'test-pk',
           sort: 'test-sk',
           // @ts-expect-error
-          test_map: { str: 2 }
+          test_map: { str: 2 },
         })
-        .params()
+        .params(),
     ).toThrow('Attribute test_map.str should be a string')
   })
 
@@ -323,12 +324,12 @@ describe('put', () => {
       .item({
         email: 'test-pk',
         sort: 'test-sk',
-        test_string_set: new Set(['a', 'b', 'c'])
+        test_string_set: new Set(['a', 'b', 'c']),
       })
       .params()
 
     expect(Item).toMatchObject({
-      test_string_set: new Set(['a', 'b', 'c'])
+      test_string_set: new Set(['a', 'b', 'c']),
     })
   })
 
@@ -339,9 +340,9 @@ describe('put', () => {
           email: 'test-pk',
           sort: 'test-sk',
           // @ts-expect-error
-          test_string_set: new Set(['a', 'b', 3])
+          test_string_set: new Set(['a', 'b', 3]),
         })
-        .params()
+        .params(),
     ).toThrow('Attribute test_string_set[x] should be a string')
   })
 
@@ -350,9 +351,9 @@ describe('put', () => {
       TestEntity3.build(PutItemCommand)
         .item(
           // @ts-expect-error
-          { email: 'test-pk', test2: 'test' }
+          { email: 'test-pk', test2: 'test' },
         )
-        .params()
+        .params(),
     ).toThrow('Attribute test is required')
   })
 
@@ -361,18 +362,20 @@ describe('put', () => {
       .item({
         pk: 'test-pk',
         test_required_boolean: false,
-        test_required_number: 0
+        test_required_number: 0,
       })
       .params()
 
     expect(Item).toMatchObject({
       test_required_boolean: false,
-      test_required_number: 0
+      test_required_number: 0,
     })
   })
 
   it('correctly aliases pks', () => {
-    const { Item } = TestEntity4.build(PutItemCommand).item({ id: 3, xyz: '123' }).params()
+    const { Item } = TestEntity4.build(PutItemCommand)
+      .item({ id: 3, xyz: '123' })
+      .params()
     expect(Item).toMatchObject({ pk: '3', sk: '3' })
   })
 
@@ -392,13 +395,13 @@ describe('put', () => {
         .item({ email: 'x', sort: 'y' })
         .options({
           // @ts-expect-error
-          capacity: 'test'
+          capacity: 'test',
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'operations.invalidCapacityOption' })
+      expect.objectContaining({ code: 'operations.invalidCapacityOption' }),
     )
   })
 
@@ -417,13 +420,13 @@ describe('put', () => {
         .item({ email: 'x', sort: 'y' })
         .options({
           // @ts-expect-error
-          metrics: 'test'
+          metrics: 'test',
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'operations.invalidMetricsOption' })
+      expect.objectContaining({ code: 'operations.invalidMetricsOption' }),
     )
   })
 
@@ -442,13 +445,13 @@ describe('put', () => {
         .item({ email: 'x', sort: 'y' })
         .options({
           // @ts-expect-error
-          returnValues: 'test'
+          returnValues: 'test',
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
     expect(invalidCall).toThrow(
-      expect.objectContaining({ code: 'operations.invalidReturnValuesOption' })
+      expect.objectContaining({ code: 'operations.invalidReturnValuesOption' }),
     )
   })
 
@@ -458,19 +461,21 @@ describe('put', () => {
         .item({ email: 'x', sort: 'y' })
         .options({
           // @ts-expect-error
-          extra: true
+          extra: true,
         })
         .params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.unknownOption' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.unknownOption' }),
+    )
   })
 
   it('sets condition', () => {
     const {
       ExpressionAttributeNames,
       ExpressionAttributeValues,
-      ConditionExpression
+      ConditionExpression,
     } = TestEntity.build(PutItemCommand)
       .item({ email: 'x', sort: 'y' })
       .options({ condition: { attr: 'email', gt: 'test' } })
@@ -485,7 +490,9 @@ describe('put', () => {
     const invalidCall = () => TestEntity.build(PutItemCommand).params()
 
     expect(invalidCall).toThrow(DynamoDBToolboxError)
-    expect(invalidCall).toThrow(expect.objectContaining({ code: 'operations.incompleteCommand' }))
+    expect(invalidCall).toThrow(
+      expect.objectContaining({ code: 'operations.incompleteCommand' }),
+    )
   })
 
   it('transformed key/attribute', () => {
@@ -500,17 +507,17 @@ describe('put', () => {
         transformedMap: map({ str: string().transform(prefix('MAP')) }),
         transformedRecord: record(
           string().transform(prefix('RECORD_KEY')),
-          string().transform(prefix('RECORD_VALUE'))
-        )
+          string().transform(prefix('RECORD_VALUE')),
+        ),
       }),
-      table: TestTable
+      table: TestTable,
     })
 
     const {
       Item,
       ConditionExpression,
       ExpressionAttributeNames,
-      ExpressionAttributeValues
+      ExpressionAttributeValues,
     } = TestEntity3.build(PutItemCommand)
       .item({
         email: 'foo@bar.mail',
@@ -519,7 +526,7 @@ describe('put', () => {
         transformedSet: new Set(['set']),
         transformedList: ['list'],
         transformedMap: { str: 'map' },
-        transformedRecord: { recordKey: 'recordValue' }
+        transformedRecord: { recordKey: 'recordValue' },
       })
       .options({
         condition: {
@@ -531,9 +538,9 @@ describe('put', () => {
              */
             // { attr: 'transformedSet', contains: 'SET' }
             { attr: 'transformedMap.str', eq: 'map', transform: false },
-            { attr: 'transformedRecord.key', eq: 'value', transform: false }
-          ]
-        }
+            { attr: 'transformedRecord.key', eq: 'value', transform: false },
+          ],
+        },
       })
       .params()
 
@@ -543,24 +550,24 @@ describe('put', () => {
       transformedSet: new Set(['SET#set']),
       transformedList: ['LIST#list'],
       transformedMap: { str: 'MAP#map' },
-      transformedRecord: { 'RECORD_KEY#recordKey': 'RECORD_VALUE#recordValue' }
+      transformedRecord: { 'RECORD_KEY#recordKey': 'RECORD_VALUE#recordValue' },
     })
     expect(ConditionExpression).toContain('#c_5.#c_6 = :c_4')
     expect(ExpressionAttributeNames).toMatchObject({
       '#c_5': 'transformedRecord',
       // transform is only applied to values, not to paths
-      '#c_6': 'RECORD_KEY#key'
+      '#c_6': 'RECORD_KEY#key',
     })
     expect(ExpressionAttributeValues).toMatchObject({
       ':c_1': 'test',
       ':c_2': 'str',
       ':c_3': 'map',
-      ':c_4': 'value'
+      ':c_4': 'value',
     })
 
-    const { ExpressionAttributeValues: ExpressionAttributeValues2 } = TestEntity3.build(
-      PutItemCommand
-    )
+    const {
+      ExpressionAttributeValues: ExpressionAttributeValues2,
+    } = TestEntity3.build(PutItemCommand)
       .item({
         email: 'foo@bar.mail',
         sort: 'y',
@@ -568,7 +575,7 @@ describe('put', () => {
         transformedSet: new Set(['set']),
         transformedList: ['list'],
         transformedMap: { str: 'map' },
-        transformedRecord: { recordKey: 'recordValue' }
+        transformedRecord: { recordKey: 'recordValue' },
       })
       .options({
         condition: {
@@ -580,9 +587,9 @@ describe('put', () => {
              */
             // { attr: 'transformedSet', contains: 'SET' }
             { attr: 'transformedMap.str', eq: 'map' },
-            { attr: 'transformedRecord.key', eq: 'value' }
-          ]
-        }
+            { attr: 'transformedRecord.key', eq: 'value' },
+          ],
+        },
       })
       .params()
 
@@ -590,7 +597,7 @@ describe('put', () => {
       ':c_1': 'EMAIL#test',
       ':c_2': 'STR#str',
       ':c_3': 'MAP#map',
-      ':c_4': 'RECORD_VALUE#value'
+      ':c_4': 'RECORD_VALUE#value',
     })
   })
 

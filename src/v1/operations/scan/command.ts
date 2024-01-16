@@ -1,21 +1,21 @@
-import type { O } from 'ts-toolbelt'
-import {
-  ScanCommandInput,
-  ScanCommand as _ScanCommand,
-  ScanCommandOutput
-} from '@aws-sdk/lib-dynamodb'
 import type { ConsumedCapacity } from '@aws-sdk/client-dynamodb'
+import {
+  ScanCommand as _ScanCommand,
+  ScanCommandInput,
+  ScanCommandOutput,
+} from '@aws-sdk/lib-dynamodb'
 import type { NativeAttributeValue } from '@aws-sdk/util-dynamodb'
+import type { O } from 'ts-toolbelt'
 
-import type { TableV2 } from 'v1/table'
 import type { EntityV2, FormattedItem } from 'v1/entity'
-import type { Item } from 'v1/schema'
 import type { CountSelectOption } from 'v1/operations/constants/options/select'
 import type { AnyAttributePath } from 'v1/operations/types'
 import { formatSavedItem } from 'v1/operations/utils/formatSavedItem'
+import type { Item } from 'v1/schema'
+import type { TableV2 } from 'v1/table'
 import { isString } from 'v1/utils/validation'
 
-import { TableCommand, $table, $entities } from '../class'
+import { $entities, $table, TableCommand } from '../class'
 import type { ScanOptions } from './options'
 import { scanParams } from './scanParams'
 
@@ -69,28 +69,32 @@ export class ScanCommand<
 
   [$options]: OPTIONS
   options: <NEXT_OPTIONS extends ScanOptions<TABLE, ENTITIES>>(
-    nextOptions: NEXT_OPTIONS
+    nextOptions: NEXT_OPTIONS,
   ) => ScanCommand<TABLE, ENTITIES, NEXT_OPTIONS>
 
   constructor(
     table: TABLE,
     entities = ([] as unknown) as ENTITIES,
-    options: OPTIONS = {} as OPTIONS
+    options: OPTIONS = {} as OPTIONS,
   ) {
     super(table, entities)
     this[$options] = options
 
-    this.entities = <NEXT_ENTITIES extends EntityV2[]>(...nextEntities: NEXT_ENTITIES) =>
+    this.entities = <NEXT_ENTITIES extends EntityV2[]>(
+      ...nextEntities: NEXT_ENTITIES
+    ) =>
       new ScanCommand<TABLE, NEXT_ENTITIES, ScanOptions<TABLE, NEXT_ENTITIES>>(
         this[$table],
         nextEntities,
         // For some reason we can't do the same as Query (cast OPTIONS) as it triggers an infinite type compute
-        this[$options] as ScanOptions<TABLE, NEXT_ENTITIES>
+        this[$options] as ScanOptions<TABLE, NEXT_ENTITIES>,
       )
-    this.options = nextOptions => new ScanCommand(this[$table], this[$entities], nextOptions)
+    this.options = nextOptions =>
+      new ScanCommand(this[$table], this[$entities], nextOptions)
   }
 
-  params = (): ScanCommandInput => scanParams(this[$table], this[$entities], this[$options])
+  params = (): ScanCommandInput =>
+    scanParams(this[$table], this[$entities], this[$options])
 
   send = async (): Promise<ScanResponse<TABLE, ENTITIES, OPTIONS>> => {
     const scanParams = this.params()
@@ -102,7 +106,9 @@ export class ScanCommand<
     })
 
     const formattedItems: Item[] = []
-    let lastEvaluatedKey: Record<string, NativeAttributeValue> | undefined = undefined
+    let lastEvaluatedKey:
+      | Record<string, NativeAttributeValue>
+      | undefined = undefined
     let count: number | undefined = 0
     let scannedCount: number | undefined = 0
     let consumedCapacity: ConsumedCapacity | undefined = undefined
@@ -117,7 +123,9 @@ export class ScanCommand<
       const pageScanParams: ScanCommandInput = {
         ...scanParams,
         // NOTE: Important NOT to override initial exclusiveStartKey on first page
-        ...(lastEvaluatedKey !== undefined ? { ExclusiveStartKey: lastEvaluatedKey } : {})
+        ...(lastEvaluatedKey !== undefined
+          ? { ExclusiveStartKey: lastEvaluatedKey }
+          : {}),
       }
 
       const {
@@ -126,8 +134,10 @@ export class ScanCommand<
         Count: pageCount,
         ScannedCount: pageScannedCount,
         ConsumedCapacity: pageConsumedCapacity,
-        $metadata: pageMetadata
-      } = await this[$table].documentClient.send(new _ScanCommand(pageScanParams))
+        $metadata: pageMetadata,
+      } = await this[$table].documentClient.send(
+        new _ScanCommand(pageScanParams),
+      )
 
       for (const item of items) {
         const itemEntityName = item[this[$table].entityAttributeSavedAs]
@@ -143,7 +153,7 @@ export class ScanCommand<
         }
 
         formattedItems.push(
-          formatSavedItem<EntityV2, {}>(itemEntity, item, { attributes })
+          formatSavedItem<EntityV2, {}>(itemEntity, item, { attributes }),
         )
       }
 
@@ -154,7 +164,10 @@ export class ScanCommand<
       }
 
       if (scannedCount !== undefined) {
-        scannedCount = pageScannedCount !== undefined ? scannedCount + pageScannedCount : undefined
+        scannedCount =
+          pageScannedCount !== undefined
+            ? scannedCount + pageScannedCount
+            : undefined
       }
 
       consumedCapacity = pageConsumedCapacity
@@ -163,16 +176,22 @@ export class ScanCommand<
 
     return {
       Items: formattedItems as ScanResponse<TABLE, ENTITIES, OPTIONS>['Items'],
-      ...(lastEvaluatedKey !== undefined ? { LastEvaluatedKey: lastEvaluatedKey } : {}),
+      ...(lastEvaluatedKey !== undefined
+        ? { LastEvaluatedKey: lastEvaluatedKey }
+        : {}),
       ...(count !== undefined ? { Count: count } : {}),
       ...(scannedCount !== undefined ? { ScannedCount: scannedCount } : {}),
       // return ConsumedCapacity & $metadata only if one page has been fetched
       ...(pageIndex === 1
         ? {
-            ...(consumedCapacity !== undefined ? { ConsumedCapacity: consumedCapacity } : {}),
-            ...(responseMetadata !== undefined ? { $metadata: responseMetadata } : {})
+            ...(consumedCapacity !== undefined
+              ? { ConsumedCapacity: consumedCapacity }
+              : {}),
+            ...(responseMetadata !== undefined
+              ? { $metadata: responseMetadata }
+              : {}),
           }
-        : {})
+        : {}),
     }
   }
 }

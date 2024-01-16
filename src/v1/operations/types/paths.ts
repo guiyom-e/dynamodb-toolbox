@@ -1,16 +1,19 @@
 import type { EntityV2 } from 'v1/entity'
 import type {
-  Schema,
   AnyAttribute,
+  AnyOfAttribute,
+  Attribute,
   ListAttribute,
   MapAttribute,
   RecordAttribute,
-  AnyOfAttribute,
-  Attribute,
-  ResolvePrimitiveAttribute
+  ResolvePrimitiveAttribute,
+  Schema,
 } from 'v1/schema'
 
-type AttributePath<ATTRIBUTE_PATH extends string, ATTRIBUTE extends Attribute> =
+type AttributePath<
+  ATTRIBUTE_PATH extends string,
+  ATTRIBUTE extends Attribute
+> =
   | ATTRIBUTE_PATH
   | (ATTRIBUTE extends AnyAttribute ? `${ATTRIBUTE_PATH}${string}` : never)
   // TO VERIFY: Can you apply clauses to Set attributes like Contains ?
@@ -39,7 +42,9 @@ type AttributePath<ATTRIBUTE_PATH extends string, ATTRIBUTE extends Attribute> =
         : never
       : never)
 
-export type SchemaAttributePath<SCHEMA extends Schema = Schema> = Schema extends SCHEMA
+export type SchemaAttributePath<
+  SCHEMA extends Schema = Schema
+> = Schema extends SCHEMA
   ? string
   : keyof SCHEMA['attributes'] extends infer ATTRIBUTE_PATH
   ? ATTRIBUTE_PATH extends string
@@ -47,9 +52,9 @@ export type SchemaAttributePath<SCHEMA extends Schema = Schema> = Schema extends
     : never
   : never
 
-export type AnyAttributePath<ENTITY extends EntityV2 = EntityV2> = SchemaAttributePath<
-  ENTITY['schema']
->
+export type AnyAttributePath<
+  ENTITY extends EntityV2 = EntityV2
+> = SchemaAttributePath<ENTITY['schema']>
 
 export type AnyCommonAttributePath<
   ENTITIES extends EntityV2[] = EntityV2[],
@@ -57,7 +62,10 @@ export type AnyCommonAttributePath<
 > = ENTITIES extends [infer ENTITIES_HEAD, ...infer ENTITIES_TAIL]
   ? ENTITIES_HEAD extends EntityV2
     ? ENTITIES_TAIL extends EntityV2[]
-      ? AnyCommonAttributePath<ENTITIES_TAIL, RESULTS & AnyAttributePath<ENTITIES_HEAD>>
+      ? AnyCommonAttributePath<
+          ENTITIES_TAIL,
+          RESULTS & AnyAttributePath<ENTITIES_HEAD>
+        >
       : never
     : never
   : RESULTS

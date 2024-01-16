@@ -1,12 +1,15 @@
 import type { EntityV2 } from 'v1/entity'
-import type { Item, AttributeValue, Extension } from 'v1/schema'
+import { DynamoDBToolboxError } from 'v1/errors/dynamoDBToolboxError'
+import type { AttributeValue, Extension, Item } from 'v1/schema'
 import type { PrimaryKey } from 'v1/table'
 import { validatorsByPrimitiveType } from 'v1/utils/validation'
-import { DynamoDBToolboxError } from 'v1/errors/dynamoDBToolboxError'
 
-export const parsePrimaryKey = <ENTITY extends EntityV2, EXTENSION extends Extension>(
+export const parsePrimaryKey = <
+  ENTITY extends EntityV2,
+  EXTENSION extends Extension
+>(
   entity: ENTITY,
-  keyInput: Item<EXTENSION>
+  keyInput: Item<EXTENSION>,
 ): PrimaryKey<ENTITY['table']> => {
   const { table } = entity
   const { partitionKey, sortKey } = table
@@ -20,17 +23,23 @@ export const parsePrimaryKey = <ENTITY extends EntityV2, EXTENSION extends Exten
     /**
      * @debt type "TODO: Make validator act as primitive typeguard"
      */
-    primaryKey[partitionKey.name] = partitionKeyValue as number | string | Buffer
+    primaryKey[partitionKey.name] = partitionKeyValue as
+      | number
+      | string
+      | Buffer
   } else {
-    throw new DynamoDBToolboxError('operations.parsePrimaryKey.invalidKeyPart', {
-      message: `Invalid partition key: ${partitionKey.name}`,
-      path: partitionKey.name,
-      payload: {
-        expected: partitionKey.type,
-        received: partitionKeyValue,
-        keyPart: 'partitionKey'
-      }
-    })
+    throw new DynamoDBToolboxError(
+      'operations.parsePrimaryKey.invalidKeyPart',
+      {
+        message: `Invalid partition key: ${partitionKey.name}`,
+        path: partitionKey.name,
+        payload: {
+          expected: partitionKey.type,
+          received: partitionKeyValue,
+          keyPart: 'partitionKey',
+        },
+      },
+    )
   }
 
   if (sortKey !== undefined) {
@@ -43,15 +52,18 @@ export const parsePrimaryKey = <ENTITY extends EntityV2, EXTENSION extends Exten
        */
       primaryKey[sortKey.name] = sortKeyValue as number | string | Buffer
     } else {
-      throw new DynamoDBToolboxError('operations.parsePrimaryKey.invalidKeyPart', {
-        message: `Invalid sort key: ${sortKey.name}`,
-        path: sortKey.name,
-        payload: {
-          expected: sortKey.type,
-          received: sortKeyValue,
-          keyPart: 'sortKey'
-        }
-      })
+      throw new DynamoDBToolboxError(
+        'operations.parsePrimaryKey.invalidKeyPart',
+        {
+          message: `Invalid sort key: ${sortKey.name}`,
+          path: sortKey.name,
+          payload: {
+            expected: sortKey.type,
+            received: sortKeyValue,
+            keyPart: 'sortKey',
+          },
+        },
+      )
     }
   }
 

@@ -2,9 +2,9 @@ import type {
   Attribute,
   AttributeBasicValue,
   AttributeValue,
-  RequiredOption,
   Extension,
-  Item
+  Item,
+  RequiredOption,
 } from 'v1/schema'
 import type { If } from 'v1/types'
 
@@ -16,7 +16,7 @@ export type ExtensionParser<
 > = (
   attribute: Attribute,
   input: AttributeValue<INPUT_EXTENSION> | undefined,
-  options: ParsingOptions<INPUT_EXTENSION, SCHEMA_EXTENSION>
+  options: ParsingOptions<INPUT_EXTENSION, SCHEMA_EXTENSION>,
 ) =>
   | {
       isExtension: true

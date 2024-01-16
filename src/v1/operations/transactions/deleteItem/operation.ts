@@ -5,9 +5,12 @@ import { DynamoDBToolboxError } from 'v1/errors'
 import { KeyInput } from 'v1/operations/types'
 
 import { $entity, EntityOperation } from '../../class'
-import type { DeleteItemTransactionOptions } from './options'
-import { transactDeleteItemParams, TransactDeleteItemParams } from './transactDeleteItemParams'
 import { WriteItemTransaction } from '../types'
+import type { DeleteItemTransactionOptions } from './options'
+import {
+  transactDeleteItemParams,
+  TransactDeleteItemParams,
+} from './transactDeleteItemParams'
 
 export const $key = Symbol('$key')
 export type $key = typeof $key
@@ -27,22 +30,28 @@ export class DeleteItemTransaction<
   public key: (keyInput: KeyInput<ENTITY>) => DeleteItemTransaction<ENTITY>
   public [$options]: OPTIONS
   public options: <NEXT_OPTIONS extends DeleteItemTransactionOptions<ENTITY>>(
-    nextOptions: NEXT_OPTIONS
+    nextOptions: NEXT_OPTIONS,
   ) => DeleteItemTransaction<ENTITY, NEXT_OPTIONS>
 
-  constructor(entity: ENTITY, key?: KeyInput<ENTITY>, options: OPTIONS = {} as OPTIONS) {
+  constructor(
+    entity: ENTITY,
+    key?: KeyInput<ENTITY>,
+    options: OPTIONS = {} as OPTIONS,
+  ) {
     super(entity)
     this[$key] = key
     this[$options] = options
 
-    this.key = nextKey => new DeleteItemTransaction(this[$entity], nextKey, this[$options])
-    this.options = nextOptions => new DeleteItemTransaction(this[$entity], this[$key], nextOptions)
+    this.key = nextKey =>
+      new DeleteItemTransaction(this[$entity], nextKey, this[$options])
+    this.options = nextOptions =>
+      new DeleteItemTransaction(this[$entity], this[$key], nextOptions)
   }
 
   params = (): TransactDeleteItemParams => {
     if (!this[$key]) {
       throw new DynamoDBToolboxError('operations.incompleteCommand', {
-        message: 'DeleteItemTransaction incomplete: Missing "key" property'
+        message: 'DeleteItemTransaction incomplete: Missing "key" property',
       })
     }
 
@@ -56,7 +65,7 @@ export class DeleteItemTransaction<
   } => ({
     documentClient: this[$entity].table.documentClient,
     type: 'Delete',
-    params: this.params()
+    params: this.params(),
   })
 }
 

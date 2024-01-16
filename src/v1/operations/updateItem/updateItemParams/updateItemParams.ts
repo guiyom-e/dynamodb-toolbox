@@ -5,10 +5,9 @@ import omit from 'lodash.omit'
 import type { EntityV2 } from 'v1/entity'
 import { parsePrimaryKey } from 'v1/operations/utils/parsePrimaryKey'
 
-import type { UpdateItemInput } from '../types'
 import type { UpdateItemOptions } from '../options'
+import type { UpdateItemInput } from '../types'
 import { parseUpdate } from '../updateExpression'
-
 import { parseEntityUpdateCommandInput } from './parseUpdateCommandInput'
 import { parseUpdateItemOptions } from './parseUpdateItemOptions'
 
@@ -18,13 +17,15 @@ export const updateItemParams = <
 >(
   entity: ENTITY,
   input: UpdateItemInput<ENTITY>,
-  updateItemOptions: OPTIONS = {} as OPTIONS
+  updateItemOptions: OPTIONS = {} as OPTIONS,
 ): UpdateCommandInput => {
   const validInputParser = parseEntityUpdateCommandInput(entity, input)
   const validInput = validInputParser.next().value
   const collapsedInput = validInputParser.next().value
 
-  const keyInput = entity.computeKey ? entity.computeKey(validInput) : collapsedInput
+  const keyInput = entity.computeKey
+    ? entity.computeKey(validInput)
+    : collapsedInput
   const primaryKey = parsePrimaryKey(entity, keyInput)
 
   const {
@@ -41,12 +42,12 @@ export const updateItemParams = <
 
   const ExpressionAttributeNames = {
     ...optionsExpressionAttributeNames,
-    ...updateExpressionAttributeNames
+    ...updateExpressionAttributeNames,
   }
 
   const ExpressionAttributeValues = {
     ...optionsExpressionAttributeValues,
-    ...updateExpressionAttributeValues
+    ...updateExpressionAttributeValues,
   }
 
   return {
@@ -55,6 +56,8 @@ export const updateItemParams = <
     ...update,
     ...options,
     ...(!isEmpty(ExpressionAttributeNames) ? { ExpressionAttributeNames } : {}),
-    ...(!isEmpty(ExpressionAttributeValues) ? { ExpressionAttributeValues } : {})
+    ...(!isEmpty(ExpressionAttributeValues)
+      ? { ExpressionAttributeValues }
+      : {}),
   }
 }

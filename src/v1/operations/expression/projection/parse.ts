@@ -1,6 +1,6 @@
 import type { EntityV2 } from 'v1/entity'
+import type { AnyAttributePath, SchemaAttributePath } from 'v1/operations/types'
 import type { Schema } from 'v1/schema'
-import type { SchemaAttributePath, AnyAttributePath } from 'v1/operations/types'
 
 import { ProjectionParser } from './parser'
 
@@ -10,7 +10,7 @@ export const parseSchemaProjection = <
 >(
   schema: SCHEMA,
   attributes: ATTRIBUTE_PATHS,
-  id?: string
+  id?: string,
 ): {
   ProjectionExpression: string
   ExpressionAttributeNames: Record<string, string>
@@ -26,5 +26,5 @@ export const parseProjection = <
 >(
   entity: ENTITY,
   attributes: ATTRIBUTE_PATHS,
-  id?: string
+  id?: string,
 ) => parseSchemaProjection(entity.schema, attributes, id)

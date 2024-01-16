@@ -1,4 +1,4 @@
-import type { RequiredOption, AtLeastOnce } from '../constants/requiredOptions'
+import type { AtLeastOnce, RequiredOption } from '../constants/requiredOptions'
 
 // Note: May look like a duplicate of AnyAttributeState but actually adds JSDocs
 
@@ -55,6 +55,6 @@ export const SET_ATTRIBUTE_DEFAULT_OPTIONS: SetAttributeDefaultOptions = {
   defaults: {
     key: undefined,
     put: undefined,
-    update: undefined
-  }
+    update: undefined,
+  },
 }

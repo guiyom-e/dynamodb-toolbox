@@ -1,1 +1,2 @@
-export const isArray = (candidate: unknown): candidate is unknown[] => Array.isArray(candidate)
+export const isArray = (candidate: unknown): candidate is unknown[] =>
+  Array.isArray(candidate)

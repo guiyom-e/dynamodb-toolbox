@@ -1,20 +1,22 @@
 import type { O } from 'ts-toolbelt'
 
-import type { If, ValueOrGetter } from 'v1/types'
 import type {
   AttributeKeyInput,
   AttributePutItemInput,
   AttributeUpdateItemInput,
   KeyInput,
   PutItemInput,
-  UpdateItemInput
+  UpdateItemInput,
 } from 'v1/operations'
+import type { If, ValueOrGetter } from 'v1/types'
 
 import type { Schema } from '../../interface'
-import type { RequiredOption, AtLeastOnce, Never, Always } from '../constants'
-import type { $type, $elements } from '../constants/attributeOptions'
-import type { $SharedAttributeState, SharedAttributeState } from '../shared/interface'
-
+import type { Always, AtLeastOnce, Never, RequiredOption } from '../constants'
+import type { $elements, $type } from '../constants/attributeOptions'
+import type {
+  $SharedAttributeState,
+  SharedAttributeState,
+} from '../shared/interface'
 import type { FreezeListAttribute } from './freeze'
 import type { $ListAttributeElements, ListAttributeElements } from './types'
 
@@ -30,7 +32,9 @@ export interface $ListAttributeNestedState<
   $ELEMENTS extends $ListAttributeElements = $ListAttributeElements,
   STATE extends SharedAttributeState = SharedAttributeState
 > extends $ListAttributeState<$ELEMENTS, STATE> {
-  freeze: (path: string) => FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>
+  freeze: (
+    path: string,
+  ) => FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>
 }
 
 /**
@@ -49,12 +53,18 @@ export interface $ListAttribute<
    * @param nextRequired RequiredOption
    */
   required: <NEXT_IS_REQUIRED extends RequiredOption = AtLeastOnce>(
-    nextRequired?: NEXT_IS_REQUIRED
-  ) => $ListAttribute<$ELEMENTS, O.Overwrite<STATE, { required: NEXT_IS_REQUIRED }>>
+    nextRequired?: NEXT_IS_REQUIRED,
+  ) => $ListAttribute<
+    $ELEMENTS,
+    O.Overwrite<STATE, { required: NEXT_IS_REQUIRED }>
+  >
   /**
    * Shorthand for `required('never')`
    */
-  optional: () => $ListAttribute<$ELEMENTS, O.Overwrite<STATE, { required: Never }>>
+  optional: () => $ListAttribute<
+    $ELEMENTS,
+    O.Overwrite<STATE, { required: Never }>
+  >
   /**
    * Hide attribute after fetch commands and formatting
    */
@@ -62,12 +72,15 @@ export interface $ListAttribute<
   /**
    * Tag attribute as needed for Primary Key computing
    */
-  key: () => $ListAttribute<$ELEMENTS, O.Overwrite<STATE, { required: Always; key: true }>>
+  key: () => $ListAttribute<
+    $ELEMENTS,
+    O.Overwrite<STATE, { required: Always; key: true }>
+  >
   /**
    * Rename attribute before save commands
    */
   savedAs: <NEXT_SAVED_AS extends string | undefined>(
-    nextSavedAs: NEXT_SAVED_AS
+    nextSavedAs: NEXT_SAVED_AS,
   ) => $ListAttribute<$ELEMENTS, O.Overwrite<STATE, { savedAs: NEXT_SAVED_AS }>>
   /**
    * Provide a default value for attribute in Primary Key computing
@@ -76,8 +89,11 @@ export interface $ListAttribute<
    */
   keyDefault: (
     nextKeyDefault: ValueOrGetter<
-      AttributeKeyInput<FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>, true>
-    >
+      AttributeKeyInput<
+        FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>,
+        true
+      >
+    >,
   ) => $ListAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -98,8 +114,11 @@ export interface $ListAttribute<
    */
   putDefault: (
     nextPutDefault: ValueOrGetter<
-      AttributePutItemInput<FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>, true>
-    >
+      AttributePutItemInput<
+        FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>,
+        true
+      >
+    >,
   ) => $ListAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -120,8 +139,11 @@ export interface $ListAttribute<
    */
   updateDefault: (
     nextUpdateDefault: ValueOrGetter<
-      AttributeUpdateItemInput<FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>, true>
-    >
+      AttributeUpdateItemInput<
+        FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>,
+        true
+      >
+    >,
   ) => $ListAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -144,10 +166,16 @@ export interface $ListAttribute<
     nextDefault: ValueOrGetter<
       If<
         STATE['key'],
-        AttributeKeyInput<FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>, true>,
-        AttributePutItemInput<FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>, true>
+        AttributeKeyInput<
+          FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>,
+          true
+        >,
+        AttributePutItemInput<
+          FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>,
+          true
+        >
       >
-    >
+    >,
   ) => $ListAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -176,9 +204,12 @@ export interface $ListAttribute<
    */
   keyLink: <SCHEMA extends Schema>(
     nextKeyDefault: ValueOrGetter<
-      AttributeKeyInput<FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>, true>,
+      AttributeKeyInput<
+        FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>,
+        true
+      >,
       [KeyInput<SCHEMA, true>]
-    >
+    >,
   ) => $ListAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -199,9 +230,12 @@ export interface $ListAttribute<
    */
   putLink: <SCHEMA extends Schema>(
     nextPutDefault: ValueOrGetter<
-      AttributePutItemInput<FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>, true>,
+      AttributePutItemInput<
+        FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>,
+        true
+      >,
       [PutItemInput<SCHEMA, true>]
-    >
+    >,
   ) => $ListAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -222,9 +256,12 @@ export interface $ListAttribute<
    */
   updateLink: <SCHEMA extends Schema>(
     nextUpdateDefault: ValueOrGetter<
-      AttributeUpdateItemInput<FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>, true>,
+      AttributeUpdateItemInput<
+        FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>,
+        true
+      >,
       [UpdateItemInput<SCHEMA, true>]
-    >
+    >,
   ) => $ListAttribute<
     $ELEMENTS,
     O.Overwrite<
@@ -247,11 +284,17 @@ export interface $ListAttribute<
     nextDefault: ValueOrGetter<
       If<
         STATE['key'],
-        AttributeKeyInput<FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>, true>,
-        AttributePutItemInput<FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>, true>
+        AttributeKeyInput<
+          FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>,
+          true
+        >,
+        AttributePutItemInput<
+          FreezeListAttribute<$ListAttributeState<$ELEMENTS, STATE>>,
+          true
+        >
       >,
       [If<STATE['key'], KeyInput<SCHEMA, true>, PutItemInput<SCHEMA, true>>]
-    >
+    >,
   ) => $ListAttribute<
     $ELEMENTS,
     O.Overwrite<

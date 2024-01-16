@@ -1,6 +1,9 @@
 import type { O } from 'ts-toolbelt'
 
-import type { AttributeOptions, AttributeOptionName } from '../constants/attributeOptions'
+import type {
+  AttributeOptionName,
+  AttributeOptions,
+} from '../constants/attributeOptions'
 
 type InferStateValueFromOption<
   OPTIONS_CONSTRAINTS extends Partial<AttributeOptions>,
@@ -23,7 +26,10 @@ export type InferStateFromOptions<
   // Applying void O.Update improves type display
   O.Update<
     {
-      [KEY in Extract<keyof OPTIONS_CONSTRAINTS, AttributeOptionName>]: InferStateValueFromOption<
+      [KEY in Extract<
+        keyof OPTIONS_CONSTRAINTS,
+        AttributeOptionName
+      >]: InferStateValueFromOption<
         OPTIONS_CONSTRAINTS,
         DEFAULT_OPTIONS,
         OPTIONS,

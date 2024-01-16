@@ -1,20 +1,20 @@
 import cloneDeep from 'lodash.clonedeep'
 
+import { DynamoDBToolboxError } from 'v1/errors'
 import type {
+  AttributeBasicValue,
+  AttributeValue,
+  Extension,
   MapAttribute,
   MapAttributeBasicValue,
-  AttributeBasicValue,
-  Extension,
-  AttributeValue
 } from 'v1/schema'
 import type { If } from 'v1/types'
-import { DynamoDBToolboxError } from 'v1/errors'
 import { isObject } from 'v1/utils/validation/isObject'
 
 import type { HasExtension } from '../types'
-import type { ParsingOptions } from './types'
 import { parseAttributeClonedInput } from './attribute'
 import { doesAttributeMatchFilters } from './doesAttributeMatchFilter'
+import type { ParsingOptions } from './types'
 
 export function* parseMapAttributeClonedInput<
   INPUT_EXTENSION extends Extension = never,
@@ -27,7 +27,10 @@ export function* parseMapAttributeClonedInput<
     [options: ParsingOptions<INPUT_EXTENSION, SCHEMA_EXTENSION>],
     [options?: ParsingOptions<INPUT_EXTENSION, SCHEMA_EXTENSION>]
   >
-): Generator<MapAttributeBasicValue<INPUT_EXTENSION>, MapAttributeBasicValue<INPUT_EXTENSION>> {
+): Generator<
+  MapAttributeBasicValue<INPUT_EXTENSION>,
+  MapAttributeBasicValue<INPUT_EXTENSION>
+> {
   const { filters } = options
   const parsers: Record<string, Generator<AttributeValue<INPUT_EXTENSION>>> = {}
   let additionalAttributeNames: Set<string> = new Set()
@@ -42,7 +45,7 @@ export function* parseMapAttributeClonedInput<
         parsers[attributeName] = parseAttributeClonedInput(
           attribute,
           inputValue[attributeName],
-          options
+          options,
         )
 
         additionalAttributeNames.delete(attributeName)
@@ -60,18 +63,21 @@ export function* parseMapAttributeClonedInput<
                 ? parseAttributeClonedInput(
                     additionalAttribute,
                     inputValue[attributeName],
-                    options
+                    options,
                   ).next().value
                 : cloneDeep(inputValue[attributeName])
 
             return [attributeName, clonedAttributeValue]
-          })
+          }),
         ),
         ...Object.fromEntries(
           Object.entries(parsers)
-            .map(([attributeName, attribute]) => [attributeName, attribute.next().value])
-            .filter(([, attributeValue]) => attributeValue !== undefined)
-        )
+            .map(([attributeName, attribute]) => [
+              attributeName,
+              attribute.next().value,
+            ])
+            .filter(([, attributeValue]) => attributeValue !== undefined),
+        ),
       }
     : cloneDeep(inputValue)
   yield clonedValue
@@ -82,15 +88,18 @@ export function* parseMapAttributeClonedInput<
       path: mapAttribute.path,
       payload: {
         received: inputValue,
-        expected: mapAttribute.type
-      }
+        expected: mapAttribute.type,
+      },
     })
   }
 
   const parsedValue = Object.fromEntries(
     Object.entries(parsers)
-      .map(([attributeName, attribute]) => [attributeName, attribute.next().value])
-      .filter(([, attributeValue]) => attributeValue !== undefined)
+      .map(([attributeName, attribute]) => [
+        attributeName,
+        attribute.next().value,
+      ])
+      .filter(([, attributeValue]) => attributeValue !== undefined),
   )
   yield parsedValue
 
@@ -98,9 +107,9 @@ export function* parseMapAttributeClonedInput<
     Object.entries(parsers)
       .map(([attributeName, attribute]) => [
         mapAttribute.attributes[attributeName].savedAs ?? attributeName,
-        attribute.next().value
+        attribute.next().value,
       ])
-      .filter(([, attributeValue]) => attributeValue !== undefined)
+      .filter(([, attributeValue]) => attributeValue !== undefined),
   )
   return collapsedValue
 }

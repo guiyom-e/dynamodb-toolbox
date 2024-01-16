@@ -1,11 +1,17 @@
-import type { Schema, AtLeastOnce, PrimitiveAttribute } from 'v1/schema'
-import type { EntityAttributeSavedAs, TableV2 } from 'v1/table'
 import { DynamoDBToolboxError } from 'v1/errors'
 import { $get } from 'v1/operations/updateItem/utils'
+import type { AtLeastOnce, PrimitiveAttribute, Schema } from 'v1/schema'
+import type { EntityAttributeSavedAs, TableV2 } from 'v1/table'
 
-import { WithInternalAttribute, addInternalAttribute } from './addInternalAttribute'
+import {
+  addInternalAttribute,
+  WithInternalAttribute,
+} from './addInternalAttribute'
 
-export type EntityAttribute<TABLE extends TableV2, ENTITY_NAME extends string> = PrimitiveAttribute<
+export type EntityAttribute<
+  TABLE extends TableV2,
+  ENTITY_NAME extends string
+> = PrimitiveAttribute<
   'string',
   {
     required: AtLeastOnce
@@ -29,7 +35,11 @@ export type WithEntityAttribute<
   ENTITY_NAME extends string
 > = string extends ENTITY_NAME
   ? SCHEMA
-  : WithInternalAttribute<SCHEMA, ENTITY_ATTRIBUTE_NAME, EntityAttribute<TABLE, ENTITY_NAME>>
+  : WithInternalAttribute<
+      SCHEMA,
+      ENTITY_ATTRIBUTE_NAME,
+      EntityAttribute<TABLE, ENTITY_NAME>
+    >
 
 type EntityAttributeAdder = <
   SCHEMA extends Schema,
@@ -52,7 +62,7 @@ export const addEntityAttribute: EntityAttributeAdder = <
   schema,
   table,
   entityAttributeName,
-  entityName
+  entityName,
 }: {
   schema: SCHEMA
   table: TABLE
@@ -62,7 +72,7 @@ export const addEntityAttribute: EntityAttributeAdder = <
   if (entityAttributeName in schema.attributes) {
     throw new DynamoDBToolboxError('entity.reservedAttributeName', {
       message: `${entityAttributeName} is a reserved attribute name. Use a different attribute name or set a different entityAttributeName option in your Entity constructor.`,
-      path: entityAttributeName
+      path: entityAttributeName,
     })
   }
 
@@ -77,15 +87,14 @@ export const addEntityAttribute: EntityAttributeAdder = <
     defaults: {
       key: undefined,
       put: entityName,
-      update: () => $get(entityAttributeName, entityName)
+      update: () => $get(entityAttributeName, entityName),
     },
-    transform: undefined
+    transform: undefined,
   }
 
-  return addInternalAttribute(schema, entityAttributeName, entityAttribute) as WithEntityAttribute<
-    SCHEMA,
-    TABLE,
-    ENTITY_ATTRIBUTE_NAME,
-    ENTITY_NAME
-  >
+  return addInternalAttribute(
+    schema,
+    entityAttributeName,
+    entityAttribute,
+  ) as WithEntityAttribute<SCHEMA, TABLE, ENTITY_ATTRIBUTE_NAME, ENTITY_NAME>
 }

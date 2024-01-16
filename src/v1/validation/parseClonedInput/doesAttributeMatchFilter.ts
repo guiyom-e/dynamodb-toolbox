@@ -4,8 +4,8 @@ import type { AttributeFilters } from './types'
 
 export const doesAttributeMatchFilters = (
   attribute: Attribute,
-  filters: AttributeFilters = {}
+  filters: AttributeFilters = {},
 ): boolean =>
   Object.entries(filters).every(
-    ([key, value]) => attribute[key as keyof AttributeFilters] === value
+    ([key, value]) => attribute[key as keyof AttributeFilters] === value,
   )

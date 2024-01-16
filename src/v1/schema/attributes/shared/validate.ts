@@ -2,7 +2,6 @@ import { DynamoDBToolboxError } from 'v1/errors'
 import { isBoolean, isString } from 'v1/utils/validation'
 
 import { requiredOptionsSet } from '../constants/requiredOptions'
-
 import type { SharedAttributeState } from './interface'
 
 /**
@@ -14,20 +13,20 @@ import type { SharedAttributeState } from './interface'
  */
 export const validateAttributeProperties = (
   attribute: SharedAttributeState,
-  path: string
+  path: string,
 ): void => {
   const attributeRequired = attribute.required
   if (!requiredOptionsSet.has(attributeRequired)) {
     throw new DynamoDBToolboxError('schema.attribute.invalidProperty', {
       message: `Invalid option value type at path ${path}. Property: 'required'. Expected: ${[
-        ...requiredOptionsSet
+        ...requiredOptionsSet,
       ].join(', ')}. Received: ${String(attributeRequired)}.`,
       path,
       payload: {
         propertyName: 'required',
         expected: [...requiredOptionsSet].join(', '),
-        received: attributeRequired
-      }
+        received: attributeRequired,
+      },
     })
   }
 
@@ -35,13 +34,13 @@ export const validateAttributeProperties = (
   if (!isBoolean(attributeHidden)) {
     throw new DynamoDBToolboxError('schema.attribute.invalidProperty', {
       message: `Invalid option value type at path ${path}. Property: 'hidden'. Expected: boolean. Received: ${String(
-        attributeHidden
+        attributeHidden,
       )}.`,
       path,
       payload: {
         propertyName: 'hidden',
-        received: attributeRequired
-      }
+        received: attributeRequired,
+      },
     })
   }
 
@@ -49,13 +48,13 @@ export const validateAttributeProperties = (
   if (!isBoolean(attributeKey)) {
     throw new DynamoDBToolboxError('schema.attribute.invalidProperty', {
       message: `Invalid option value type at path ${path}. Property: 'key'. Expected: boolean. Received: ${String(
-        attributeHidden
+        attributeHidden,
       )}.`,
       path,
       payload: {
         propertyName: 'key',
-        received: attributeRequired
-      }
+        received: attributeRequired,
+      },
     })
   }
 
@@ -63,13 +62,13 @@ export const validateAttributeProperties = (
   if (attributeSavedAs !== undefined && !isString(attributeSavedAs)) {
     throw new DynamoDBToolboxError('schema.attribute.invalidProperty', {
       message: `Invalid option value type at path ${path}. Property: 'savedAs'. Expected: string. Received: ${String(
-        attributeHidden
+        attributeHidden,
       )}.`,
       path,
       payload: {
         propertyName: 'savedAs',
-        received: attributeRequired
-      }
+        received: attributeRequired,
+      },
     })
   }
 }

@@ -1,15 +1,14 @@
 import type { O } from 'ts-toolbelt'
 
-import { validateAttributeProperties } from '../shared/validate'
 import {
-  $required,
+  $castAs,
+  $defaults,
   $hidden,
   $key,
+  $required,
   $savedAs,
-  $defaults,
-  $castAs
 } from '../constants/attributeOptions'
-
+import { validateAttributeProperties } from '../shared/validate'
 import type { $AnyAttributeState, AnyAttribute } from './interface'
 import type { AnyAttributeState } from './types'
 
@@ -30,7 +29,7 @@ export type FreezeAnyAttribute<$ANY_ATTRIBUTE extends $AnyAttributeState> =
 
 type AnyAttributeFreezer = <STATE extends AnyAttributeState>(
   anyAttribute: STATE,
-  path: string
+  path: string,
 ) => FreezeAnyAttribute<$AnyAttributeState<STATE>>
 
 /**
@@ -40,9 +39,11 @@ type AnyAttributeFreezer = <STATE extends AnyAttributeState>(
  * @param path Path of the instance in the related schema (string)
  * @return void
  */
-export const freezeAnyAttribute: AnyAttributeFreezer = <STATE extends AnyAttributeState>(
+export const freezeAnyAttribute: AnyAttributeFreezer = <
+  STATE extends AnyAttributeState
+>(
   state: STATE,
-  path: string
+  path: string,
 ) => {
   validateAttributeProperties(state, path)
 

@@ -8,17 +8,26 @@ import { parseMetricsOption } from 'v1/operations/utils/parseOptions/parseMetric
 import { parseReturnValuesOption } from 'v1/operations/utils/parseOptions/parseReturnValuesOption'
 import { rejectExtraOptions } from 'v1/operations/utils/parseOptions/rejectExtraOptions'
 
-import { putItemCommandReturnValuesOptionsSet, PutItemOptions } from '../options'
+import {
+  putItemCommandReturnValuesOptionsSet,
+  PutItemOptions,
+} from '../options'
 
 type CommandOptions = Omit<PutCommandInput, 'TableName' | 'Item'>
 
 export const parsePutItemOptions = <ENTITY extends EntityV2>(
   entity: ENTITY,
-  putItemOptions: PutItemOptions<ENTITY>
+  putItemOptions: PutItemOptions<ENTITY>,
 ): CommandOptions => {
   const commandOptions: CommandOptions = {}
 
-  const { capacity, metrics, returnValues, condition, ...extraOptions } = putItemOptions
+  const {
+    capacity,
+    metrics,
+    returnValues,
+    condition,
+    ...extraOptions
+  } = putItemOptions
   rejectExtraOptions(extraOptions)
 
   if (capacity !== undefined) {
@@ -32,7 +41,7 @@ export const parsePutItemOptions = <ENTITY extends EntityV2>(
   if (returnValues !== undefined) {
     commandOptions.ReturnValues = parseReturnValuesOption(
       putItemCommandReturnValuesOptionsSet,
-      returnValues
+      returnValues,
     )
   }
 
@@ -40,7 +49,7 @@ export const parsePutItemOptions = <ENTITY extends EntityV2>(
     const {
       ExpressionAttributeNames,
       ExpressionAttributeValues,
-      ConditionExpression
+      ConditionExpression,
     } = parseCondition(entity, condition)
 
     if (!isEmpty(ExpressionAttributeNames)) {

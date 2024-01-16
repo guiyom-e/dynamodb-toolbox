@@ -1,5 +1,4 @@
 import { ResolvedPrimitiveAttribute } from '../primitive'
-
 import { RequiredOption } from './requiredOptions'
 
 export const $type = Symbol('$type')
